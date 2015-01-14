@@ -14,16 +14,8 @@ public class LPVar {
     return identifier;
   }
 
-  public void setIdentifier(String identifier) {
-    this.identifier = identifier;
-  }
-
   public LPVarType getVarType() {
     return varType;
-  }
-
-  public void setVarType(LPVarType varType) {
-    this.varType = varType;
   }
 
   public double getlBound() {
