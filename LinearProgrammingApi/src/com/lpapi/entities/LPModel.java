@@ -152,8 +152,20 @@ public abstract class LPModel <X, Y, Z> {
   }
 
   public void setObjFn(LPExpression objFn) throws LPModelException {
-    if (objFn==null)
-      throw new LPModelException("Objective function cannot be null");
-    this.objFn = objFn;
+    synchronized (lpVarIdentifiers) {
+      if (objFn==null)
+        throw new LPModelException("Objective function cannot be null");
+      this.objFn = objFn;
+      //generate map of all variables used in the expression
+      Map<String, Double> objContributionMap = objFn.getVarContribution();
+
+      for (LPVar var: lpVarIdentifiers.values()) {
+        if (objContributionMap.containsKey(var.getIdentifier())) {
+          var.setObjContribution(objContributionMap.get(var.getIdentifier()));
+        } else {
+          var.setObjContribution(0);
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project basedir="." default="build" name="LinearProgrammingApi">
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
+    <path id="LinearProgrammingApi.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/logging/slf4j-api-1.7.10.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="init" name="build">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="LinearProgrammingApi.classpath"/>
+        </javac>
+    </target>
+    <target depends="clean, build" name="createjar">
+        <delete file="jars/LPApi.jar"/>
+        <jar destfile="./jars/LPApi.jar" basedir="bin/">
+            <manifest>
+                <attribute name="Class-Path" value="slf4j-api-1.7.10.jar"/>
+            </manifest>
+        </jar>
+    </target>
+</project>
