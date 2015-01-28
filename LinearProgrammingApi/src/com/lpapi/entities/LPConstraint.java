@@ -32,4 +32,8 @@ public abstract class LPConstraint<Z> {
   public LPOperator getOperator() {
     return operator;
   }
+
+  protected abstract Z getModelConstraint();
+
+  protected abstract Z initModelConstraint();
 }
