@@ -1,9 +1,6 @@
 package com.lpapi.entities;
 
-import com.lpapi.entities.exception.LPConstraintException;
-import com.lpapi.entities.exception.LPModelException;
-import com.lpapi.entities.exception.LPVarException;
-import com.lpapi.entities.exception.LPVarGroupException;
+import com.lpapi.entities.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +18,8 @@ public abstract class LPModel <X, Y, Z> {
 
   private static final String DEF_VAR_GROUP = "Default";
 
+  private static final String DEF_CONSTR_GROUP = "Default_Constraints";
+
   private String identifier;
 
   private Map<String, LPVarGroup> lpVarGroup = new HashMap<>();
@@ -29,12 +28,19 @@ public abstract class LPModel <X, Y, Z> {
 
   private Map<LPVarGroup, Set<LPVar>> lpVars = new HashMap<>();
 
-  private List<LPConstraint> lpConstraintList = new ArrayList<>();
+  private Map<String, LPConstraintGroup> lpConstraintGroup = new HashMap<>();
+
+  private Map<String, LPConstraint> lpConstraintIdentifiers = new HashMap<>();
+
+  private Map<LPConstraintGroup, Set<LPConstraint>> lpConstraints = new HashMap<>();
+
+  private LPObjType objType;
 
   private LPExpression objFn;
 
   public LPModel(String identifier) throws LPModelException {
     createLPVarGroup(DEF_VAR_GROUP, "Default variable group used in the model");
+    createLPConstraintGroup(DEF_CONSTR_GROUP, "Default constraint group used in the model");
     if (identifier==null) {
       this.identifier = "";
     } else {
@@ -53,6 +59,7 @@ public abstract class LPModel <X, Y, Z> {
     LPVarGroup group = new LPVarGroup(identifier, description);
     log.info("Created new LP Variable Group {}", group);
     lpVarGroup.put(identifier, group);
+    lpVars.put(group, new HashSet<LPVar>());
     return group;
   }
 
@@ -63,7 +70,7 @@ public abstract class LPModel <X, Y, Z> {
     if (lpVarGroup.containsKey(identifier)) {
       return lpVarGroup.get(identifier);
     } else
-      throw new LPVarGroupException("Identifier (" + identifier +") not found in the model");
+      throw new LPVarGroupException("Variable Group Identifier (" + identifier +") not found in the model");
   }
 
   public Set<String> getLPVarGroupIDs() {
@@ -74,7 +81,7 @@ public abstract class LPModel <X, Y, Z> {
     try {
       return createLPVar(identifier, type, lBound, uBound, getLPVarGroup(DEF_VAR_GROUP));
     } catch (LPVarGroupException e) {
-      log.error("Default var Group not created, exiting", e);
+      log.error("Default Variable Group not created, exiting", e);
       System.exit(1);
       return null;
     }
@@ -111,14 +118,67 @@ public abstract class LPModel <X, Y, Z> {
     }
   }
 
-  public void addConstraint(LPExpression lhs, LPOperator operator, LPExpression rhs) throws LPConstraintException {
-    LPConstraint constraint = getLPConstraintFactory().generateConstraint(lhs, operator, rhs);
-    log.info("Constraint created successfully. Adding to model");
-     lpConstraintList.add(constraint);
+  public LPConstraintGroup createLPConstraintGroup(String identifier, String description) throws LPConstraintGroupException {
+    if (identifier==null) {
+      throw new LPConstraintGroupException("Identifier cannot be null");
+    }
+    if (lpConstraintGroup.containsKey(identifier)) {
+      throw new LPConstraintGroupException("Identifier (" + identifier + ") already exists");
+    }
+
+    LPConstraintGroup group = new LPConstraintGroup(identifier, description);
+    log.info("Created new LP Constraint Group {}", group);
+    lpConstraintGroup.put(identifier, group);
+    lpConstraints.put(group, new HashSet<LPConstraint>());
+    return group;
+
   }
 
-  public List<LPConstraint> getConstraintList() {
-    return Collections.unmodifiableList(lpConstraintList);
+  public LPConstraintGroup getLPConstraintGroup(String identifier) throws LPConstraintGroupException {
+    if (identifier==null) {
+      throw new LPConstraintGroupException("Identifier cannot be null");
+    }
+    if (lpConstraintGroup.containsKey(identifier)) {
+      return lpConstraintGroup.get(identifier);
+    } else
+      throw new LPConstraintGroupException("Constraint Group Identifier (" + identifier +") not found in the model");
+  }
+
+  public Set<String> getLPConstraintGroupIDs(){
+    return Collections.unmodifiableSet(lpConstraintGroup.keySet());
+  }
+
+  public void addConstraint(String identifier, LPExpression lhs, LPOperator operator, LPExpression rhs) throws LPConstraintException {
+    try {
+      addConstraint(identifier, lhs, operator, rhs, getLPConstraintGroup(DEF_CONSTR_GROUP));
+    } catch (LPConstraintGroupException e) {
+      log.error("Default Constraint Group not created, exiting", e);
+      System.exit(1);
+    }
+  }
+
+  public void addConstraint(String identifier, LPExpression lhs, LPOperator operator, LPExpression rhs, LPConstraintGroup group) throws LPConstraintException, LPConstraintGroupException {
+    //check if var group is valid
+    LPConstraintGroup used = getLPConstraintGroup(group.getIdentifier());
+    synchronized (lpVarIdentifiers) {
+      if (identifier==null)
+        throw new LPConstraintException("Identifier cannot be null");
+      if (lpConstraintIdentifiers.containsKey(identifier))
+        throw new LPConstraintException("Constraint with identifier (" + identifier + ") already exists");
+
+      LPConstraint constraint = getLPConstraintFactory().generateConstraint(this, identifier, lhs, operator, rhs);
+
+      //If no exception was throws, variable is valid, add to model
+      lpConstraintIdentifiers.put(identifier, constraint);
+      //add variable to set of corresponding var group
+      Set<LPConstraint> constraints = lpConstraints.get(used);
+      constraints.add(constraint);
+      log.info("Constraint created {}", this);
+    }
+  }
+
+  public Collection<LPConstraint> getConstraintList() {
+    return Collections.unmodifiableCollection(lpConstraintIdentifiers.values());
   }
 
   public String getIdentifier() {
@@ -140,42 +200,47 @@ public abstract class LPModel <X, Y, Z> {
 
   //Method to initialize the variables
   public void initVars() throws LPModelException {
-    if (objFn==null) {
-      throw new LPModelException("Objective function cannot be null");
-    } else {
-      log.info("Initializing model vars");
-      for (LPVar var: lpVarIdentifiers.values()) {
-        log.debug("Initializing variable: " + var.getIdentifier());
-        var.initModelVar();
-      }
+    log.info("Initializing model vars");
+    for (LPVar var: lpVarIdentifiers.values()) {
+      log.debug("Initializing variable: " + var.getIdentifier());
+      var.initModelVar();
     }
+    log.info("Model Variables initialized");
   }
 
+  //Method to initialize the objective function
+  public abstract void initObjectiveFunction() throws LPModelException;
+
   //method to initialize the constraints
-  public abstract void initConstraints();
+  public void initConstraints() throws LPModelException {
+    log.info("Initializing model constraints");
+    for (LPConstraint constraint: lpConstraintIdentifiers.values()) {
+      log.debug("Initializing constraint: " + constraint.getIdentifier());
+      constraint.initModelConstraint();
+    }
+    log.info("Model constraints initialized");
+  }
 
   //method to initialize the computation
-  public abstract void computeModel();
+  public abstract void computeModel() throws LPModelException;
 
-  public LPExpression getObjFn() {
+  public LPExpression getObjFn() throws LPModelException {
+    if (objFn==null)
+      throw new LPModelException("Objective function has not been defined");
     return objFn;
   }
 
-  public void setObjFn(LPExpression objFn) throws LPModelException {
-    synchronized (lpVarIdentifiers) {
-      if (objFn==null)
-        throw new LPModelException("Objective function cannot be null");
-      this.objFn = objFn;
-      //generate map of all variables used in the expression
-      Map<String, Double> objContributionMap = objFn.getVarContribution();
+  public void setObjFn(LPExpression objFn, LPObjType type) throws LPModelException {
+    if (objFn==null)
+      throw new LPModelException("Objective function cannot be null");
+    if (type == null)
+      throw new LPModelException("Objective should be either to maximize or minimize");
+    this.objType = type;
+    this.objFn = objFn;
 
-      for (LPVar var: lpVarIdentifiers.values()) {
-        if (objContributionMap.containsKey(var.getIdentifier())) {
-          var.setObjContribution(objContributionMap.get(var.getIdentifier()));
-        } else {
-          var.setObjContribution(0);
-        }
-      }
-    }
+  }
+
+  public LPObjType getObjType() {
+    return objType;
   }
 }

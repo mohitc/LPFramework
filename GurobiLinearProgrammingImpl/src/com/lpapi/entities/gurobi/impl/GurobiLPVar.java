@@ -29,7 +29,7 @@ public class GurobiLPVar extends LPVar<GRBVar> {
     if (lpModel.getModel()!=null) {
       if (lpModel.getModel().getClass().isAssignableFrom(GRBModel.class)) {
         try {
-          modelVar = ((GRBModel)lpModel.getModel()).addVar(this.getlBound(), this.getuBound(), this.getObjContribution(), getGrbVarType(), this.getIdentifier());
+          modelVar = ((GRBModel)lpModel.getModel()).addVar(this.getlBound(), this.getuBound(), 0, getGrbVarType(), this.getIdentifier());
         } catch (GRBException e) {
           log.error("Error in creating Gurobi variable", e);
         }
