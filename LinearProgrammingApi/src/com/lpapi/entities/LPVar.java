@@ -21,6 +21,10 @@ public abstract class LPVar<T extends Object> {
 
   private double uBound;
 
+  private double result;
+
+  private boolean resultSet = false;
+
   protected LPVar(LPModel model, String identifier, LPVarType type) throws LPVarException {
     log.info(marker, "Validating input parameters and generating new LP Var");
     if (model==null) {
@@ -85,4 +89,16 @@ public abstract class LPVar<T extends Object> {
 
   protected abstract void initModelVar() throws LPModelException;
 
+  public double getResult() {
+    return result;
+  }
+
+  protected void setResult(double result){
+    this.result = result;
+    this.resultSet = true;
+  }
+
+  public boolean isResultSet() {
+    return resultSet;
+  }
 }
