@@ -1,7 +1,7 @@
 package com.lpapi.entities;
 
-import com.lpapi.entities.exception.LPExpressionException;
-import com.lpapi.entities.exception.LPVarException;
+import com.lpapi.exception.LPExpressionException;
+import com.lpapi.exception.LPVarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

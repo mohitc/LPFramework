@@ -1,6 +1,6 @@
 package com.lpapi.entities;
 
-import com.lpapi.entities.exception.LPVarException;
+import com.lpapi.exception.LPVarException;
 
 public interface LPVarFactory <T> {
 

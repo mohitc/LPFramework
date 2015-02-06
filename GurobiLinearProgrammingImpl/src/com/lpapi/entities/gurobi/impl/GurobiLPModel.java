@@ -1,7 +1,7 @@
 package com.lpapi.entities.gurobi.impl;
 
 import com.lpapi.entities.*;
-import com.lpapi.entities.exception.LPModelException;
+import com.lpapi.exception.LPModelException;
 import gurobi.*;
 
 import java.util.List;

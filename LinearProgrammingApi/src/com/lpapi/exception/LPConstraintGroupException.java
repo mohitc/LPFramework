@@ -1,4 +1,4 @@
-package com.lpapi.entities.exception;
+package com.lpapi.exception;
 
 public class LPConstraintGroupException extends LPModelException {
   public LPConstraintGroupException(String message) {

@@ -1,6 +1,6 @@
 package com.lpapi.entities;
 
-import com.lpapi.entities.exception.*;
+import com.lpapi.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

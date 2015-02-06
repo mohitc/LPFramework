@@ -1,7 +1,7 @@
 package test.lpapi.gurobi;
 
 import com.lpapi.entities.LPModel;
-import com.lpapi.entities.exception.LPModelException;
+import com.lpapi.exception.LPModelException;
 import com.lpapi.entities.gurobi.impl.GurobiLPModel;
 import test.lpapi.LPModelTest;
 

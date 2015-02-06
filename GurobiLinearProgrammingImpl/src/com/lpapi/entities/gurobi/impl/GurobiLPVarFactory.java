@@ -4,7 +4,7 @@ import com.lpapi.entities.LPModel;
 import com.lpapi.entities.LPVar;
 import com.lpapi.entities.LPVarFactory;
 import com.lpapi.entities.LPVarType;
-import com.lpapi.entities.exception.LPVarException;
+import com.lpapi.exception.LPVarException;
 import gurobi.GRBVar;
 
 public class GurobiLPVarFactory implements LPVarFactory<GRBVar> {

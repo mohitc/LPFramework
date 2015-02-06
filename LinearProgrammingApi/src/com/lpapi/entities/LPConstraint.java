@@ -1,7 +1,7 @@
 package com.lpapi.entities;
 
-import com.lpapi.entities.exception.LPConstraintException;
-import com.lpapi.entities.exception.LPModelException;
+import com.lpapi.exception.LPConstraintException;
+import com.lpapi.exception.LPModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
