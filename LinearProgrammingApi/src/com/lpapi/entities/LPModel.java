@@ -38,6 +38,8 @@ public abstract class LPModel <X, Y, Z> {
 
   private LPExpression objFn;
 
+  private LPSolutionStatus solutionStatus;
+
   public LPModel(String identifier) throws LPModelException {
     createLPVarGroup(DEF_VAR_GROUP, "Default variable group used in the model");
     createLPConstraintGroup(DEF_CONSTR_GROUP, "Default constraint group used in the model");
@@ -243,4 +245,35 @@ public abstract class LPModel <X, Y, Z> {
   public LPObjType getObjType() {
     return objType;
   }
+
+  protected abstract Map<LPSolutionParams, Object> getModelSolutionParams();
+
+  public LPSolutionStatus getSolutionStatus() throws LPModelException {
+    return getSolutionParam(LPSolutionParams.STATUS, LPSolutionStatus.class);
+  }
+
+  public long getComputationTime() throws LPModelException {
+    return getSolutionParam(LPSolutionParams.TIME, Long.class);
+  }
+
+  public double getObjectiveValue() throws LPModelException {
+    return getSolutionParam(LPSolutionParams.OBJECTIVE, Double.class);
+  }
+
+  public double getMipGap() throws LPModelException {
+    return getSolutionParam(LPSolutionParams.MIP_GAP, Double.class);
+  }
+
+  private <T> T getSolutionParam(LPSolutionParams param, Class<T> instance) throws LPModelException {
+    Object paramVal = getModelSolutionParams().get(param);
+    if (paramVal!=null) {
+      if (instance.isAssignableFrom(paramVal.getClass())){
+        return (T) paramVal;
+      } else {
+        throw new LPModelException("Invalid parameter value assigned to " + param.getDescription());
+      }
+    } else
+      throw new LPModelException(param.getDescription() + " not found in model");
+  }
+
 }
