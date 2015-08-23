@@ -127,6 +127,16 @@ public abstract class LPModel <X, Y, Z> {
     }
   }
 
+  public Set<LPVar> getLPVars(String varGrpIdentifier) throws LPVarGroupException {
+    //check if var Group exists
+    LPVarGroup localGrp = getLPVarGroup(varGrpIdentifier);
+    return Collections.unmodifiableSet(lpVars.get(localGrp));
+  }
+
+  public Set<String> getLPVarIdentifiers() {
+    return Collections.unmodifiableSet(lpVarIdentifiers.keySet());
+  }
+
   public LPConstraintGroup createLPConstraintGroup(String identifier, String description) throws LPConstraintGroupException {
     return createLPConstraintGroup(identifier, description, null, null);
   }
@@ -199,6 +209,9 @@ public abstract class LPModel <X, Y, Z> {
     return identifier;
   }
 
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
   //method to get the model for the ILP
   public abstract X getModel();
 
