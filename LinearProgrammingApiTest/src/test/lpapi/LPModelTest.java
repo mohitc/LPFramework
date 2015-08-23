@@ -29,8 +29,8 @@ public abstract class LPModelTest {
 //      assertTrue(instance.getLPVarGroupIDs().size()==1);
 
       LPVar x = instance.createLPVar("X", LPVarType.BOOLEAN, 0, 1);
-      LPVar y =instance.createLPVar("Y", LPVarType.BOOLEAN, 0, 1);
-      LPVar z =instance.createLPVar("Z", LPVarType.BOOLEAN, 0, 1);
+      LPVar y = instance.createLPVar("Y", LPVarType.BOOLEAN, 0, 1);
+      LPVar z = instance.createLPVar("Z", LPVarType.BOOLEAN, 0, 1);
 
       LPExpression obj =  new LPExpression(instance);
       obj.addTerm(1, x);
@@ -55,10 +55,7 @@ public abstract class LPModelTest {
       rhs2.addTerm(1);
       instance.addConstraint("Constr2", lhs2, LPOperator.GREATER_EQUAL, rhs2);
 
-      instance.initModel();
-      instance.initVars();
-      instance.initObjectiveFunction();
-      instance.initConstraints();
+      instance.init();
       instance.computeModel();
 
     } catch (LPModelException e) {

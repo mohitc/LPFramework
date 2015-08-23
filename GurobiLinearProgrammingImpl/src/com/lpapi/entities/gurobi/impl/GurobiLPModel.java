@@ -6,7 +6,6 @@ import gurobi.*;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
@@ -50,6 +49,7 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
       model = new GRBModel(grbEnv);
     } catch (GRBException e) {
       log.error("Error in generating Gurobi model", e);
+      throw new LPModelException("Error in generating Gurobi model" + e.getMessage());
     }
   }
 
@@ -66,7 +66,8 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
 
   @Override
   public void initObjectiveFunction() throws LPModelException {
-    GRBLinExpr obj = generateLinearExpression(getObjFn());
+    GurobiLPExpressionGenerator generator = new GurobiLPExpressionGenerator();
+    GRBLinExpr obj = generator.generateExpression(getObjFn());
     int objOperator;
     if (this.getObjType()==LPObjType.MAXIMIZE) {
       objOperator = GRB.MAXIMIZE;
@@ -136,24 +137,4 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
     return Collections.unmodifiableMap(solnParams);
   }
 
-  private GRBLinExpr generateLinearExpression(LPExpression expression) throws LPModelException {
-    GRBLinExpr linExpr = new GRBLinExpr();
-    List<LPExpressionTerm> termList = expression.getTermList();
-    if ((termList!=null) && (termList.size()!=0)){
-      for (LPExpressionTerm term: termList) {
-        if (term.isConstant()) {
-          linExpr.addConstant(term.getCoefficient());
-        } else {
-          if ((term.getVar().getModelVar() != null) && (GRBVar.class.isAssignableFrom(term.getVar().getModelVar().getClass()))) {
-            linExpr.addTerm(term.getCoefficient(), (GRBVar) term.getVar().getModelVar());
-          } else {
-            throw new LPModelException("Model variable is either null or is not an instance of GRBVar");
-          }
-        }
-      }
-    } else {
-      throw new LPModelException("Expression is empty");
-    }
-    return linExpr;
-  }
 }
