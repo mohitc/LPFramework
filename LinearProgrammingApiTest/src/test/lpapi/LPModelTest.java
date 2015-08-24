@@ -39,13 +39,17 @@ public abstract class LPModelTest {
 
       instance.setObjFn(obj, LPObjType.MAXIMIZE);
 
+      LPConstant constant1 = instance.createLpConstant("term1", 1);
+      LPConstant constant2 = instance.createLpConstant("term2", 2);
+      LPConstant constant3 = instance.createLpConstant("term3", 3);
+
       LPExpression lhs1 = new LPExpression(instance);
       LPExpression rhs1 = new LPExpression(instance);
       LPExpression lhs2 = new LPExpression(instance);
       LPExpression rhs2 = new LPExpression(instance);
-      lhs1.addTerm(1, x);
-      lhs1.addTerm(2, y);
-      lhs1.addTerm(3, z);
+      lhs1.addTerm(constant1, x);
+      lhs1.addTerm(constant2, y);
+      lhs1.addTerm(constant3, z);
 
       rhs1.addTerm(4);
       instance.addConstraint("Constr1", lhs1, LPOperator.LESS_EQUAL, rhs1);

@@ -2,6 +2,8 @@ package com.lpapi.entities;
 
 public class LPExpressionTerm {
 
+  private LPConstant constantTerm;
+
   private double coefficient;
 
   private LPVar var;
@@ -13,6 +15,15 @@ public class LPExpressionTerm {
 
   public LPExpressionTerm(double coefficient) {
     this.coefficient = coefficient;
+  }
+
+  public LPExpressionTerm(LPConstant constantTerm) {
+    this.constantTerm = constantTerm;
+  }
+
+  public LPExpressionTerm(LPConstant constantTerm, LPVar var) {
+    this.constantTerm = constantTerm;
+    this.var = var;
   }
 
   public String toString() {
@@ -29,7 +40,10 @@ public class LPExpressionTerm {
   }
 
   public double getCoefficient() {
-    return coefficient;
+    if (constantTerm==null)
+      return coefficient;
+    else
+      return constantTerm.getValue();
   }
 
   protected void setCoefficient(double coefficient) {
