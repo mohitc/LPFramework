@@ -1,10 +1,3 @@
-/*
- *  Copyright 2013 ADVA Optical Networking SE. All rights reserved.
- *
- *  Owner: mchamania
- *
- *  $Id: $
- */
 package com.lpapi.entities.glpk.impl;
 
 import com.lpapi.entities.*;
