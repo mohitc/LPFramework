@@ -1,5 +1,6 @@
 package com.lpapi.entities;
 
+import com.lpapi.entities.group.LPEmptyGroupInitializer;
 import com.lpapi.entities.group.LPGroupInitializer;
 import com.lpapi.entities.group.LPNameGenerator;
 import com.lpapi.entities.group.generators.LPEmptyNameGenratorImpl;
@@ -29,7 +30,14 @@ public abstract class LPGroup {
       this.nameGenerator = generator;
     else
       this.nameGenerator = new LPEmptyNameGenratorImpl<Object>();
-    this.initializer = initializer;
+    if (initializer!=null) {
+      this.initializer = initializer;
+      initializer.setGroup(this);
+
+    } else {
+      initializer = new LPEmptyGroupInitializer();
+      initializer.setGroup(this);
+    }
   }
 
   public LPNameGenerator<?> getNameGenerator() {
