@@ -54,22 +54,24 @@ public class LPExpression {
     expressionList.add(new LPExpressionTerm(constant, var));
   }
 
-  public void add(LPExpression expression) {
+  public LPExpression add(LPExpression expression) {
     if (expression.expressionList!=null) {
       this.expressionList.addAll(expression.expressionList);
     }
+    return this;
   }
 
-  public void multiply(double constant) {
+  public LPExpression multiply(double constant) {
     for (LPExpressionTerm term: this.expressionList) {
       term.setCoefficient(term.getCoefficient()*constant);
     }
+    return this;
   }
 
-  public void reduce() {
+  public LPExpression reduce() {
     if (expressionList.size()==0) {
       //no reduction required
-      return;
+      return this;
     }
     //reduce occurences of terms to single instances
     Map<String, LPExpressionTerm> reduceMap = new HashMap<>();
@@ -94,6 +96,7 @@ public class LPExpression {
     reduceList.addAll(reduceMap.values());
     this.expressionList = reduceList;
     log.debug("LP Expression reduction complete");
+    return this;
   }
 
   public Map<String, Double> getVarContribution() {
@@ -114,5 +117,24 @@ public class LPExpression {
 
   public List<LPExpressionTerm> getTermList() {
     return Collections.unmodifiableList(expressionList);
+  }
+
+  public double getConstantContribution() {
+    double contribution = 0;
+    for (LPExpressionTerm term: expressionList) {
+      if (term.isConstant()) {
+        contribution = contribution + term.getCoefficient();
+      }
+    }
+    return contribution;
+  }
+
+  public LPExpression createCopy () throws LPExpressionException {
+    LPExpression copy = new LPExpression(model);
+    List<LPExpressionTerm> list = getTermList();
+    for (LPExpressionTerm term: list) {
+      copy.addTerm(term.createCopy());
+    }
+    return copy;
   }
 }
