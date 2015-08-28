@@ -49,4 +49,11 @@ public class LPExpressionTerm {
   protected void setCoefficient(double coefficient) {
     this.coefficient = coefficient;
   }
+
+  public LPExpressionTerm createCopy() {
+    if (constantTerm!=null)
+      return new LPExpressionTerm(constantTerm, var);
+    else
+      return new LPExpressionTerm(coefficient, var);
+  }
 }
