@@ -22,7 +22,7 @@ public abstract class LPGroup {
 
   private static final Logger log = LoggerFactory.getLogger(LPGroup.class);
 
-  protected LPGroup (LPModel model, String identifier, String description, LPNameGenerator<?> generator, LPGroupInitializer initializer) {
+  protected LPGroup (LPModel model, String identifier, String description, LPNameGenerator generator, LPGroupInitializer initializer) {
     this.identifier = identifier;
     this.description = description;
     this.model = model;
@@ -40,7 +40,7 @@ public abstract class LPGroup {
     }
   }
 
-  public LPNameGenerator<?> getNameGenerator() {
+  public LPNameGenerator getNameGenerator() {
     return this.nameGenerator;
   }
 
