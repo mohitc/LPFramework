@@ -1,11 +1,13 @@
 package com.lpapi.entities.group.generators;
 
 import com.lpapi.entities.group.LPNameGenerator;
+import com.lpapi.entities.group.LPNamePrefixValidator;
 import com.lpapi.exception.LPNameException;
 import com.lpapi.exception.LPNameParamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +20,8 @@ public abstract class LPNameGeneratorImpl<T> implements LPNameGenerator <T> {
   protected String separator = "-/-";
 
   private static final Logger log = LoggerFactory.getLogger(LPNameGeneratorImpl.class);
+
+  private List<LPNamePrefixValidator> validatorsList;
 
   public LPNameGeneratorImpl(String prefix, int indexCount) {
     if ((prefix==null) || (prefix.trim().length()==0)) {
@@ -32,6 +36,16 @@ public abstract class LPNameGeneratorImpl<T> implements LPNameGenerator <T> {
     } else {
       this.indexCount = indexCount;
     }
+  }
+
+  public void addValidator(LPNamePrefixValidator validator) {
+    if (validator==null) {
+      log.error("Empty validator provided, skipping");
+    }
+    if (validatorsList==null) {
+      validatorsList = new ArrayList<>();
+    }
+    validatorsList.add(validator);
   }
 
   public LPNameGeneratorImpl(String prefix, int indexCount, String separator) {
@@ -72,6 +86,13 @@ public abstract class LPNameGeneratorImpl<T> implements LPNameGenerator <T> {
       throw new LPNameParamException("Number of parameters provided does not match index count " + indexCount);
     }
     List<T> outList = Arrays.asList(objects);
+
+    if (validatorsList!=null) {
+      for (LPNamePrefixValidator validator: validatorsList) {
+        validator.validate(outList);
+      }
+    }
+
     validatePrefixConstraint(outList);
   }
 
