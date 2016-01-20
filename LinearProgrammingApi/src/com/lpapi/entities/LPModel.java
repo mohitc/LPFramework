@@ -316,6 +316,15 @@ public abstract class LPModel <X, Y, Z> {
   public abstract void initModel() throws LPModelException;
 
   //method to invoke the initialization of all the var groups
+  public void initConstantGroups() throws LPModelException {
+    log.info("Initializing Constant groups");
+    for (LPConstantGroup group: lpConstantGroup.values()) {
+      group.init();
+    }
+  }
+
+
+  //method to invoke the initialization of all the var groups
   public void initVarGroups() throws LPModelException {
     log.info("Initializing Variable groups");
     for (LPVarGroup group: lpVarGroup.values()) {
@@ -409,6 +418,7 @@ public abstract class LPModel <X, Y, Z> {
   //Initialize relevant entities in order
   public void init() throws LPModelException {
     this.initModel();
+    this.initConstantGroups();
     this.initVarGroups();
     this.initVars();
     this.initConstraintGroups();
