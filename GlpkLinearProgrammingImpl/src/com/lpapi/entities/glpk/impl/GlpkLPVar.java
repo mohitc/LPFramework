@@ -57,4 +57,8 @@ public class GlpkLPVar extends LPVar<Integer>{
     }
     throw new LPModelException("Mapping to GLPk variable type not defined");
   }
+
+  public String toString () {
+    return super.toString();
+  }
 }

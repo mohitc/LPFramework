@@ -46,4 +46,7 @@ public class GurobiLPConstraint extends LPConstraint<GRBConstr> {
     throw new LPModelException("Operator not defined");
   }
 
+  public String toString () {
+    return super.toString();
+  }
 }

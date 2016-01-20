@@ -47,4 +47,7 @@ public class GurobiLPVar extends LPVar<GRBVar> {
     throw new LPModelException("No variable type defined for variable: " + this.getIdentifier());
   }
 
+  public String toString () {
+    return super.toString();
+  }
 }

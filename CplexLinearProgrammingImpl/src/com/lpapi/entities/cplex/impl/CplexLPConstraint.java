@@ -47,4 +47,7 @@ public class CplexLPConstraint extends LPConstraint<IloConstraint> {
     }
   }
 
+  public String toString () {
+    return super.toString();
+  }
 }
