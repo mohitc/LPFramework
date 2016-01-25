@@ -19,7 +19,7 @@ public class GurobiLPConstraint extends LPConstraint<GRBConstr> {
       throw new LPConstraintException("Model should be of type GurobiLPModel");
     }
     this.model = (GurobiLPModel)model;
-    exprGen = new GurobiLPExpressionGenerator();
+    exprGen = new GurobiLPExpressionGenerator(identifier);
   }
 
   @Override
