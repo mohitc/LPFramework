@@ -74,9 +74,9 @@ public abstract class LPModel <X, Y, Z> {
     }
 
     LPConstantGroup group = new LPConstantGroup(this, identifier, description, generator, initializer);
-    log.info("Created new LP Constant Group {}", group);
+    log.info("Created new LP Constant Group {}", group.toString());
     lpConstantGroup.put(identifier, group);
-    lpConstants.put(group, new HashSet<LPConstant>());
+    lpConstants.put(group, new HashSet<>());
     return group;
   }
 
@@ -121,7 +121,7 @@ public abstract class LPModel <X, Y, Z> {
       //add variable to set of corresponding constant group
       Set<LPConstant> constants = lpConstants.get(used);
       constants.add(constant);
-      log.info("Constant created {}", this);
+      log.debug("LPConstant created {}", constant.toString());
     }
     return constant;
   }
@@ -155,9 +155,9 @@ public abstract class LPModel <X, Y, Z> {
     }
 
     LPVarGroup group = new LPVarGroup(this, identifier, description, generator, initializer);
-    log.info("Created new LP Variable Group {}", group);
+    log.info("Created new LP Variable Group {}", group.toString());
     lpVarGroup.put(identifier, group);
-    lpVars.put(group, new HashSet<LPVar>());
+    lpVars.put(group, new HashSet<>());
     return group;
   }
 
@@ -202,7 +202,7 @@ public abstract class LPModel <X, Y, Z> {
       //add variable to set of corresponding var group
       Set<LPVar> vars = lpVars.get(used);
       vars.add(var);
-      log.info("Variable created {}", this);
+      log.debug("LPVariable created {}", var.toString());
     }
     return var;
   }
@@ -240,7 +240,7 @@ public abstract class LPModel <X, Y, Z> {
     }
 
     LPConstraintGroup group = new LPConstraintGroup(this, identifier, description, generator, initializer);
-    log.info("Created new LP Constraint Group {}", group);
+    log.info("Created new LP Constraint Group {}", group.toString());
     lpConstraintGroup.put(identifier, group);
     lpConstraints.put(group, new HashSet<LPConstraint>());
     return group;
@@ -287,7 +287,7 @@ public abstract class LPModel <X, Y, Z> {
       //add variable to set of corresponding var group
       Set<LPConstraint> constraints = lpConstraints.get(used);
       constraints.add(constraint);
-      log.info("Constraint created {}", this);
+      log.debug("LP Constraint created {}", constraint.toString());
     }
   }
 
