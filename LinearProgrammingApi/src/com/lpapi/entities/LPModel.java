@@ -423,7 +423,6 @@ public abstract class LPModel <X, Y, Z> {
     this.initVars();
     this.initConstraintGroups();
     this.initConstraints();
-    this.initObjectiveFunction();
   }
 
 }
