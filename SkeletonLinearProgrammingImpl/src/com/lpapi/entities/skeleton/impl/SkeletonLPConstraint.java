@@ -16,7 +16,7 @@ public class SkeletonLPConstraint extends LPConstraint<SkeletonConstr> {
 
   public SkeletonLPConstraint(LPModel model, String identifier, LPExpression lhs, LPOperator operator, LPExpression rhs) throws LPConstraintException {
     super(model, identifier, lhs, operator, rhs);
-    exprGen = new SkeletonLPExpressionGenerator();
+    exprGen = new SkeletonLPExpressionGenerator(this.getIdentifier());
   }
 
   @Override
@@ -26,6 +26,8 @@ public class SkeletonLPConstraint extends LPConstraint<SkeletonConstr> {
 
   @Override
   protected void initModelConstraint() throws LPModelException {
+    exprGen.generateExpression(getLhs());
+    exprGen.generateExpression(getRhs());
     log.debug("Do nothing");
   }
 
