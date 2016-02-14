@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="GlpkLinearProgrammingApi">
+  <property name="debuglevel" value="source,lines,vars"/>
+  <property name="LinearProgrammingApi.location" value="../LinearProgrammingApi"/>
+  <property name="debuglevel" value="source,lines,vars"/>
+  <property name="target" value="1.8"/>
+  <property name="source" value="1.8"/>
+
+  <!--Include path to GLPK Java jar file -->
+  <property name="GlpkJar.location" value="/opt/glpk/swig"/>
+
+  <path id="LinearProgrammingApi.classpath">
+    <pathelement location="${LinearProgrammingApi.location}/bin"/>
+    <pathelement location="${LinearProgrammingApi.location}/lib/logging/slf4j-api-1.7.10.jar"/>
+  </path>
+  <path id="GlpkLinearProgrammingApi.classpath">
+    <pathelement location="bin"/>
+    <path refid="LinearProgrammingApi.classpath"/>
+    <pathelement location="${GlpkJar.location}/glpk-java.jar"/>
+  </path>
+  <target name="init">
+    <mkdir dir="bin"/>
+    <copy includeemptydirs="false" todir="bin">
+      <fileset dir="src">
+        <exclude name="**/*.launch"/>
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+  <target name="clean">
+    <delete dir="bin"/>
+  </target>
+  <target depends="clean" name="cleanall">
+    <ant antfile="build.xml" dir="${LinearProgrammingApi.location}" inheritAll="false" target="clean"/>
+  </target>
+  <target depends="build-subprojects,build-project" name="build"/>
+  <target name="build-subprojects">
+    <ant antfile="build.xml" dir="${LinearProgrammingApi.location}" inheritAll="false" target="build">
+      <propertyset>
+        <propertyref name="build.compiler"/>
+      </propertyset>
+    </ant>
+  </target>
+  <target depends="init" name="build-project">
+    <echo message="${ant.project.name}: ${ant.file}"/>
+    <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+      <src path="src"/>
+      <classpath refid="GlpkLinearProgrammingApi.classpath"/>
+    </javac>
+  </target>
+  <target depends="clean, build" name="createjar">
+    <delete file="jars/GlpkLPImpl.jar"/>
+    <jar destfile="./jars/GlpkLPImpl.jar" basedir="bin/">
+      <manifest>
+        <attribute name="Class-Path" value="slf4j-api-1.7.10.jar"/>
+      </manifest>
+    </jar>
+  </target>
+
+</project>
