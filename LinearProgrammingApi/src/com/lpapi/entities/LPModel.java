@@ -44,6 +44,8 @@ public abstract class LPModel <X, Y, Z> {
 
   private Map<LPConstantGroup, Set<LPConstant>> lpConstants = new HashMap<>();
 
+  private LPObjFnGenerator objFunGenerator = null;
+
   private LPObjType objType;
 
   private LPExpression objFn;
@@ -242,7 +244,7 @@ public abstract class LPModel <X, Y, Z> {
     LPConstraintGroup group = new LPConstraintGroup(this, identifier, description, generator, initializer);
     log.info("Created new LP Constraint Group {}", group.toString());
     lpConstraintGroup.put(identifier, group);
-    lpConstraints.put(group, new HashSet<LPConstraint>());
+    lpConstraints.put(group, new HashSet<>());
     return group;
 
   }
@@ -342,6 +344,25 @@ public abstract class LPModel <X, Y, Z> {
     log.info("Model Variables initialized");
   }
 
+  //method to register an objective function generator
+  public void attachObjectiveFunctionGenerator(LPObjFnGenerator generator) {
+    if (generator!=null) {
+      generator.setModel(this);
+      this.objFunGenerator = generator;
+      log.info("Objective function generator " + generator.getClass().getSimpleName() + " registered successfully");
+    } else {
+      log.error("Objective function generator cannot be null");
+    }
+  }
+
+  //method to create the objective function from the generator
+  public void initObjFunctionGenerator() throws LPModelException {
+    if (objFunGenerator!=null) {
+      log.info("Found Objective function generator. Using function to generate the objective function expression");
+      this.setObjFn(objFunGenerator.generate(), objFunGenerator.getObjType());
+    }
+  }
+
   //Method to initialize the objective function
   public abstract void initObjectiveFunction() throws LPModelException;
 
@@ -423,6 +444,7 @@ public abstract class LPModel <X, Y, Z> {
     this.initVars();
     this.initConstraintGroups();
     this.initConstraints();
+    this.initObjFunctionGenerator();
   }
 
 }

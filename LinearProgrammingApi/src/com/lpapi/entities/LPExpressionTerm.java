@@ -28,7 +28,7 @@ public class LPExpressionTerm {
 
   public String toString() {
     //if constant, return constant, or else return coefficient . variable
-    return (isConstant())? "" + coefficient: coefficient + "." + var.getIdentifier();
+    return (isConstant())? "" + getCoefficient(): getCoefficient() + "." + var.getIdentifier();
   }
 
   public boolean isConstant() {
