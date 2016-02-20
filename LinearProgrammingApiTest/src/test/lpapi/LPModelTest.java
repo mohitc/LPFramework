@@ -60,6 +60,7 @@ public abstract class LPModelTest {
       instance.addConstraint("Constr2", lhs2, LPOperator.GREATER_EQUAL, rhs2);
 
       instance.init();
+      instance.initObjectiveFunction();
       instance.computeModel();
 
     } catch (LPModelException e) {

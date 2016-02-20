@@ -93,7 +93,7 @@ public abstract class LPVar<T> {
     return result;
   }
 
-  protected void setResult(double result){
+  public void setResult(double result){
     this.result = result;
     this.resultSet = true;
   }

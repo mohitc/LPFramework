@@ -36,7 +36,8 @@ public class GlpkLPVar extends LPVar<Integer>{
       varIndex = GLPK.glp_add_cols(lp, 1);
       GLPK.glp_set_col_name(lp, varIndex, getIdentifier());
       GLPK.glp_set_col_kind(lp, varIndex, getGlpVarType(getVarType()));
-      GLPK.glp_set_col_bnds(lp, varIndex, GLPKConstants.GLP_DB, getlBound(), getuBound());
+      int boundType = (getlBound()==getuBound()) ? GLPKConstants.GLP_FX : GLPKConstants.GLP_DB;
+      GLPK.glp_set_col_bnds(lp, varIndex, boundType, getlBound(), getuBound());
     } catch (Exception e) {
       log.error("Error while initializing LP Variable" , e);
       throw new LPModelException("Error whilie initializing LP Variable: " + e.getMessage());

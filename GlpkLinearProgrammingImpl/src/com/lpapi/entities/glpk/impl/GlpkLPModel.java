@@ -4,6 +4,7 @@ import com.lpapi.entities.*;
 import com.lpapi.exception.LPModelException;
 import org.gnu.glpk.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
 
   @Override
   public void initObjectiveFunction() throws LPModelException {
-
+    GLPK.glp_set_obj_name(model, "Obj");
     switch (getObjType()) {
       case MINIMIZE:
         GLPK.glp_set_obj_dir(model, GLPKConstants.GLP_MIN);
@@ -83,7 +84,7 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
     glp_iocp iocp = new glp_iocp();
     GLPK.glp_init_iocp(iocp);
     iocp.setPresolve(GLPKConstants.GLP_ON);
-//  GLPK.glp_write_lp(lp, null, "yi.lp");
+    GLPK.glp_write_lp(model, null, "model.lp");
     int ret = GLPK.glp_intopt(model, iocp);
 
     int i;
@@ -102,12 +103,32 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
       name = GLPK.glp_get_col_name(model, i);
       val  = GLPK.glp_mip_col_val(model, i);
       log.debug(name + " = " + val);
+      this.getLPVar(name).setResult(val);
     }
-
+    LPSolutionStatus solnStatus = getSolutionStatus(GLPK.glp_mip_status(model));
+    solnParams.put(LPSolutionParams.STATUS, solnStatus);
+    if (solnStatus!=LPSolutionStatus.UNKNOWN && solnStatus!=LPSolutionStatus.INFEASIBLE) {
+      log.debug("Objective : " + GLPK.glp_get_obj_val(model));
+      solnParams.put(LPSolutionParams.OBJECTIVE, GLPK.glp_get_obj_val(model));
+    }
   }
+
+  private LPSolutionStatus getSolutionStatus(int solnStatus) {
+    if (solnStatus==GLPKConstants.GLP_UNDEF)
+      return LPSolutionStatus.UNKNOWN;
+    else if (solnStatus==GLPKConstants.GLP_OPT)
+      return LPSolutionStatus.OPTIMAL;
+    else if (solnStatus==GLPKConstants.GLP_FEAS)
+      return LPSolutionStatus.TIME_LIMIT;
+    else if (solnStatus==GLPKConstants.GLP_INFEAS)
+      return LPSolutionStatus.INFEASIBLE;
+
+    return LPSolutionStatus.UNKNOWN;
+  }
+
 
   @Override
   protected Map<LPSolutionParams, Object> getModelSolutionParams() {
-    return null;
+    return Collections.unmodifiableMap(solnParams);
   }
 }
