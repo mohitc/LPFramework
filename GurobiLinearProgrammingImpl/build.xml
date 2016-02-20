@@ -7,7 +7,7 @@
     <property name="source" value="1.7"/>
 
     <!--Include path to Gurobi 6.0.0 jar file -->
-    <property name="GurobiJar.location" value="c:/gurobi600/win64/lib"/>
+    <property name="GurobiJar.location" value="/opt/gurobi650/linux64/lib"/>
 
     <path id="LinearProgrammingApi.classpath">
         <pathelement location="${LinearProgrammingApi.location}/bin"/>
