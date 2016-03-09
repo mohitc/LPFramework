@@ -97,6 +97,7 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
     System.out.print(name);
     System.out.print(" = ");
     System.out.println(val);
+/*
     n = GLPK.glp_get_num_cols(model);
     for(i=1; i <= n; i++)
     {
@@ -105,13 +106,31 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
       log.debug(name + " = " + val);
       this.getLPVar(name).setResult(val);
     }
+*/
     LPSolutionStatus solnStatus = getSolutionStatus(GLPK.glp_mip_status(model));
     solnParams.put(LPSolutionParams.STATUS, solnStatus);
     if (solnStatus!=LPSolutionStatus.UNKNOWN && solnStatus!=LPSolutionStatus.INFEASIBLE) {
       log.debug("Objective : " + GLPK.glp_get_obj_val(model));
       solnParams.put(LPSolutionParams.OBJECTIVE, GLPK.glp_get_obj_val(model));
+      extractResults();
     }
   }
+
+  @Override
+  public void extractResults() throws LPModelException {
+    log.info("Extracting results of computed model into the variables");
+    for (String varIdentifier: getLPVarIdentifiers()) {
+      LPVar var  = getLPVar(varIdentifier);
+      if (var instanceof GlpkLPVar) {
+        try {
+          var.setResult(GLPK.glp_mip_col_val(model, ((GlpkLPVar)var).getModelVar()));
+        } catch (Exception e) {
+          log.error("Error while extracting value of variable " + var, e);
+        }
+      }
+    }
+  }
+
 
   private LPSolutionStatus getSolutionStatus(int solnStatus) {
     if (solnStatus==GLPKConstants.GLP_UNDEF)

@@ -82,7 +82,7 @@ public class CplexLPModel extends LPModel<IloCplex, IloNumVar, IloConstraint> {
         solnParams.put(LPSolutionParams.OBJECTIVE, cplexModel.getObjValue());
         solnParams.put(LPSolutionParams.MIP_GAP, cplexModel.getMIPRelativeGap());
         solnParams.put(LPSolutionParams.TIME, (endTime - startTime));
-
+        extractResults();
       } else if (out == IloCplex.Status.InfeasibleOrUnbounded) {
         log.info("Model is infeasible or unbounded");
         solnParams.put(LPSolutionParams.STATUS, LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED);
@@ -98,6 +98,7 @@ public class CplexLPModel extends LPModel<IloCplex, IloNumVar, IloConstraint> {
         solnParams.put(LPSolutionParams.OBJECTIVE, cplexModel.getObjValue());
         solnParams.put(LPSolutionParams.MIP_GAP, cplexModel.getMIPRelativeGap());
         solnParams.put(LPSolutionParams.TIME, (endTime - startTime));
+        extractResults();
       } else {
         //Error
         log.info("Optimization was stopped with Error status (Cplex Status: " + out.toString() + ")");
@@ -105,6 +106,21 @@ public class CplexLPModel extends LPModel<IloCplex, IloNumVar, IloConstraint> {
     } catch (IloException e) {
       log.error("Error while solving CPLEX model", e);
       throw new LPModelException("Error while solving CPLEX model" + e.getMessage());
+    }
+  }
+
+  @Override
+  public void extractResults() throws LPModelException {
+    log.info("Extracting results of computed model into the variables");
+    for (String varIdentifier: getLPVarIdentifiers()) {
+      LPVar var  = getLPVar(varIdentifier);
+      if (var instanceof CplexLPVar) {
+        try {
+          var.setResult(this.getModel().getValue(((CplexLPVar)var).getModelVar()));
+        } catch (Exception e) {
+          log.error("Error while extracting value of variable " + var, e);
+        }
+      }
     }
   }
 

@@ -96,6 +96,7 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
           solnParams.put(LPSolutionParams.OBJECTIVE, model.get(GRB.DoubleAttr.ObjVal));
           solnParams.put(LPSolutionParams.MIP_GAP, model.get(GRB.DoubleAttr.MIPGap));
           solnParams.put(LPSolutionParams.TIME, (endTime - startTime));
+          extractResults();
           break;
         case GRB.Status.INF_OR_UNBD:
           log.info("Model is infeasible or unbounded");
@@ -113,6 +114,7 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
           log.info("Time limit reached");
           solnParams.put(LPSolutionParams.STATUS, LPSolutionStatus.TIME_LIMIT);
           solnParams.put(LPSolutionParams.TIME, (endTime - startTime));
+          extractResults();
           break;
         case GRB.Status.CUTOFF:
           log.info("Cutoff reached. Objective: " + model.get(GRB.DoubleAttr.ObjVal) + ", MIP Gap: " + model.get(GRB.DoubleAttr.MIPGap));
@@ -120,6 +122,7 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
           solnParams.put(LPSolutionParams.OBJECTIVE, model.get(GRB.DoubleAttr.ObjVal));
           solnParams.put(LPSolutionParams.MIP_GAP, model.get(GRB.DoubleAttr.MIPGap));
           solnParams.put(LPSolutionParams.TIME, (endTime - startTime));
+          extractResults();
           break;
         default:
           log.info("Optimization was stopped with unknown status (GRB Status: " + optimstatus + ")");
@@ -129,6 +132,21 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
     } catch (GRBException e) {
       log.error("Error in optimizing model", e);
       throw new LPModelException("Error in optimizing model");
+    }
+  }
+
+  @Override
+  public void extractResults() throws LPModelException {
+    log.info("Extracting results of computed model into the variables");
+    for (String varIdentifier: getLPVarIdentifiers()) {
+      LPVar var  = getLPVar(varIdentifier);
+      if (var instanceof GurobiLPVar) {
+        try {
+          var.setResult(((GurobiLPVar)var).getModelVar().get(GRB.DoubleAttr.X));
+        } catch (GRBException e) {
+          log.error("Error while extracting value of variable " + var, e);
+        }
+      }
     }
   }
 

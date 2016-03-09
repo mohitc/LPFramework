@@ -21,7 +21,7 @@ public abstract class LPVar<T> {
 
   private double uBound;
 
-  private double result;
+  private Number result;
 
   private boolean resultSet = false;
 
@@ -89,13 +89,22 @@ public abstract class LPVar<T> {
 
   protected abstract void initModelVar() throws LPModelException;
 
-  public double getResult() {
+  public Number getResult() {
     return result;
   }
 
-  public void setResult(double result){
-    this.result = result;
+  public void setResult(Number result){
     this.resultSet = true;
+    if (this.varType==null || result == null) {
+      this.resultSet = false;
+    } else {
+      if (this.varType == LPVarType.DOUBLE) {
+        this.result = result;
+      } else {
+        //value is an integer
+        this.result = (int)(result.doubleValue() + 0.5);
+      }
+    }
   }
 
   public boolean isResultSet() {

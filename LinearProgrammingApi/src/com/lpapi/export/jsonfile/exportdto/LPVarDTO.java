@@ -13,7 +13,7 @@ public class LPVarDTO {
 
   private double uBound;
 
-  private Double result;
+  private Number result;
 
   public LPVarDTO() {}
 
@@ -58,11 +58,11 @@ public class LPVarDTO {
     this.uBound = uBound;
   }
 
-  public Double getResult() {
+  public Number getResult() {
     return result;
   }
 
-  public void setResult(Double result) {
+  public void setResult(Number result) {
     this.result = result;
   }
 }

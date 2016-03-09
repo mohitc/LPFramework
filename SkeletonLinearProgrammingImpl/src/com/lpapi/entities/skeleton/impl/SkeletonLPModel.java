@@ -58,6 +58,11 @@ public class SkeletonLPModel extends LPModel<SkeletonModel, SkeletonVar, Skeleto
   }
 
   @Override
+  public void extractResults() throws LPModelException {
+    log.debug("Do nothing");
+  }
+
+  @Override
   protected Map<LPSolutionParams, Object> getModelSolutionParams() {
     return Collections.unmodifiableMap(solnParams);
   }
