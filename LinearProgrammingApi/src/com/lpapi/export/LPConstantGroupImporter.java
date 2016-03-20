@@ -13,31 +13,27 @@ public abstract class LPConstantGroupImporter {
 
   private LPModel model;
 
-  private LPConstantGroup lpConstantGroup;
+  private String groupID;
 
-  public LPConstantGroupImporter(LPModel model, String identifier, String description) throws LPImportException {
+  public LPConstantGroupImporter(LPModel model, String identifier) throws LPImportException {
     if (model==null)
       throw new LPImportException("Model cannot be null");
     if (identifier==null)
       throw new LPImportException("Identifier cannot be null");
 
-    //check if LP constraints group by the identifier can be created
-    try {
-      lpConstantGroup = model.createLPConstantGroup(identifier, description);
-      this.model = model;
-    } catch (LPConstantGroupException e) {
-      log.error("Error while creating the LP Constraint group");
-      throw new LPImportException(e.getMessage());
-    }
+    //check if LP constant group already exists, and if not, then try to create the group
+    this.model = model;
+    this.groupID = identifier;
   }
 
   public LPModel getModel() {
     return model;
   }
 
-  public LPConstantGroup getLpConstantGroup() {
-    return lpConstantGroup;
+  public abstract void importGroup() throws LPImportException;
+
+  public String getGroupID() {
+    return groupID;
   }
 
-  public abstract void importGroup() throws LPImportException;
 }

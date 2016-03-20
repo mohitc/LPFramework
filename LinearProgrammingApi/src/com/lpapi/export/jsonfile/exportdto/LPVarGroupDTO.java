@@ -9,18 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class LPVarGroupDTO {
+public class LPVarGroupDTO extends LPGroupDTO {
 
   private List<LPVarDTO> vars;
 
   public LPVarGroupDTO() {}
 
   public LPVarGroupDTO(LPModel model, LPVarGroup varGrp) throws LPModelException {
-    //Generate DTO
-    if (model==null)
-      throw new LPModelException("Model cannot be null");
-    if (varGrp==null)
-      throw new LPModelException("Variable group cannot be null");
+    super(model, varGrp);
 
     Set<LPVar> lpVars = model.getLPVars(varGrp.getIdentifier());
     vars = new ArrayList<>();

@@ -18,13 +18,10 @@ public class SkeletonLPModel extends LPModel<SkeletonModel, SkeletonVar, Skeleto
 
   private LPConstraintFactory<SkeletonConstr> grbConstraintFactory;
 
-  private Map<LPSolutionParams, Object> solnParams;
-
   public SkeletonLPModel(String identifier) throws LPModelException {
     super(identifier);
     grbVarFactory = new SkeletonLPVarFactory();
     grbConstraintFactory = new SkeletonLPConstraintFactory();
-    solnParams = new HashMap<>();
   }
 
   @Override
@@ -60,11 +57,6 @@ public class SkeletonLPModel extends LPModel<SkeletonModel, SkeletonVar, Skeleto
   @Override
   public void extractResults() throws LPModelException {
     log.debug("Do nothing");
-  }
-
-  @Override
-  protected Map<LPSolutionParams, Object> getModelSolutionParams() {
-    return Collections.unmodifiableMap(solnParams);
   }
 
 }

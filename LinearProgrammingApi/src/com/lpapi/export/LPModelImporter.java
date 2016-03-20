@@ -22,5 +22,5 @@ public abstract class LPModelImporter {
     return model;
   }
 
-  public abstract void importModel();
+  public abstract void importModel() throws LPImportException;
 }

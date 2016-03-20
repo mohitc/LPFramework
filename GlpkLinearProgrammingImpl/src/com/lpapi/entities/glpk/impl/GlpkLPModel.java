@@ -17,14 +17,11 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
 
   private glp_prob model;
 
-  private Map<LPSolutionParams, Object> solnParams;
 
   public GlpkLPModel(String identifier) throws LPModelException {
     super(identifier);
     this.varFactory = new GlpkLPVarFactory();
     this.constraintFactory = new GlpkLPConstraintFactory();
-    solnParams = new HashMap<>();
-
   }
 
   @Override
@@ -87,31 +84,12 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
     GLPK.glp_write_lp(model, null, "model.lp");
     int ret = GLPK.glp_intopt(model, iocp);
 
-    int i;
-    int n;
-    String name;
-    double val;
-
-    name = GLPK.glp_get_obj_name(model);
-    val  = GLPK.glp_mip_obj_val(model);
-    System.out.print(name);
-    System.out.print(" = ");
-    System.out.println(val);
-/*
-    n = GLPK.glp_get_num_cols(model);
-    for(i=1; i <= n; i++)
-    {
-      name = GLPK.glp_get_col_name(model, i);
-      val  = GLPK.glp_mip_col_val(model, i);
-      log.debug(name + " = " + val);
-      this.getLPVar(name).setResult(val);
-    }
-*/
+    double val  = GLPK.glp_mip_obj_val(model);
     LPSolutionStatus solnStatus = getSolutionStatus(GLPK.glp_mip_status(model));
     solnParams.put(LPSolutionParams.STATUS, solnStatus);
     if (solnStatus!=LPSolutionStatus.UNKNOWN && solnStatus!=LPSolutionStatus.INFEASIBLE) {
       log.debug("Objective : " + GLPK.glp_get_obj_val(model));
-      solnParams.put(LPSolutionParams.OBJECTIVE, GLPK.glp_get_obj_val(model));
+      solnParams.put(LPSolutionParams.OBJECTIVE, val);
       extractResults();
     }
   }
@@ -146,8 +124,4 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
   }
 
 
-  @Override
-  protected Map<LPSolutionParams, Object> getModelSolutionParams() {
-    return Collections.unmodifiableMap(solnParams);
-  }
 }
