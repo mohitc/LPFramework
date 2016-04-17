@@ -1,0 +1,18 @@
+<ivy-module version="2.0">
+  <info organisation="apache" module="ivy-fetch"/>
+  <configurations>
+    <conf name="runtime" description="Modules needed for running the application"/>
+  </configurations>
+  <dependencies>
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.7.21"/>
+    <dependency org="org.slf4j" name="slf4j-simple" rev="1.7.21"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.7.3"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.7.3"/>
+    <dependency org="com.fasterxml.jackson.core" name="jackson-annotations" rev="2.7.3"/>
+
+    <exclude type="src" ext="jar" conf="runtime"/>
+    <exclude org="*" ext="*" type="source" conf="runtime"/>
+    <exclude type="javadoc" ext="jar" conf="runtime"/>
+    <exclude type="license" ext="txt" conf="runtime"/>
+  </dependencies>
+</ivy-module>

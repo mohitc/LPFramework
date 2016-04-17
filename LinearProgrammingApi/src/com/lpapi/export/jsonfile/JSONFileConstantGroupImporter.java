@@ -1,5 +1,8 @@
 package com.lpapi.export.jsonfile;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lpapi.entities.LPConstantGroup;
 import com.lpapi.entities.LPModel;
 import com.lpapi.exception.LPConstantException;
@@ -8,10 +11,6 @@ import com.lpapi.exception.LPImportException;
 import com.lpapi.export.LPConstantGroupImporter;
 import com.lpapi.export.jsonfile.exportdto.LPConstantDTO;
 import com.lpapi.export.jsonfile.exportdto.LPConstantGroupDTO;
-import com.lpapi.export.jsonfile.exportdto.LPModelDTO;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
