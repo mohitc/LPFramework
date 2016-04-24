@@ -11,7 +11,9 @@
 
   <path id="LinearProgrammingApi.classpath">
     <pathelement location="${LinearProgrammingApi.location}/bin"/>
-    <pathelement location="${LinearProgrammingApi.location}/lib/logging/slf4j-api-1.7.10.jar"/>
+    <fileset dir="${LinearProgrammingApi.location}/lib">
+      <include name="**/*.jar" />
+    </fileset>
   </path>
   <path id="GlpkLinearProgrammingApi.classpath">
     <pathelement location="bin"/>
