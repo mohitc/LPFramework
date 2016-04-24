@@ -103,10 +103,8 @@ public abstract class LPModel <X, Y, Z> {
       return createLpConstant(identifier, value, getLPConstantGroup(DEF_CONST_GROUP));
     } catch (LPConstantGroupException e) {
       log.error("Default Constant Group not created, exiting", e);
-      System.exit(1);
-      return null;
+      throw new RuntimeException("Default Constant Group not created, exiting");
     }
-
   }
 
   public LPConstant createLpConstant(String identifier, double value, LPConstantGroup group) throws LPConstantException, LPConstantGroupException {
@@ -185,8 +183,7 @@ public abstract class LPModel <X, Y, Z> {
       return createLPVar(identifier, type, lBound, uBound, getLPVarGroup(DEF_VAR_GROUP));
     } catch (LPVarGroupException e) {
       log.error("Default Variable Group not created, exiting", e);
-      System.exit(1);
-      return null;
+      throw new RuntimeException("Default Constant Group not created, exiting");
     }
   }
 
@@ -271,7 +268,7 @@ public abstract class LPModel <X, Y, Z> {
       addConstraint(identifier, lhs, operator, rhs, getLPConstraintGroup(DEF_CONSTR_GROUP));
     } catch (LPConstraintGroupException e) {
       log.error("Default Constraint Group not created, exiting", e);
-      System.exit(1);
+      throw new RuntimeException("Default Constant Group not created, exiting");
     }
   }
 
