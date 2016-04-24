@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JSONFileLPModelImporter extends LPModelImporter {
 
@@ -28,12 +31,13 @@ public class JSONFileLPModelImporter extends LPModelImporter {
   public void importModel() throws LPImportException {
 
     try {
-      File file = new File(folderPath + getModel().getIdentifier() +
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
           JSONFileConstants.MODEL_EXTENSION);
 
       //Read model parameters to DTO
       ObjectMapper mapper = new ObjectMapper();
-      LPModelDTO modelDTO = mapper.readValue(file, LPModelDTO.class);
+      LPModelDTO modelDTO = mapper.readValue(Files.newBufferedReader(path, JSONFileConstants.ENCODING),
+          LPModelDTO.class);
 
       //Read constant groups from IDs
       for (String constantGroup: modelDTO.getConstantGroups()) {

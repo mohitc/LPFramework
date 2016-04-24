@@ -1,5 +1,8 @@
 package com.lpapi.export.jsonfile;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 public interface JSONFileConstants {
 
   String MODEL_EXTENSION = ".json";
@@ -16,5 +19,6 @@ public interface JSONFileConstants {
   //Suffix for constant groups
   String CONSTANT_GROUP_SUFFIX = "-CONSTANTG-";
 
-
+  //Encoding
+  Charset ENCODING = StandardCharsets.UTF_8;
 }

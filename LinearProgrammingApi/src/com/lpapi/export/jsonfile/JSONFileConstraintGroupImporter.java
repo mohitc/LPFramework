@@ -12,6 +12,9 @@ import com.lpapi.export.jsonfile.exportdto.LPConstraintGroupDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JSONFileConstraintGroupImporter extends LPConstraintGroupImporter {
 
@@ -25,12 +28,13 @@ public class JSONFileConstraintGroupImporter extends LPConstraintGroupImporter {
   @Override
   public void importGroup() throws LPImportException {
     try {
-      File file = new File(folderPath + getModel().getIdentifier() +
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
           JSONFileConstants.CONSTR_GROUP_SUFFIX + getGroupID() + JSONFileConstants.MODEL_EXTENSION);
 
       //Read model parameters to DTO
       ObjectMapper mapper = new ObjectMapper();
-      LPConstraintGroupDTO groupDTO = mapper.readValue(file, LPConstraintGroupDTO.class);
+      LPConstraintGroupDTO groupDTO = mapper.readValue(Files.newBufferedReader(path, JSONFileConstants.ENCODING),
+          LPConstraintGroupDTO.class);
 
       LPConstraintGroup group;
 
