@@ -18,7 +18,7 @@ public class LPGroupTest {
 
   private static final Logger log = LoggerFactory.getLogger(LPGroupTest.class);
 
-  private class VarGroupInitializer extends LPGroupInitializer {
+  private static class VarGroupInitializer extends LPGroupInitializer {
 
     private String varName;
 
@@ -33,7 +33,7 @@ public class LPGroupTest {
   }
 
 
-  private class ConstantPrefixNameGenerator extends LPNameGeneratorImpl {
+  private static class ConstantPrefixNameGenerator extends LPNameGeneratorImpl {
 
     public ConstantPrefixNameGenerator (List<String> varName, int eqCount) {
       super("C", 2);
@@ -51,7 +51,7 @@ public class LPGroupTest {
     }
   }
 
-  private class ConstantPrefixGroupInitialiazer extends LPGroupInitializer {
+  private static class ConstantPrefixGroupInitialiazer extends LPGroupInitializer {
     @Override
     public void run() throws LPModelException {
       try {
@@ -67,7 +67,7 @@ public class LPGroupTest {
     }
   }
 
-  private class ConstantValNameGenerator extends LPNameGeneratorImpl<Integer> {
+  private static class ConstantValNameGenerator extends LPNameGeneratorImpl<Integer> {
 
     public ConstantValNameGenerator (int eqCount) {
       super("Cout", 1);
@@ -80,7 +80,7 @@ public class LPGroupTest {
     }
   }
 
-  private class ConstantValGroupIntiializer extends LPGroupInitializer {
+  private static class ConstantValGroupIntiializer extends LPGroupInitializer {
 
     @Override
     public void run() throws LPModelException {
@@ -94,7 +94,7 @@ public class LPGroupTest {
   }
 
 
-  private class ConstraintNameGenerator extends LPNameGeneratorImpl<Integer> {
+  private static class ConstraintNameGenerator extends LPNameGeneratorImpl<Integer> {
 
     public ConstraintNameGenerator(int eqCount) {
       super("Constraint", 1);
@@ -108,7 +108,7 @@ public class LPGroupTest {
   }
 
 
-  private class ConstraintGroupInitializer extends LPGroupInitializer {
+  private static class ConstraintGroupInitializer extends LPGroupInitializer {
 
     private LPNameGenerator constantPrefixGenerator, constantValNameGenerator;
 
@@ -149,7 +149,7 @@ public class LPGroupTest {
     }
   }
 
-  private class ObjFunGenerator extends LPObjFnGenerator {
+  private static class ObjFunGenerator extends LPObjFnGenerator {
 
     public ObjFunGenerator(LPObjType objType) {
       super(objType);
