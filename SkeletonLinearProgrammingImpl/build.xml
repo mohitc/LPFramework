@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build" name="SkeletonLinearProgrammingImpl">
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<project basedir="." default="build" name="SkeletonLinearProgrammingImpl" xmlns:ivy="antlib:org.apache.ivy.ant">
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="LinearProgrammingApi.location" value="../LinearProgrammingApi"/>
     <property name="debuglevel" value="source,lines,vars"/>
@@ -8,11 +8,16 @@
 
     <path id="LinearProgrammingApi.classpath">
         <pathelement location="${LinearProgrammingApi.location}/bin"/>
-        <pathelement location="${LinearProgrammingApi.location}/lib/logging/slf4j-api-1.7.10.jar"/>
+    </path>
+    <path id="SkeletonLinearProgrammingImpl.jars.classpath">
+        <fileset dir="./lib">
+            <include name="**/*.jar" />
+        </fileset>
     </path>
     <path id="SkeletonLinearProgrammingImpl.classpath">
         <pathelement location="bin"/>
         <path refid="LinearProgrammingApi.classpath"/>
+        <path refid="SkeletonLinearProgrammingImpl.jars.classpath"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -24,7 +29,12 @@
         </copy>
     </target>
     <target name="clean">
-        <delete dir="bin"/>
+        <delete failonerror="false">
+            <fileset dir = "bin"/>
+            <fileset dir = "lib"/>
+        </delete>
+        <echo message="Fetching all dependencies from repository"/>
+        <ivy:retrieve pattern="lib/[artifact].[ext]" conf="runtime"/>
     </target>
     <target depends="clean" name="cleanall">
         <ant antfile="build.xml" dir="${LinearProgrammingApi.location}" inheritAll="false" target="clean"/>
