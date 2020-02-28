@@ -16,6 +16,7 @@
         <module>lp-solver</module>
         <module>gurobi-solver</module>
         <module>glpk-solver</module>
+        <module>lp-solver-sample</module>
     </modules>
 
     <properties>

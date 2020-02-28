@@ -8,6 +8,8 @@ class LPConstant constructor(override val identifier: String, var value: Double)
 
   constructor(identifier: String) : this(identifier, 0.0)
 
+  constructor(identifier: String, number: Number) : this(identifier, number.toDouble())
+
   fun value(value:Double): LPConstant {
     this.value = value
     return this

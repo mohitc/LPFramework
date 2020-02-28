@@ -7,7 +7,7 @@ import com.lpapi.model.enums.LPOperator
  * lhs OPERATOR rhs
  */
 class LPConstraint constructor(override val identifier: String, val lhs: LPExpression,
-                               val operator: LPOperator, val rhs: LPExpression) : LPParameter {
+                               var operator: LPOperator, val rhs: LPExpression) : LPParameter {
 
   /** Default constructor that generates a constraint with a default operation where the LHS is greater than the RHS
    */

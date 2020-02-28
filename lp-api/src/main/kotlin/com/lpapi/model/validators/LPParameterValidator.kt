@@ -98,6 +98,13 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
       return false
     }
 
+    //validate that the constraint has atleast one variable term in the LHS or the RHS
+    val reducedConstraint : LPConstraint? = model.reduce(instance)
+    if (reducedConstraint==null) {
+      log.error { "Constraint ${instance.identifier} cannot be reduced to a valid constraint" }
+      return false
+    }
+
     //Validate all terms in the expression of a constraint
     return listOf(instance.lhs, instance.rhs).flatMap { v -> v.expression }
       .map{

@@ -7,8 +7,8 @@ class LPExpression {
 
   /** Add a constant value specified as a fixed Double value
    */
-  fun add(value: Double): LPExpression {
-    expression.add(LPExpressionTerm(value, null, null))
+  fun add(value: Number): LPExpression {
+    expression.add(LPExpressionTerm(value.toDouble(), null, null))
     return this
   }
 
@@ -33,6 +33,13 @@ class LPExpression {
     return this
   }
 
+  /** Add a variable term specified as an LP Variable Identifier (e.g. 1.X)
+   */
+  fun addTerm(variableIdentifier: String): LPExpression {
+    expression.add(LPExpressionTerm(1.0, variableIdentifier, null))
+    return this
+  }
+
   /** Add a variable term specified as an LP Constant and Variable (e.g. c.X)
    */
   fun addTerm(constant: LPConstant, variable: LPVar): LPExpression {
@@ -49,15 +56,15 @@ class LPExpression {
 
   /** Add a variable term specified as a double and LP Variable (e.g. 3.X)
    */
-  fun addTerm(constant: Double, variable: LPVar): LPExpression {
-    expression.add(LPExpressionTerm(constant, variable.identifier, null))
+  fun addTerm(constant: Number, variable: LPVar): LPExpression {
+    expression.add(LPExpressionTerm(constant.toDouble(), variable.identifier, null))
     return this
   }
 
   /** Add a variable term specified as a double  and Variable identifier (e.g. 3.X)
    */
-  fun addTerm(constant: Double, variableIdentifier: String): LPExpression {
-    expression.add(LPExpressionTerm(constant, variableIdentifier, null))
+  fun addTerm(constant: Number, variableIdentifier: String): LPExpression {
+    expression.add(LPExpressionTerm(constant.toDouble(), variableIdentifier, null))
     return this
   }
 
