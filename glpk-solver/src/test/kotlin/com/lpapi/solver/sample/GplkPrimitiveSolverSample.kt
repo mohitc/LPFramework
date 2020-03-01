@@ -1,10 +1,14 @@
-package com.lpapi.solver.sample.glpk
+package com.lpapi.solver.sample
 
 import com.lpapi.model.LPModel
 import com.lpapi.solver.enums.LPSolutionStatus
 import com.lpapi.solver.glpk.GlpkLpSolver
-import com.lpapi.solver.sample.PrimitiveSolverSample
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
+@Tag("integrationTest")
 class GplkPrimitiveSolverSample : PrimitiveSolverSample() {
 
   override fun initAndSolveModel(model: LPModel): LPModel? {
@@ -22,13 +26,16 @@ class GplkPrimitiveSolverSample : PrimitiveSolverSample() {
       null
   }
 
+  @Test
+  fun testSolver() {
+    val model = initAndSolveModel(initLpModel())
+
+    assertNotNull(model, "Model should be computed successfully.")
+    assertEquals(model.variables.get("X")?.result, 1, "X should be = 1")
+    assertEquals(model.variables.get("Y")?.result, 1, "Y should be = 1")
+    assertEquals(model.variables.get("Z")?.result, 0, "Z should be = 1")
+  }
+
 }
 
-fun main(args: Array<String>) {
-  val solver = GplkPrimitiveSolverSample()
-  solver.log.info { "Starting test. Checking if model is initialized and solved correctly" }
-  val solvedModel = solver.initAndSolveModel(solver.initLpModel())
-  if (solvedModel==null)
-    solver.log.error { "Solver should have solved model correctly" }
-}
 

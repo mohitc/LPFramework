@@ -5,7 +5,6 @@ import com.lpapi.model.validators.LPParamIdValidator
 import com.lpapi.model.validators.LPParameterValidator
 import com.lpapi.model.validators.LPVarValidator
 import mu.KotlinLogging
-import java.util.stream.Collectors
 
 class LPModel (val identifier: String){
   private val log = KotlinLogging.logger("LPModel")
@@ -194,10 +193,10 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
 
   fun get (identifier: String) : T? = parameters[identifier]
 
-  fun getAllGroups() : Set<String> = grouping.keys.stream().collect(Collectors.toUnmodifiableSet())
+  fun getAllGroups() : Set<String> = grouping.keys.toSet()
 
   fun getAllIdentifiers(group: String) : Set<String>? {
-    return grouping[group]?.stream()?.collect(Collectors.toUnmodifiableSet())
+    return grouping[group]?.toSet()
   }
 
   fun allValues() : MutableCollection<T> {
