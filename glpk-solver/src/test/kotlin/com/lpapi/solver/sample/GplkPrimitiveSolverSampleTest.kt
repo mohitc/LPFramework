@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 @Tag("integrationTest")
-class GplkPrimitiveSolverSample : PrimitiveSolverSample() {
+class GplkPrimitiveSolverSampleTest : PrimitiveSolverSample() {
 
   override fun initAndSolveModel(model: LPModel): LPModel? {
     if (!model.validate()) {

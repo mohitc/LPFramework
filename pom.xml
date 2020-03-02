@@ -27,8 +27,7 @@
     <logger.version>1.7.7</logger.version>
     <slf4j.version>1.7.29</slf4j.version>
     <revision>1.0-SNAPSHOT</revision>
-    <skip.unit.tests>false</skip.unit.tests>
-    <skip.integration.tests>false</skip.integration.tests>
+    <glpk.skiptests>false</glpk.skiptests>
   </properties>
 
   <dependencies>
@@ -48,6 +47,7 @@
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-test-junit5</artifactId>
       <version>${kotlin.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

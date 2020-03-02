@@ -25,4 +25,22 @@ In order to evaluate models using this solver, we need to install both the GLPK 
   
 ## Running Problem instances 
 The GLPK solver needs the references to the glpk-java jni references. In order to do so, please include the following 
-VM argument <code>-Djava.library.path=/usr/local/lib/jni:/usr/lib/jni</code>
+VM argument <code>-Djava.library.path=/usr/local/lib/jni:/usr/lib/jni</code>. Sample problem instances can be found as tests 
+in the glpk-solver project, and are disabled by default. In order to enable the tests, go to the parent pom and set the property 
+```xml    
+<glpk.skiptests>true</glpk.skiptests>
+```
+
+In order to include the JVM arguments when running the tests, either include them as an environment variable, e.g. 
+```
+MAVEN_OPTS=" -Djava.library.path=/usr/local/lib/jni:/usr/lib/jni"
+export MAVEN_OPTS
+```
+and then run the target 
+```
+mvn clean compile test
+```
+or include them directly in the command line 
+```
+mvn clean compile test -DargLine="-Djava.library.path=/usr/local/lib/jni:/usr/lib/jni"
+```
