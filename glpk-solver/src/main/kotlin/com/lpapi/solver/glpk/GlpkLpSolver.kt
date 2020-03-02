@@ -10,9 +10,7 @@ import com.lpapi.solver.enums.LPSolutionStatus
 import mu.KotlinLogging
 import org.gnu.glpk.*
 
-class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
-
-  private val log = KotlinLogging.logger("GlpkLpSolver")
+open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
   private var glpkModel : glp_prob? = null
 
@@ -20,18 +18,14 @@ class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
   private var constraintMap : MutableMap<String, Int> = mutableMapOf()
 
-  override fun initialize() : Boolean {
-    try {
+  override fun initModel(): Boolean {
+    return try {
       glpkModel = GLPK.glp_create_prob()
       GLPK.glp_set_prob_name(glpkModel, model.identifier)
-      if (!initVars())
-        return false
-      if (!initConstraints())
-        return false
-      return initObjectiveFunction()
+      true
     } catch (e: Exception) {
       log.error { "Error while initializing GLPK Problem instance $e" }
-      return false
+      false
     }
   }
 
@@ -74,7 +68,7 @@ class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
   /** Function to initialize all variables in the GLPK Model. Returns false in case any variable initialization fails
    */
-  private fun initVars() : Boolean {
+  override fun initVars() : Boolean {
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
@@ -95,7 +89,7 @@ class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
   /** Function to initialize all constraints in the GLPK Model. Returns false in case any constraint initialization fails
    */
-  private fun initConstraints() : Boolean {
+  override fun initConstraints() : Boolean {
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -154,7 +148,7 @@ class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     return true
   }
 
-  private fun initObjectiveFunction() : Boolean {
+  override fun initObjectiveFunction() : Boolean {
     try {
       GLPK.glp_set_obj_name(glpkModel, "Objective Function")
       when (model.objective.objective) {
@@ -185,7 +179,7 @@ class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     return true
   }
 
-  private fun getGlpVarType(type: LPVarType) : Int {
+  internal fun getGlpVarType(type: LPVarType) : Int {
     return when (type) {
       LPVarType.BOOLEAN -> GLPKConstants.GLP_BV
       LPVarType.INTEGER -> GLPKConstants.GLP_IV

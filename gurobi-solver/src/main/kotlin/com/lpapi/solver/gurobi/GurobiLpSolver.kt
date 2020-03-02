@@ -10,16 +10,13 @@ import mu.KotlinLogging
 
 class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
 
-  private val log = KotlinLogging.logger("GurobiLpSolver")
-
   private var grbModel : GRBModel? = null
 
-  override fun initialize() : Boolean {
+  override fun initModel(): Boolean {
     try {
       val env = GRBEnv()
       this.grbModel = GRBModel(env)
-//      initVars(model)
-//      initConstraints(model)
+      return true
     } catch (e: GRBException) {
       log.error("Error in generating Gurobi model", e)
     }
@@ -31,6 +28,18 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
   }
 
   override fun solve(): LPSolutionStatus {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun initVars(): Boolean {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun initConstraints(): Boolean {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun initObjectiveFunction(): Boolean {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 }
