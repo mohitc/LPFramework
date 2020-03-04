@@ -37,30 +37,12 @@ class LPModel (val identifier: String){
    * and a single constant term. In case the value for any constant identifier is not found in the model, a null value is returned
    */
   fun reduce(objective: LPObjective) : LPObjective? {
-    val varMap : MutableMap<String, Double> = mutableMapOf()
-    var constant = 0.0
-    var hasConstantTerm = false
-    objective.expression.expression.forEach{ term ->
-      if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
-        log.error { "Objective has term with constant identifier ${term.lpConstantIdentifier} which is not defined in the model" }
-        return null
-      }
-      if (term.isConstant()) {
-        hasConstantTerm = true
-        //Sum up all constant terms
-        constant += term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!
-      } else
-      // For each term in the expression, create a map that includes the variable identifier and the double value computed till now
-        varMap[term.lpVarIdentifier!!] = (varMap.getOrPut(term.lpVarIdentifier, { 0.0 })
-            + (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!))
-    }
-
-    //Initialize new objective function
-    val reducedObjective = LPObjective(objective.objective)
-    if (hasConstantTerm)
-      reducedObjective.expression.add(constant)
-    varMap.entries.forEach { entry -> reducedObjective.expression.addTerm(entry.value, entry.key) }
-    return reducedObjective
+    val reducedObjectiveExpression = reduce(objective.expression)
+    //If a reduced expression is available for the objective, use that to generate the objective function
+    return if (reducedObjectiveExpression !=null)
+      LPObjective(objective.objective, reducedObjectiveExpression, null)
+    else
+      null
   }
 
   /** Function to reduce the constraint to the format where all variable terms are on the LHS, with single instances of a
@@ -111,6 +93,37 @@ class LPModel (val identifier: String){
     newLPConstraint.rhs.add(constant)
     return newLPConstraint
   }
+
+  /** Function to reduce an expression to the format where all variables have a single double coefficient,
+   * and a single constant term. In case the value for any constant identifier is not found in the model, a null value is returned
+   */
+  fun reduce(expression: LPExpression) : LPExpression? {
+    val varMap : MutableMap<String, Double> = mutableMapOf()
+    var constant = 0.0
+    var hasConstantTerm = false
+    expression.expression.forEach{ term ->
+      if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
+        log.error { "Expression has term with constant identifier ${term.lpConstantIdentifier} which is not defined in the model" }
+        return null
+      }
+      if (term.isConstant()) {
+        hasConstantTerm = true
+        //Sum up all constant terms
+        constant += term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!
+      } else
+      // For each term in the expression, create a map that includes the variable identifier and the double value computed till now
+        varMap[term.lpVarIdentifier!!] = (varMap.getOrPut(term.lpVarIdentifier, { 0.0 })
+            + (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!))
+    }
+
+    //Initialize new objective function
+    val reducedExpression = LPExpression()
+    if (hasConstantTerm)
+      reducedExpression.add(constant)
+    varMap.entries.forEach { entry -> reducedExpression.addTerm(entry.value, entry.key) }
+    return reducedExpression
+  }
+
 
   fun validate() : Boolean {
 

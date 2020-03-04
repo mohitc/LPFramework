@@ -29,6 +29,7 @@
     <slf4j.version>1.7.29</slf4j.version>
     <revision>1.0-SNAPSHOT</revision>
     <glpk.skiptests>true</glpk.skiptests>
+    <cplex.skiptests>true</cplex.skiptests>
   </properties>
 
   <dependencies>
