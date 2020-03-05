@@ -222,8 +222,12 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
 
 }
 
-class LPModelResult (val status: LPSolutionStatus, val objective: Double?, val mipGap: Double?) {
+/** Class to store the results from an LP computation */
+class LPModelResult (val status: LPSolutionStatus, val objective: Double?, val computationTime: Long?, val mipGap: Double?) {
+
+  constructor(solnStatus: LPSolutionStatus) : this(solnStatus, null, null, null)
+
   override fun toString(): String {
-    return "LPModelResult(status=$status, objective=$objective, mipGap=$mipGap)"
+    return "LPModelResult(status=$status, objective=$objective, computationTime=$computationTime, mipGap=$mipGap)"
   }
 }
