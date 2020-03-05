@@ -2,12 +2,12 @@ package com.lpapi.solver.glpk
 
 import com.lpapi.model.LPConstraint
 import com.lpapi.model.LPModel
+import com.lpapi.model.LPModelResult
 import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
-import com.lpapi.solver.enums.LPSolutionStatus
-import mu.KotlinLogging
+import com.lpapi.model.enums.LPSolutionStatus
 import org.gnu.glpk.*
 
 open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
@@ -49,14 +49,17 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       if (solnStatus !== LPSolutionStatus.UNKNOWN && solnStatus !== LPSolutionStatus.INFEASIBLE) {
         val result : Double = GLPK.glp_get_obj_val(glpkModel)
         log.info {"Objective : $result"}
-        model.objective.result = result
+        model.solution = LPModelResult(solnStatus, result, null)
         //Extract results and set it to variables
         log.info { "Extracting computed results to the model variables" }
         variableMap.entries.forEach { entry ->
-          val result = GLPK.glp_mip_col_val (glpkModel, entry.value)
-          model.variables.get(entry.key)?.populateResult(result)
+          val varResult = GLPK.glp_mip_col_val (glpkModel, entry.value)
+          model.variables.get(entry.key)?.populateResult(varResult)
           log.debug { "Variable ${entry.key} has value ${model.variables.get(entry.key)?.result}" }
         }
+      } else {
+        log.info { "Solution status : $solnStatus" }
+        model.solution = LPModelResult(solnStatus, null, null)
       }
       return solnStatus
     } catch (e: Exception) {

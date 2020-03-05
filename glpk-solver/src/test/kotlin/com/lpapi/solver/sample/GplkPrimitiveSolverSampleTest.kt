@@ -1,7 +1,7 @@
 package com.lpapi.solver.sample
 
 import com.lpapi.model.LPModel
-import com.lpapi.solver.enums.LPSolutionStatus
+import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.solver.glpk.GlpkLpSolver
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -19,8 +19,8 @@ class GplkPrimitiveSolverSampleTest : PrimitiveSolverSample() {
     val solver = GlpkLpSolver(model)
     solver.initialize()
     val status = solver.solve()
-    return if (status!=LPSolutionStatus.UNKNOWN &&
-        status!=LPSolutionStatus.INFEASIBLE && status!=LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED)
+    return if (status!= LPSolutionStatus.UNKNOWN &&
+        status!= LPSolutionStatus.INFEASIBLE && status!= LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED)
       solver.model
     else
       null

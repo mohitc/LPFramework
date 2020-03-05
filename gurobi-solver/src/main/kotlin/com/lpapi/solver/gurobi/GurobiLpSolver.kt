@@ -2,11 +2,10 @@ package com.lpapi.solver.gurobi
 
 import com.lpapi.model.LPModel
 import com.lpapi.solver.LPSolver
-import com.lpapi.solver.enums.LPSolutionStatus
+import com.lpapi.model.enums.LPSolutionStatus
 import gurobi.GRBEnv
 import gurobi.GRBException
 import gurobi.GRBModel
-import mu.KotlinLogging
 
 class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
 

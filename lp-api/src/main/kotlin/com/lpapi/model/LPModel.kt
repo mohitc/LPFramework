@@ -1,5 +1,6 @@
 package com.lpapi.model
 
+import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.validators.LPConstraintValidator
 import com.lpapi.model.validators.LPParamIdValidator
 import com.lpapi.model.validators.LPParameterValidator
@@ -33,6 +34,9 @@ class LPModel (val identifier: String){
   /**Default to empty objective */
   val objective : LPObjective = LPObjective()
 
+  /**The result of the model computation is populated in this variable*/
+  var solution: LPModelResult? = null
+
   /** Function to reduce the objective function expression to the format where all variables have a single double coefficient,
    * and a single constant term. In case the value for any constant identifier is not found in the model, a null value is returned
    */
@@ -40,7 +44,7 @@ class LPModel (val identifier: String){
     val reducedObjectiveExpression = reduce(objective.expression)
     //If a reduced expression is available for the objective, use that to generate the objective function
     return if (reducedObjectiveExpression !=null)
-      LPObjective(objective.objective, reducedObjectiveExpression, null)
+      LPObjective(objective.objective, reducedObjectiveExpression)
     else
       null
   }
@@ -216,4 +220,10 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
     return parameters.values
   }
 
+}
+
+class LPModelResult (val status: LPSolutionStatus, val objective: Double?, val mipGap: Double?) {
+  override fun toString(): String {
+    return "LPModelResult(status=$status, objective=$objective, mipGap=$mipGap)"
+  }
 }

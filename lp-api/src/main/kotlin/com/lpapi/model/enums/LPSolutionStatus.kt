@@ -1,4 +1,4 @@
-package com.lpapi.solver.enums
+package com.lpapi.model.enums
 
 enum class LPSolutionStatus {
   OPTIMAL,
