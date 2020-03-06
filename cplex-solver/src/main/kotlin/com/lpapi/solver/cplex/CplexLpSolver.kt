@@ -112,7 +112,7 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
           variableMap[lpVar.identifier] = cplexVar
         }
       } catch (e: Exception) {
-        log.error { "Error while initializing GLPK Var ($lpVar) : $e" }
+        log.error { "Error while initializing Cplex Var ($lpVar) : $e" }
         return false
       }
     }
@@ -148,7 +148,7 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
         log.debug { "Initializing Constraint ($lpConstraint)" }
         val reducedConstraint: LPConstraint? = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
-          log.error { "Reduced constraint could not be computed for constriat ${lpConstraint.identifier}" }
+          log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
           return false
         }
 
