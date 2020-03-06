@@ -7,6 +7,7 @@ enum class LPSolutionStatus {
   TIME_LIMIT,
   INFEASIBLE_OR_UNBOUNDED,
   CUTOFF,
+  BOUNDED,
   UNKNOWN,
   ERROR;
 }

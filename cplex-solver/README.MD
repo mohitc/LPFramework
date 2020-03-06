@@ -19,4 +19,32 @@ mvn install:install-file -Dfile=cplex.jar -DgroupId=cplex -DartifactId=cplex -Dv
 <module>cplex-solver</module>
 ```
 
-The project should 
+## Running Problem instances 
+The CPLEX solver needs the references to the CPLEX jni references. In order to do so, we need to include the reference to the 
+CPLEX JNI libraries as a VM argument. The CPLEX jni libraries are usually included at the same location as the CPLEX binaries, 
+and can be found, for example in linux in <code>[CPLEX Install Folder]/cplex/bin/[system architecture]</code>. In order to 
+run the solver, please include the VM argument <code>-Djava.library.path=[Path to Cplex jni libraries]</code>, for example 
+```
+-Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux
+```
+
+## Running Test Problem instances 
+Sample problem instances can be found as tests in the cplex-solver project, and are disabled by default. In order to enable 
+the tests, go to the parent pom and set the property 
+```xml    
+<cplex.skiptests>true</cplex.skiptests>
+```
+
+In order to include the JVM arguments when running the tests, either include them as an environment variable, e.g. 
+```
+MAVEN_OPTS=" -Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux"
+export MAVEN_OPTS
+```
+and then run the target 
+```
+mvn clean compile test
+```
+or include them directly in the command line 
+```
+mvn clean compile test -DargLine="-Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux"
+```
