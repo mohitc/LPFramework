@@ -4,3 +4,4 @@
 .idea/
 target/
 *.jar
+.flattened-pom.xml
