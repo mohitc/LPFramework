@@ -18,6 +18,11 @@
       <artifactId>lp-solver</artifactId>
       <version>${revision}</version>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-test-junit5</artifactId>
+      <version>${kotlin.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
