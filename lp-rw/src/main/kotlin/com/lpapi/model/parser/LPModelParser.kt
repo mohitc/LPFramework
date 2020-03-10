@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.lpapi.model.*
 import com.lpapi.model.dto.*
+import com.lpapi.model.enums.LPSolutionStatus
 import mu.KotlinLogging
 import java.io.File
 
@@ -99,6 +100,76 @@ class LPModelParser (format: LPModelFormat = LPModelFormat.YAML) {
       log.error("Error while generating model from file $fileName : $e")
     }
     return null
+  }
+
+  /**Funtion to generate the Result DTO from the LP Model*/
+  fun generateModelResultDto(model: LPModel) : LPModelResultDto {
+    val solution = model.solution
+    return if (solution==null) {
+      LPModelResultDto(false)
+    } else {
+      //Solution was computed. Set the parameters accordingly
+      //If the objective is set, then the model is present and the results are likely set
+      if (solution.objective != null) {
+        LPModelResultDto(true, solution.status, solution.objective, solution.computationTime, solution.mipGap,
+            model.variables.allValues().toList().map { lpVar -> LPVarResultDto(lpVar.identifier, lpVar.result) }
+        )
+      } else {
+        LPModelResultDto(true, solution.status, solution.objective, solution.computationTime, solution.mipGap)
+      }
+    }
+  }
+
+  /**Function to populate the model result into the LP model from the LPModelResultDTO, returns
+   * true in case everything went okay otherwise returns false*/
+  fun populateModuleResult(model: LPModel, resultDto: LPModelResultDto) : Boolean {
+    if (resultDto.computed) {
+      if (resultDto.status===null) {
+        log.error { "Model computed but solution status is unknown" }
+        return false
+      }
+      model.solution = LPModelResult(resultDto.status, resultDto.objective, resultDto.computationTime, resultDto.mipGap)
+      if (resultDto.objective!=null) {
+        //variable results must be set
+        if (resultDto.vars==null) {
+          log.error { "result has objective value but no information on the values of the variables" }
+          return false
+        }
+        resultDto.vars.forEach { lpVarResult -> run {
+          val lpVar = model.variables.get(lpVarResult.identifier)
+          if (lpVar != null) {
+            lpVar.populateResult(lpVarResult.result)
+          } else {
+            log.error { "result has variable ${lpVarResult.identifier} but variable not found in model" }
+            return false
+          }
+        }}
+      }
+    }
+    return true
+  }
+
+  /**Function to convert the model to the corresponding Result DTO and write to file */
+  fun writeResultToFile(lpModel : LPModel, fileName: String) : Boolean {
+    return try {
+      mapper.writeValue(File(fileName), generateModelResultDto(lpModel))
+      true
+    } catch (e: Exception) {
+      log.error("Error while writing model result to file $fileName : $e")
+      false
+    }
+  }
+
+  /**Function to read the DTO from a file, parse the DTO, and create an LP model from the parsed data*/
+  fun readResultFromFile(fileName: String, model: LPModel) : Boolean {
+    try {
+      val modelResultDto: LPModelResultDto = mapper.readValue(File(fileName), LPModelResultDto::class.java)
+      log.info { "Model Result Dto parsed successfully.Populating results into provided LPModel" }
+      return populateModuleResult(model, modelResultDto)
+    } catch (e: Exception) {
+      log.error("Error while generating model from file $fileName : $e")
+    }
+    return false
   }
 
   /** Function to generate the DTO from a model expression
