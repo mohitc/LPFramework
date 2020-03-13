@@ -125,8 +125,8 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
       //Initialize cplex objective, to be used later to extract value of the objective function
       cplexObjective = generateExpression(model.objective.expression)
       when(model.objective.objective) {
-        LPObjectiveType.MAXIMIZE -> cplexModel?.maximize(cplexObjective)
-        LPObjectiveType.MINIMIZE -> cplexModel?.minimize(cplexObjective)
+        LPObjectiveType.MAXIMIZE -> cplexModel?.addMaximize(cplexObjective)
+        LPObjectiveType.MINIMIZE -> cplexModel?.addMinimize(cplexObjective)
         else -> {
           log.error { "Mechanism not implemented to support objective type ${model.objective.objective}" }
           null
