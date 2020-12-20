@@ -6,7 +6,9 @@ import com.lpapi.model.LPModel
 import com.lpapi.model.LPVar
 import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
+import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
+import com.lpapi.spi.Solver
 import mu.KotlinLogging
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -62,12 +64,21 @@ abstract class PrimitiveSolverSample {
 
   @Test
   fun validateModel() {
-    assertTrue(model.validate(), "Model Validation failed in the primitive solver");
+    assertTrue(model.validate(), "Model Validation failed in the primitive solver")
   }
 
   /** Function to be implemented in the specific solvers. Function takes in a model, solves it, and provides a model with
    * the results set */
-  abstract fun initAndSolveModel(model: LPModel) : LPModel?
+  open fun initAndSolveModel(model: LPModel) : LPModel? {
+    val solver = Solver.create(model)
+    solver.initialize()
+    val status = solver.solve()
+    return if (status != LPSolutionStatus.UNKNOWN &&
+        status != LPSolutionStatus.INFEASIBLE && status != LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED)
+      solver.model
+    else
+      null
+  }
 
   /**Test function that validates the results computed by the model*/
   @Test
