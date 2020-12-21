@@ -1,6 +1,3 @@
 package com.lpapi.solver.sample
 
-class CplexPrimitiveSolverSampleTest: PrimitiveSolverSample() {
-}
-
-
+class CplexPrimitiveSolverSampleTest : PrimitiveSolverSample()

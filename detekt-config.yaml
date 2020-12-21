@@ -1,0 +1,23 @@
+style:
+  NewLineAtEndOfFile:
+    active: false
+  NoTabs:
+    active: true
+  ReturnCount:
+    max: 4
+  MagicNumber:
+    excludes: ['**/test/**', 'lp-solver-sample/src/main/**']
+
+complexity:
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 13
+    thresholdInClasses: 13
+    thresholdInInterfaces: 13
+    thresholdInObjects: 13
+    thresholdInEnums: 13
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+

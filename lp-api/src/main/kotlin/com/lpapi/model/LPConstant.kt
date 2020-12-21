@@ -10,12 +10,12 @@ class LPConstant constructor(override val identifier: String, var value: Double)
 
   constructor(identifier: String, number: Number) : this(identifier, number.toDouble())
 
-  fun value(value:Double): LPConstant {
+  fun value(value: Double): LPConstant {
     this.value = value
     return this
   }
 
-  override fun toString():String = "[Constant] $identifier : $value"
+  override fun toString(): String = "[Constant] $identifier : $value"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -34,5 +34,4 @@ class LPConstant constructor(override val identifier: String, var value: Double)
     result = 31 * result + value.hashCode()
     return result
   }
-
 }

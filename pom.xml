@@ -25,13 +25,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <java.version>11</java.version>
-    <kotlin.version>1.3.61</kotlin.version>
+    <kotlin.version>1.4.21</kotlin.version>
     <logger.version>1.7.7</logger.version>
     <slf4j.version>1.7.29</slf4j.version>
     <revision>1.0-SNAPSHOT</revision>
     <glpk.skiptests>true</glpk.skiptests>
     <cplex.skiptests>true</cplex.skiptests>
     <gurobi.skiptests>true</gurobi.skiptests>
+    <ktlint.version>1.7.0</ktlint.version>
   </properties>
 
   <dependencies>
@@ -105,6 +106,21 @@
             <phase>clean</phase>
             <goals>
               <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Kotlin Linter -->
+      <plugin>
+        <groupId>com.github.gantsign.maven</groupId>
+        <artifactId>ktlint-maven-plugin</artifactId>
+        <version>${ktlint.version}</version>
+        <executions>
+          <execution>
+            <id>format</id>
+            <phase>post-clean</phase>
+            <goals>
+              <goal>format</goal>
             </goals>
           </execution>
         </executions>

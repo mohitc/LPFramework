@@ -16,24 +16,22 @@ import ilog.concert.IloNumVarType
 import ilog.cplex.IloCplex
 import kotlin.system.measureTimeMillis
 
-class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
+class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
 
   private var cplexModel: IloCplex? = null
 
-  private var variableMap : MutableMap<String, IloNumVar> = mutableMapOf()
+  private var variableMap: MutableMap<String, IloNumVar> = mutableMapOf()
 
-  private var constraintMap : MutableMap<String, IloConstraint> = mutableMapOf()
+  private var constraintMap: MutableMap<String, IloConstraint> = mutableMapOf()
 
   private var cplexObjective: IloLinearNumExpr? = null
 
-
   override fun initModel(): Boolean {
-    try{
+    try {
       log.info { "Initializing cplex model for ${model.identifier}" }
       cplexModel = IloCplex()
-
     } catch (e: Exception) {
-      log.error { "Error while initializing CPlex Model $e" }
+      log.error { "Error while initializing CPLEX Model $e" }
       return false
     }
     return true
@@ -54,15 +52,23 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
       if (solutionStatus == LPSolutionStatus.ERROR) {
         log.error { "Could not determine solution status" }
         model.solution = LPModelResult(LPSolutionStatus.ERROR)
-      } else if (!(solutionStatus==LPSolutionStatus.INFEASIBLE ||
-              solutionStatus==LPSolutionStatus.UNBOUNDED ||
-              solutionStatus==LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED)) {
-        //add model results
+      } else if (!(
+        solutionStatus==LPSolutionStatus.INFEASIBLE ||
+          solutionStatus==LPSolutionStatus.UNBOUNDED ||
+          solutionStatus==LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+        )
+      ) {
+        // add model results
         extractResults()
-        model.solution = LPModelResult(solutionStatus, cplexModel?.getValue(cplexObjective), executionTime, cplexModel?.mipRelativeGap)
+        model.solution = LPModelResult(
+            solutionStatus,
+            cplexModel?.getValue(cplexObjective),
+            executionTime,
+            cplexModel?.mipRelativeGap
+        )
         log.info { "${model.solution}" }
       } else {
-       model.solution = LPModelResult(solutionStatus)
+        model.solution = LPModelResult(solutionStatus)
       }
       return solutionStatus
     } catch (e: Exception) {
@@ -75,10 +81,10 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
   /** Function to extract the results of the LP model into the corresponding variables in the model
    */
   fun extractResults() {
-    log.info {"Extracting results of computed model into the variables"}
+    log.info { "Extracting results of computed model into the variables" }
     variableMap.entries.forEach { entry ->
       try {
-        cplexModel?.getValue(entry.value)?.let { doubleVal -> model.variables.get(entry.key)?.populateResult(doubleVal) }
+        cplexModel?.getValue(entry.value)?.let { model.variables.get(entry.key)?.populateResult(it) }
       } catch (e: Exception) {
         log.error { "Error while extracting results from CPLEX model : $e" }
       }
@@ -94,15 +100,14 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
       IloCplex.Status.Bounded -> LPSolutionStatus.BOUNDED
       IloCplex.Status.Error -> LPSolutionStatus.ERROR
       null -> LPSolutionStatus.ERROR
-      else -> { LPSolutionStatus.UNKNOWN}
+      else -> { LPSolutionStatus.UNKNOWN }
     }
   }
-
 
   /** Function to initialize all variables in the model
    *
    */
-  override fun initVars() : Boolean {
+  override fun initVars(): Boolean {
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
@@ -124,7 +129,7 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
     try {
       //Initialize cplex objective, to be used later to extract value of the objective function
       cplexObjective = generateExpression(model.objective.expression)
-      when(model.objective.objective) {
+      when (model.objective.objective) {
         LPObjectiveType.MAXIMIZE -> cplexModel?.addMaximize(cplexObjective)
         LPObjectiveType.MINIMIZE -> cplexModel?.addMinimize(cplexObjective)
         else -> {
@@ -140,7 +145,6 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
     }
   }
 
-
   override fun initConstraints(): Boolean {
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
@@ -152,14 +156,32 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
           return false
         }
 
-        val modelConstraint : IloConstraint? =
-            when(lpConstraint.operator) {
-              LPOperator.LESS_EQUAL -> cplexModel?.addLe(generateExpression(lpConstraint.lhs), generateExpression(lpConstraint.rhs), lpConstraint.identifier)
-              LPOperator.GREATER_EQUAL -> cplexModel?.addGe(generateExpression(lpConstraint.lhs), generateExpression(lpConstraint.rhs), lpConstraint.identifier)
-              LPOperator.EQUAL -> cplexModel?.addEq(generateExpression(lpConstraint.lhs), generateExpression(lpConstraint.rhs), lpConstraint.identifier)
-              else -> {null}
+        val modelConstraint: IloConstraint? =
+          when (lpConstraint.operator) {
+            LPOperator.LESS_EQUAL -> {
+              cplexModel?.addLe(
+                  generateExpression(lpConstraint.lhs),
+                  generateExpression(lpConstraint.rhs),
+                  lpConstraint.identifier
+              )
             }
-        if (modelConstraint==null) {
+            LPOperator.GREATER_EQUAL -> {
+              cplexModel?.addGe(
+                  generateExpression(lpConstraint.lhs),
+                  generateExpression(lpConstraint.rhs),
+                  lpConstraint.identifier
+              )
+            }
+            LPOperator.EQUAL -> {
+              cplexModel?.addEq(
+                  generateExpression(lpConstraint.lhs),
+                  generateExpression(lpConstraint.rhs),
+                  lpConstraint.identifier
+              )
+            }
+            else -> { null }
+          }
+        if (modelConstraint == null) {
           log.error { "Error while generating model constraint ${lpConstraint.identifier}" }
           return false
         }
@@ -175,7 +197,7 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
   /** Function to generate CPLEX linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
    */
-  private fun generateExpression(expr: LPExpression) : IloLinearNumExpr ? {
+  private fun generateExpression(expr: LPExpression): IloLinearNumExpr ? {
     try {
       val cplexExpr: IloLinearNumExpr? = cplexModel?.linearNumExpr()
       if (cplexExpr == null) {
@@ -183,7 +205,7 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
         return null
       }
       val reducedExpr = model.reduce(expr)
-      if (reducedExpr==null) {
+      if (reducedExpr == null) {
         log.error { "Error in reducing expression. Please check the logs" }
         return null
       }
@@ -201,8 +223,8 @@ class CplexLpSolver(model: LPModel): LPSolver<IloCplex>(model) {
     }
   }
 
-  internal fun getCplexVarType(type: LPVarType) : IloNumVarType? {
-    return when(type) {
+  internal fun getCplexVarType(type: LPVarType): IloNumVarType? {
+    return when (type) {
       LPVarType.BOOLEAN -> IloNumVarType.Bool
       LPVarType.INTEGER -> IloNumVarType.Int
       LPVarType.DOUBLE -> IloNumVarType.Float

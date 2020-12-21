@@ -1,6 +1,7 @@
 package com.lpapi.model
 
-/** The LPExpression is a linear expression which is described as a sum of multiple terms described in the LPExpressionTerm.
+/** The LPExpression is a linear expression which is described as a sum of multiple terms described in the
+ * LPExpressionTerm.
  */
 class LPExpression {
   var expression: MutableList<LPExpressionTerm> = mutableListOf()
@@ -21,7 +22,7 @@ class LPExpression {
 
   /** Add a constant value specified as an LP Constant identifier
    */
-  fun add(constantIdentifier: String) : LPExpression {
+  fun add(constantIdentifier: String): LPExpression {
     expression.add(LPExpressionTerm(null, null, constantIdentifier))
     return this
   }
@@ -75,16 +76,15 @@ class LPExpression {
     return this
   }
 
-  fun copy() : LPExpression {
+  fun copy(): LPExpression {
     val newExpression = LPExpression()
-    expression.forEach{
+    expression.forEach {
       newExpression.expression.add(LPExpressionTerm(it.coefficient, it.lpVarIdentifier, it.lpConstantIdentifier))
     }
     return newExpression
   }
 
-  override fun toString(): String = expression.stream().map{ v -> v.toString()}
-      .reduce{ acc, expTerm -> "$acc + $expTerm" }
-      .orElse("")
-
+  override fun toString(): String = expression.stream().map { v -> v.toString() }
+    .reduce { acc, expTerm -> "$acc + $expTerm" }
+    .orElse("")
 }
