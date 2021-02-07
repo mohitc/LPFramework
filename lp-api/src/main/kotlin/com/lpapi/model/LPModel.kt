@@ -65,42 +65,28 @@ class LPModel(val identifier: String) {
     val varMap: MutableMap<String, Double> = mutableMapOf()
     var constant = 0.0
 
-    // Validation on the expression terms before employing the reduce function
-    fun exprTermInvalid(term: LPExpressionTerm) : Boolean {
-      return if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
-        log.error { "Constraint ${constraint.identifier} has term with constant identifier " +
-            "${term.lpConstantIdentifier} which is not defined in the model" }
-        true
-      } else {
-        false
-      }
-    }
+    val reducedLhs = this.reduce(constraint.lhs) ?: return null
+    val reducedRhs = this.reduce(constraint.rhs) ?: return null
 
     // Function to process each term for the reduction into a simpler expression. Terms with variables are incorporated
     // into the varMap, and constant terms are accumulated in the constant var
     fun processTerm(term: LPExpressionTerm, isLhs: Boolean) {
       val constMultiplier = if (isLhs) -1.0 else 1.0 // Constants are on the RHS, so value from LHS is subtracted
       val varMultiplier = constMultiplier * -1 // Variables have the opposite treatment to the constants
+      val constantTerm = term.coefficient!!
       if (term.isConstant()) {
-        constant += constMultiplier * (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!)
+        constant += constMultiplier * constantTerm
       } else {
         // For each term in the LHS, create a map that includes the variable identifier and the computed double value
         varMap[term.lpVarIdentifier!!] = (
             varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
-               varMultiplier * (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!)
+               varMultiplier * constantTerm
             )
       }
     }
 
-    constraint.lhs.expression.forEach { term ->
-      if (exprTermInvalid(term)) return null
-      processTerm(term, isLhs = true)
-    }
-
-    constraint.rhs.expression.forEach { term ->
-      if (exprTermInvalid(term)) return null
-      processTerm(term, isLhs = false)
-    }
+    reducedLhs.expression.forEach { processTerm(it, isLhs = true)}
+    reducedRhs.expression.forEach {processTerm(it, isLhs = false)}
 
     if (varMap.isEmpty()) {
       log.error { "Constraint ${constraint.identifier} has term with no variables which is not a valid constraint" }
@@ -127,6 +113,9 @@ class LPModel(val identifier: String) {
         log.error { "Expression has term with constant identifier ${term.lpConstantIdentifier} which is not defined " +
             "in the model" }
         return null
+      } else if (term.lpConstantIdentifier == null && term.coefficient == null) {
+        log.error { "term $term has both constant identifier and coefficient set to null" }
+        return null
       }
       if (term.isConstant()) {
         hasConstantTerm = true
@@ -140,7 +129,14 @@ class LPModel(val identifier: String) {
           )
     }
 
-    // Initialize new objective function
+    // check that all variables have been initialized
+    val unknownVars = varMap.keys.filter { !this.variables.exists(it) }
+    if (unknownVars.isNotEmpty()) {
+      log.error { "Expression has terms with vars $unknownVars which have not been initialized" }
+      return null
+    }
+
+    // Initialize new expression
     val reducedExpression = LPExpression()
     if (hasConstantTerm)
       reducedExpression.add(constant)
@@ -234,4 +230,27 @@ class LPModelResult(
   override fun toString(): String {
     return "LPModelResult(status=$status, objective=$objective, computationTime=$computationTime, mipGap=$mipGap)"
   }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as LPModelResult
+
+    if (status != other.status) return false
+    if (objective != other.objective) return false
+    if (computationTime != other.computationTime) return false
+    if (mipGap != other.mipGap) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = status.hashCode()
+    result = 31 * result + (objective?.hashCode() ?: 0)
+    result = 31 * result + (computationTime?.hashCode() ?: 0)
+    result = 31 * result + (mipGap?.hashCode() ?: 0)
+    return result
+  }
+
 }

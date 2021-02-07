@@ -111,33 +111,37 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
       return false
     }
 
+    // Validate all terms in the expression of a constraint
+    if (!listOf(instance.lhs, instance.rhs)
+            .flatMap { v -> v.expression }
+            .map {
+              if (it.coefficient == null && it.lpConstantIdentifier == null) {
+                log.error { "Constraint ${instance.identifier} has term with no constant reference or value defined" }
+                false
+              } else if (it.coefficient != null && it.lpConstantIdentifier != null) {
+                log.error { "Constraint ${instance.identifier} has term that has both constant reference " +
+                    "${it.lpConstantIdentifier} and fixed value coefficient ${it.coefficient}" }
+                false
+              } else if (it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier)) {
+                log.error { "Constraint ${instance.identifier} has term with constant reference " +
+                    "${it.lpConstantIdentifier} which is not defined in the model" }
+                false
+              } else if (it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier)) {
+                log.error { "Constraint ${instance.identifier} has term with variable reference " +
+                    "${it.lpVarIdentifier} which is not defined in the model" }
+                false
+              } else
+                true
+            }.reduce { u, v -> u && v }) {
+      return false
+    }
+
     // validate that the constraint has at least one variable term in the LHS or the RHS
     val reducedConstraint: LPConstraint? = model.reduce(instance)
     if (reducedConstraint == null) {
       log.error { "Constraint ${instance.identifier} cannot be reduced to a valid constraint" }
       return false
     }
-
-    // Validate all terms in the expression of a constraint
-    return listOf(instance.lhs, instance.rhs).flatMap { v -> v.expression }
-        .map {
-          if (it.coefficient == null && it.lpConstantIdentifier == null) {
-            log.error { "Constraint ${instance.identifier} has term that has no constant reference or value defined" }
-            false
-          } else if (it.coefficient != null && it.lpConstantIdentifier != null) {
-            log.error { "Constraint ${instance.identifier} has term that has both constant reference " +
-                "${it.lpConstantIdentifier} and fixed value coefficient ${it.coefficient}" }
-            false
-          } else if (it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier)) {
-            log.error { "Constraint ${instance.identifier} has term with constant reference ${it.lpConstantIdentifier} " +
-                "which is not defined in the model" }
-            false
-          } else if (it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier)) {
-            log.error { "Constraint ${instance.identifier} has term with variable reference ${it.lpVarIdentifier} " +
-                "which is not defined in the model" }
-            false
-          } else
-            true
-        }.reduce { u, v -> u && v }
+    return true
   }
 }
