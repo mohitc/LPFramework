@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.test.assertFalse
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPConstantTest : LPParameterTest<LPConstant>() {
@@ -19,7 +18,7 @@ class LPConstantTest : LPParameterTest<LPConstant>() {
     val c = LPConstant("c")
     log.info { "Testing with constant $c" }
     Assertions.assertTrue(c == c,"Same object instance should return true")
-    assertFalse(c.equals(null),
+    Assertions.assertFalse(c.equals(null),
         "Equal comparison with a null value fails")
     Assertions.assertFalse(c.equals(LPVar("c", LPVarType.BOOLEAN)),
         "Different param types  with same identifiers are not equal")
