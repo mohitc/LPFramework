@@ -168,6 +168,32 @@ class LPModel(val identifier: String) {
         parameterValidation(variableValidator, variables, "Variable") && // Variable validation
         parameterValidation(constraintValidator, constraints, "Constraint") // Constraint validation
   }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as LPModel
+
+    if (identifier != other.identifier) return false
+    if (constants != other.constants) return false
+    if (variables != other.variables) return false
+    if (constraints != other.constraints) return false
+    if (objective != other.objective) return false
+    if (solution != other.solution) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = identifier.hashCode()
+    result = 31 * result + constants.hashCode()
+    result = 31 * result + variables.hashCode()
+    result = 31 * result + constraints.hashCode()
+    result = 31 * result + objective.hashCode()
+    result = 31 * result + (solution?.hashCode() ?: 0)
+    return result
+  }
 }
 
 /** Parameters in the LP model (variables, constraints, Constants, can all be modeled as groups of parameters.
@@ -215,10 +241,29 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
   fun allValues(): MutableCollection<T> {
     return parameters.values
   }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as LPParameterGroup<*>
+
+    if (grouping != other.grouping) return false
+    if (parameters != other.parameters) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = grouping.hashCode()
+    result = 31 * result + parameters.hashCode()
+    return result
+  }
+
 }
 
 /** Class to store the results from an LP computation */
-class LPModelResult(
+class LPModelResult constructor(
   val status: LPSolutionStatus,
   val objective: Double?,
   val computationTime: Long?,

@@ -2,6 +2,7 @@ package com.lpapi.model
 
 import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
+import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -157,5 +158,77 @@ class LPModelTest {
       Assertions.assertNotEquals(model.reduce(constraint), constraint,
           "Reduced value is not a copy of the original constraint")
     }
+  }
+
+  @Test
+  @DisplayName("Test Model Equality")
+  fun testEquality() {
+    val modelId = "test-model"
+    val x = LPVar("x", LPVarType.DOUBLE, 0, 2)
+    val a = LPConstant("a", 2)
+    val b = LPConstant("b", 3)
+    val constraint = LPConstraint("default-constraint")
+    constraint.lhs.addTerm("a", "x").add("b")
+    constraint.rhs.add(3)
+
+    val assertEquals = fun (a: LPModel, b: LPModel, message: String) {
+      Assertions.assertEquals(a, b, "equals(): $message")
+      Assertions.assertEquals(a.hashCode(), b.hashCode(), "hashCode(): $message")
+    }
+    val assertNotEquals = fun (a: LPModel, b: LPModel, message: String) {
+      Assertions.assertNotEquals(a, b, "not equals(): $message")
+      Assertions.assertNotEquals(a.hashCode(), b.hashCode(), "not equals hashCode(): $message")
+    }
+
+    val model = LPModel(modelId)
+
+    assertEquals(model, model, "Same reference is evaluated as equal")
+    Assertions.assertFalse(model.equals(x), "Equality across different types is evaluated as false")
+    assertNotEquals(model, LPModel("some-other-identifier"), "Equality considers model identifier")
+    assertEquals(model, LPModel(modelId), "Equality considers model identifier")
+
+
+    model.variables.add(x)
+    model.constants.add(a)
+    model.constants.add(b)
+    model.constraints.add(constraint)
+
+    val testModel = LPModel(modelId)
+    assertNotEquals(model, testModel, "Models with different parameters are not equal")
+    testModel.constants.add(a)
+    testModel.constants.add(b)
+    assertNotEquals(model, testModel, "Models with different parameters (same constants) are not equal")
+
+    testModel.variables.add(x)
+    assertNotEquals(model, testModel, "Models with different parameters (same variables and constants) are not equal")
+
+    testModel.constraints.add(constraint)
+    assertEquals(model, testModel, "Models with same parameters are equal")
+
+    model.objective.expression.addTerm(3, "x")
+    testModel.objective.expression.add(2)
+
+    assertNotEquals(model, testModel, "Models with different objectives are not equal")
+
+    model.objective.expression.add(2)
+    testModel.objective.expression.addTerm(3, "x")
+
+    assertEquals(model, testModel, "Models with same objectives are equal")
+
+    model.solution = LPModelResult(status = LPSolutionStatus.UNKNOWN,
+        objective = null,
+        computationTime = null,
+        mipGap = null)
+    testModel.solution = LPModelResult(status = LPSolutionStatus.OPTIMAL,
+        objective = 1.0,
+        computationTime = 2,
+        mipGap = null)
+    assertNotEquals(model, testModel, "Models with different solution status are not equal")
+
+    model.solution = LPModelResult(status = LPSolutionStatus.OPTIMAL,
+        objective = 1.0,
+        computationTime = 2,
+        mipGap = null)
+    assertEquals(model, testModel, "Models with same solution status are equal")
   }
 }

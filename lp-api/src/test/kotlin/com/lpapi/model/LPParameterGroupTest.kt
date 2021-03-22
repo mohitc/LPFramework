@@ -1,5 +1,6 @@
 package com.lpapi.model
 
+import com.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -72,6 +73,56 @@ class LPParameterGroupTest {
         "getAllIdentifiers($anotherGroup) should contain y")
     Assertions.assertEquals(pg.allValues().toSet(), setOf("x", "y").map { TestParameter(it) }.toSet(),
         "allValues() should contain x and y")
+
+  }
+
+  private fun assertNotEquals(a : LPParameterGroup<*>, b : LPParameterGroup<*>, condition:String) {
+    Assertions.assertNotEquals(a, b, "Not Equals(): $condition")
+    Assertions.assertNotEquals(a.hashCode(), b.hashCode(), "Not equal hashCode(): $condition")
+  }
+
+  private fun<T:LPParameter> assertEquals(a : LPParameterGroup<T>, b : LPParameterGroup<T>, condition:String) {
+    Assertions.assertEquals(a, b, "Equals(): $condition")
+    Assertions.assertEquals(a.hashCode(), b.hashCode(), "hashCode(): $condition")
+  }
+
+  @Test
+  @DisplayName("Test Equality of Parameter groups")
+  fun testEquality() {
+    val defaultGroupIdentifier = "Default Identifier"
+    val someOtherGroupIdentifier = "some-other-identifier"
+
+    val pg = LPParameterGroup<TestParameter>(defaultGroupIdentifier)
+
+    Assertions.assertNotEquals(pg, TestParameter("c"), "Comparison of different class type fails")
+
+    assertEquals(pg, pg, "Reference to the same parameter group are equal")
+
+    assertEquals(pg, LPParameterGroup<TestParameter>(someOtherGroupIdentifier),
+        "Default identifiers with no parameters are equal")
+
+    pg.add(TestParameter("x"))
+    assertNotEquals(pg, LPParameterGroup<TestParameter>(someOtherGroupIdentifier),
+        "Different parameters results in non-equality")
+    val x = LPParameterGroup<LPVar>(defaultGroupIdentifier)
+    x.add(LPVar("x", LPVarType.BOOLEAN))
+    assertNotEquals(pg, x, "Same parameter identifiers and grouping, but different type are not equal")
+
+    var b = LPParameterGroup<TestParameter>(defaultGroupIdentifier)
+    b.add( TestParameter("y"))
+    assertNotEquals(pg, b,"Different parameter in the same groups are not equal")
+
+    b = LPParameterGroup<TestParameter>(defaultGroupIdentifier)
+    b.add("some-other-group", TestParameter("x"))
+    assertNotEquals(pg, b,"Same parameter in different groups are not equal")
+
+    b = LPParameterGroup<TestParameter>(defaultGroupIdentifier)
+    pg.add("some-other-group", TestParameter("y"))
+    b.add("some-other-group", TestParameter("y"))
+    b.add(TestParameter("x"))
+    pg.add(TestParameter("z"))
+    b.add(TestParameter("z"))
+    assertEquals(pg, b,"Same parameter and group configuration results in equality")
 
   }
 }
