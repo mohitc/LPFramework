@@ -16,11 +16,11 @@ The Gurobi solver needs the references to the Gurobi jni references. As part of 
 successfully solve a model using Gurobi. These can be included as a VM
 argument `-Djava.library.path={PATH_TO_GUROBI_HOME}/lib` when running a program using the solver.
 
-Sample problem instances can be found as tests in the gurobi-solver project, and are disabled by default. In order to
-enable the tests, go to the parent pom and set the property:
+Sample problem instances can be found as integration tests in the gurobi-solver project, and are disabled by default. In
+order to enable the tests, go to the parent pom and set the property:
 
 ```xml    
-<gurobi.skiptests>true</gurobi.skiptests>
+<gurobi.skiptests>false</gurobi.skiptests>
 ```
 
 In order to include the JVM arguments when running the tests, either include them as an environment variable, e.g.
@@ -33,11 +33,11 @@ export MAVEN_OPTS
 and then run the target
 
 ```
-mvn clean compile test
+mvn clean verify
 ```
 
 or include them directly in the command line
 
 ```
-mvn clean compile test -DargLine="-Djava.library.path={PATH_TO_GUROBI_HOME}/lib"
+mvn clean verify -DargLine="-Djava.library.path={PATH_TO_GUROBI_HOME}/lib"
 ```

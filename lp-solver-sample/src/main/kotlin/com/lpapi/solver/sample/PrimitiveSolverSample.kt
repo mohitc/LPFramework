@@ -85,6 +85,7 @@ open class PrimitiveSolverSample {
   @Test
   fun testSolver() {
     val model = initAndSolveModel(model)
+    log.info { model?.solution}
     assertNotNull(model, "Model should be computed successfully.")
     assertEquals(model.variables.get("X")?.result, 1, "X should be = 1")
     assertEquals(model.variables.get("Y")?.result, 1, "Y should be = 1")
