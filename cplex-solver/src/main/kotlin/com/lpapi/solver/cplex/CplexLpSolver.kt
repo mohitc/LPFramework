@@ -72,7 +72,7 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
       }
       return solutionStatus
     } catch (e: Exception) {
-      log.error { "Error while computing CPLEX model: $e" }
+      log.error("Error while computing CPLEX model", e)
       model.solution = LPModelResult(LPSolutionStatus.ERROR)
       return LPSolutionStatus.ERROR
     }
@@ -80,13 +80,15 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
 
   /** Function to extract the results of the LP model into the corresponding variables in the model
    */
-  fun extractResults() {
+  @Throws(Exception::class)
+  private fun extractResults() {
     log.info { "Extracting results of computed model into the variables" }
     variableMap.entries.forEach { entry ->
       try {
         cplexModel?.getValue(entry.value)?.let { model.variables.get(entry.key)?.populateResult(it) }
       } catch (e: Exception) {
-        log.error { "Error while extracting results from CPLEX model : $e" }
+        log.error { "Error while extracting results from CPLEX model for variable ${entry.key} : $e" }
+        throw e
       }
     }
   }
@@ -115,6 +117,10 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
         val cplexVar = cplexModel?.numVar(lpVar.lbound, lpVar.ubound, getCplexVarType(lpVar.type), lpVar.identifier)
         if (cplexVar != null) {
           variableMap[lpVar.identifier] = cplexVar
+        } else {
+          log.error { "Variable not initialized when attempting to create cplexModel?.numVar(" +
+              "${lpVar.lbound}, ${lpVar.ubound}, ${getCplexVarType(lpVar.type)}, ${lpVar.identifier})" }
+          return false
         }
       } catch (e: Exception) {
         log.error { "Error while initializing Cplex Var ($lpVar) : $e" }
@@ -128,7 +134,16 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
     log.info { "Initializing Objective Function" }
     try {
       //Initialize cplex objective, to be used later to extract value of the objective function
-      cplexObjective = generateExpression(model.objective.expression)
+      val reducedExpression = model.reduce(model.objective.expression)
+      if (reducedExpression==null) {
+        log.error { "Objective function ${model.objective} could not be reduced" }
+        return false
+      }
+      cplexObjective = generateExpression(reducedExpression)
+      if (cplexObjective==null) {
+        log.error { "Error while generating objective function" }
+        return false
+      }
       when (model.objective.objective) {
         LPObjectiveType.MAXIMIZE -> cplexModel?.addMaximize(cplexObjective)
         LPObjectiveType.MINIMIZE -> cplexModel?.addMinimize(cplexObjective)
@@ -155,29 +170,22 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
           return false
         }
-
+        val lhs = generateExpression(lpConstraint.lhs)
+        val rhs = generateExpression(lpConstraint.rhs)
+        if (lhs == null || rhs == null) {
+          log.error { "Error while generating expression for model constraint ${lpConstraint.identifier}" }
+          return false
+        }
         val modelConstraint: IloConstraint? =
           when (lpConstraint.operator) {
             LPOperator.LESS_EQUAL -> {
-              cplexModel?.addLe(
-                  generateExpression(lpConstraint.lhs),
-                  generateExpression(lpConstraint.rhs),
-                  lpConstraint.identifier
-              )
+              cplexModel?.addLe(lhs, rhs, lpConstraint.identifier)
             }
             LPOperator.GREATER_EQUAL -> {
-              cplexModel?.addGe(
-                  generateExpression(lpConstraint.lhs),
-                  generateExpression(lpConstraint.rhs),
-                  lpConstraint.identifier
-              )
+              cplexModel?.addGe(lhs, rhs, lpConstraint.identifier)
             }
             LPOperator.EQUAL -> {
-              cplexModel?.addEq(
-                  generateExpression(lpConstraint.lhs),
-                  generateExpression(lpConstraint.rhs),
-                  lpConstraint.identifier
-              )
+              cplexModel?.addEq(lhs, rhs, lpConstraint.identifier)
             }
             else -> { null }
           }
@@ -201,7 +209,7 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
     try {
       val cplexExpr: IloLinearNumExpr? = cplexModel?.linearNumExpr()
       if (cplexExpr == null) {
-        log.error { "Unexpected error while generating expression. Check is model is initialized" }
+        log.info { "Unexpected error while generating expression. Check is model is initialized" }
         return null
       }
       val reducedExpr = model.reduce(expr)

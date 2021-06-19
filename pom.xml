@@ -38,6 +38,7 @@
     <surefire.version>3.0.0-M5</surefire.version>
     <build-helper.version>1.9.1</build-helper.version>
     <failsafe.version>2.18</failsafe.version>
+    <mockito.version>3.2.0</mockito.version>
   </properties>
 
   <dependencies>
