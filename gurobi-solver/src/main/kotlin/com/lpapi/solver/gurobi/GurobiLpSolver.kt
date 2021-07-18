@@ -20,6 +20,14 @@ import kotlin.system.measureTimeMillis
 
 class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
 
+  companion object {
+    val solutionStatesWithoutResults =
+        setOf(LPSolutionStatus.UNBOUNDED,
+            LPSolutionStatus.INFEASIBLE,
+            LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED,
+            LPSolutionStatus.UNKNOWN)
+  }
+
   private var grbModel: GRBModel? = null
 
   private var variableMap: MutableMap<String, GRBVar> = mutableMapOf()
@@ -54,12 +62,7 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
       if (solutionStatus == LPSolutionStatus.ERROR) {
         log.error { "Could not determine solution status" }
         model.solution = LPModelResult(LPSolutionStatus.ERROR)
-      } else if (!(
-              solutionStatus==LPSolutionStatus.INFEASIBLE ||
-                  solutionStatus==LPSolutionStatus.UNBOUNDED ||
-                  solutionStatus==LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
-              )
-      ) {
+      } else if (!(solutionStatesWithoutResults.contains(solutionStatus))) {
         // add model results
         extractResults()
         model.solution = LPModelResult(
@@ -82,13 +85,16 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
 
   /** Function to extract the results of the LP model into the corresponding variables in the model
    */
-  fun extractResults() {
+  private fun extractResults() {
     log.info { "Extracting results of computed model into the variables" }
-    variableMap.entries.forEach { entry ->
+    for (entry in variableMap.entries) {
       try {
         model.variables.get(entry.key)?.populateResult(entry.value.get(GRB.DoubleAttr.X))
       } catch (e: Exception) {
-        log.error { "Error while extracting results from GLPK model : $e" }
+        log.error { "Error while extracting results from Gurobi model : $e" }
+        // clear flag to indicate that results were set for variables
+        model.variables.allValues().forEach { it.resultSet = false }
+        throw e
       }
     }
   }
@@ -121,6 +127,9 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
         val grbVar = grbModel?.addVar(lpVar.lbound, lpVar.ubound, 0.0, grbVarType, lpVar.identifier)
         if (grbVar != null) {
           variableMap[lpVar.identifier] = grbVar
+        } else {
+          log.info { "Could not create variable for variable $lpVar" }
+          return false
         }
       } catch (e: Exception) {
         log.error { "Error while initializing Gurobi Var ($lpVar) : $e" }
@@ -156,7 +165,7 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.debug { "Initializing Constraint ($lpConstraint)" }
+        log.info { "Initializing Constraint ($lpConstraint)" }
         val reducedConstraint: LPConstraint? = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
@@ -193,6 +202,8 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
       // Initialize cplex objective, to be used later to extract value of the objective function
       val gurobiObjective = generateExpression(model.objective.expression)
       val objectiveType = getGurobiObjectiveType(model.objective.objective)
+      if (gurobiObjective==null)
+        return false
       grbModel?.setObjective(gurobiObjective, objectiveType)
       true
     } catch (e: Exception) {
@@ -213,7 +224,7 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
   /** Function to generate Gurobi linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
    */
-  private fun generateExpression(expr: LPExpression): GRBLinExpr? {
+  internal fun generateExpression(expr: LPExpression): GRBLinExpr? {
     try {
       val linExpr = GRBLinExpr()
       val reducedExpr = model.reduce(expr)
@@ -222,8 +233,7 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
         return null
       }
       reducedExpr.expression.forEach { term ->
-        term.coefficient?.let { const ->
-          {
+        term.coefficient?.let { const -> apply {
             if (term.isConstant())
               linExpr.addConstant(const)
             else
