@@ -65,8 +65,11 @@ class LPModelValidationTest {
     Assertions.assertFalse(lpModel.validate(), "Boolean variable with invalid bounds should fail validation")
     lpModel = LPModel("testModel")
     lpModel.variables.add(LPVar("a", LPVarType.DOUBLE, 1.1, 1.0))
-    Assertions.assertFalse(lpModel.validate(), "Variable with lower bound greater than the upper bound should" +
-        " fail validation")
+    Assertions.assertFalse(
+      lpModel.validate(),
+      "Variable with lower bound greater than the upper bound should" +
+        " fail validation"
+    )
 
     lpModel = LPModel("testModel")
     lpModel.variables.add(LPVar("a", LPVarType.INTEGER, 2.1, 2.2))
@@ -82,8 +85,11 @@ class LPModelValidationTest {
 
     lpModel = LPModel("testModel")
     lpModel.variables.add(LPVar("a", LPVarType.INTEGER, 1.9, 2.0))
-    Assertions.assertTrue(lpModel.validate(), "Integer bounding should pass if variables have at least one " +
-        "integer value between their bounds")
+    Assertions.assertTrue(
+      lpModel.validate(),
+      "Integer bounding should pass if variables have at least one " +
+        "integer value between their bounds"
+    )
   }
 
   @Test
@@ -109,24 +115,32 @@ class LPModelValidationTest {
     constr.operator = LPOperator.EQUAL
     lpModel.constraints.add(constr)
     Assertions.assertTrue(lpModel.validate(), "Constraint with non-empty LHS or RHS should pass validation")
-    constr.lhs.expression.add(1,
-        LPExpressionTerm(lpVarIdentifier = "x", lpConstantIdentifier = null, coefficient = null))
+    constr.lhs.expression.add(
+      1,
+      LPExpressionTerm(lpVarIdentifier = "x", lpConstantIdentifier = null, coefficient = null)
+    )
     Assertions.assertFalse(lpModel.validate(), "Constraint having term with (no coefficient or constant) fails")
 
     lpModel = LPModel("testModel")
     var constraint: LPConstraint? = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
     constraint?.lhs?.add(1.0)
     constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with non-empty LHS and RHS but with no variables " +
-        "should fail validation")
+    Assertions.assertFalse(
+      lpModel.validate(),
+      "Constraint with non-empty LHS and RHS but with no variables " +
+        "should fail validation"
+    )
 
     lpModel = LPModel("testModel")
     constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
     lpModel.variables.add(LPVar("x", LPVarType.BOOLEAN))
     constraint?.lhs?.add(1.0)?.addTerm(2.0, "x")
     constraint?.rhs?.add(1.0)
-    Assertions.assertTrue(lpModel.validate(), "Constraint with non-empty LHS and RHS and with defined " +
-        "variable should pass validation")
+    Assertions.assertTrue(
+      lpModel.validate(),
+      "Constraint with non-empty LHS and RHS and with defined " +
+        "variable should pass validation"
+    )
 
     // Constraint with both constant and identifier defined should fail validation
     lpModel = LPModel("testModel")
@@ -134,29 +148,41 @@ class LPModelValidationTest {
     constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
     constraint?.lhs?.expression?.add(LPExpressionTerm(1.0, null, "c"))
     constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with both coefficient and identifier defined " +
-        "should fail validation")
+    Assertions.assertFalse(
+      lpModel.validate(),
+      "Constraint with both coefficient and identifier defined " +
+        "should fail validation"
+    )
 
     // Conditional checks on expressions to check if all terms are defined
     lpModel = LPModel("testModel")
     constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
     constraint?.lhs?.addTerm("a", "x")?.addTerm("b", "y")
     constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with no variables and constants defined should " +
-        "fail validation")
+    Assertions.assertFalse(
+      lpModel.validate(),
+      "Constraint with no variables and constants defined should " +
+        "fail validation"
+    )
     lpModel.variables.add(LPVar("x", LPVarType.BOOLEAN))
     lpModel.variables.add(LPVar("y", LPVarType.BOOLEAN))
     Assertions.assertFalse(lpModel.validate(), "Constraint with no constants defined should fail validation")
     lpModel.constants.add(LPConstant("a", 1.1))
     lpModel.constants.add(LPConstant("b", 1.1))
-    Assertions.assertTrue(lpModel.validate(), "Constraint with all variables and constants defined should " +
-        "pass validation")
+    Assertions.assertTrue(
+      lpModel.validate(),
+      "Constraint with all variables and constants defined should " +
+        "pass validation"
+    )
     val constant = LPConstant("c", 1.0)
     constraint?.rhs?.add(constant)
     Assertions.assertFalse(lpModel.validate(), "Constraint with no constants defined should fail validation")
     lpModel.constants.add(constant)
-    Assertions.assertTrue(lpModel.validate(), "Constraint with all variables and constants defined should " +
-        "pass validation")
+    Assertions.assertTrue(
+      lpModel.validate(),
+      "Constraint with all variables and constants defined should " +
+        "pass validation"
+    )
 
     // Conditional checks on expressions to check if all terms are defined when expressions use constants
     constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint2"))
@@ -165,7 +191,10 @@ class LPModelValidationTest {
     Assertions.assertFalse(lpModel.validate(), "Constraint with no variables defined should fail validation")
     lpModel.variables.add(LPVar("x2", LPVarType.BOOLEAN))
     lpModel.variables.add(LPVar("y2", LPVarType.BOOLEAN))
-    Assertions.assertTrue(lpModel.validate(), "Constraint with all variables and constants defined should " +
-        "pass validation")
+    Assertions.assertTrue(
+      lpModel.validate(),
+      "Constraint with all variables and constants defined should " +
+        "pass validation"
+    )
   }
 }

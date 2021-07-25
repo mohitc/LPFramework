@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.mockito.kotlin</groupId>
       <artifactId>mockito-kotlin</artifactId>
-      <version>${mockito.version}</version>
+      <version>${mockito-kotlin.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

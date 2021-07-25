@@ -20,7 +20,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
   companion object {
     val solutionStatesWithoutResults =
-        setOf(LPSolutionStatus.UNBOUNDED, LPSolutionStatus.INFEASIBLE, LPSolutionStatus.UNKNOWN)
+      setOf(LPSolutionStatus.UNBOUNDED, LPSolutionStatus.INFEASIBLE, LPSolutionStatus.UNKNOWN)
   }
 
   private var glpkModel: glp_prob? = null
@@ -61,8 +61,10 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       }
 
       val solnStatus: LPSolutionStatus = getSolutionStatus(GLPK.glp_mip_status(glpkModel))
-      log.info { "Computation terminated. Solution Status : $solnStatus, mip objective: " +
-          "${GLPK.glp_mip_obj_val(glpkModel)} mip status: ${GLPK.glp_mip_status(glpkModel)}" }
+      log.info {
+        "Computation terminated. Solution Status : $solnStatus, mip objective: " +
+          "${GLPK.glp_mip_obj_val(glpkModel)} mip status: ${GLPK.glp_mip_status(glpkModel)}"
+      }
 
       if (!solutionStatesWithoutResults.contains(solnStatus)) {
         val result: Double = GLPK.glp_get_obj_val(glpkModel)
@@ -125,11 +127,12 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
         // Get the constant contribution from the RHS
         val constant: Double? = reducedConstraint.rhs.expression
-            .map { term -> if (term.coefficient != null) term.coefficient else 0.0 }
-            .reduce { u, v -> u!! + v!! }
+          .map { term -> if (term.coefficient != null) term.coefficient else 0.0 }
+          .reduce { u, v -> u!! + v!! }
 
         if (constant == null) {
-          log.error { "Constant contribution not found in the reduced expression for constraint " +
+          log.error {
+            "Constant contribution not found in the reduced expression for constraint " +
               lpConstraint.identifier
           }
           return false
@@ -141,8 +144,10 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
           LPOperator.GREATER_EQUAL -> GLPK.glp_set_row_bnds(glpkModel, index, GLPKConstants.GLP_LO, constant, 0.0)
           LPOperator.EQUAL -> GLPK.glp_set_row_bnds(glpkModel, index, GLPKConstants.GLP_FX, constant, constant)
           else -> {
-            log.error { "Bound handling not supported in GLPK for operator ${reducedConstraint.operator} in " +
-                "constraint ${lpConstraint.identifier}" }
+            log.error {
+              "Bound handling not supported in GLPK for operator ${reducedConstraint.operator} in " +
+                "constraint ${lpConstraint.identifier}"
+            }
             return false
           }
         }
@@ -185,11 +190,11 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       }
 
       val reducedObjective = model.reduce(model.objective)
-      if (reducedObjective==null) {
+      if (reducedObjective == null) {
         log.error { "Could not compute reduced objective function" }
         return false
       }
-      reducedObjective.expression.expression.forEach{
+      reducedObjective.expression.expression.forEach {
         if (it.isConstant()) {
           GLPK.glp_set_obj_coef(glpkModel, 0, it.coefficient!!)
         } else {

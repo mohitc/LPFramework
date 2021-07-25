@@ -29,11 +29,11 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
 
   /** Initialize object mapper and enable YAML parsing if required, otherwise enable pretty printing for JSON */
   private val mapper: ObjectMapper =
-      if (format == LPModelFormat.YAML)
-        ObjectMapper(YAMLFactory())
-      else
-        ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
-
+    if (format == LPModelFormat.YAML) {
+      ObjectMapper(YAMLFactory())
+    } else {
+      ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+    }
   init {
     // Configuration for the ObjectMapper
     mapper.registerModule(KotlinModule())
@@ -78,29 +78,34 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
   }
 
   /** Function to create the LP Model from a DTO */
-  fun generateModel(dto: LPModelDto): LPModel {
+  private fun generateModel(dto: LPModelDto): LPModel {
     val model = LPModel(dto.identifier)
 
     // Initialize constants
     dto.constants.entries.forEach { mapEntry ->
       mapEntry.value.forEach { constantDto ->
         model.constants.add(mapEntry.key, LPConstant(constantDto.identifier, constantDto.value))
-      } 
+      }
     }
 
     // Initialize variables
     dto.vars.entries.forEach { mapEntry ->
       mapEntry.value.forEach { varDto ->
         model.variables.add(mapEntry.key, LPVar(varDto.identifier, varDto.type, varDto.lbound, varDto.ubound))
-      } 
+      }
     }
 
     // Initialize constraints
     dto.constraints.entries.forEach { mapEntry ->
       mapEntry.value.forEach { constraintDto ->
-        model.constraints.add(mapEntry.key, LPConstraint(constraintDto.identifier,
-            generateExpression(constraintDto.lhs), constraintDto.operator, generateExpression(constraintDto.rhs)))
-      } 
+        model.constraints.add(
+          mapEntry.key,
+          LPConstraint(
+            constraintDto.identifier,
+            generateExpression(constraintDto.lhs), constraintDto.operator, generateExpression(constraintDto.rhs)
+          )
+        )
+      }
     }
 
     // Initialize Objective function
@@ -176,7 +181,7 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
               log.error { "result has variable ${lpVarResult.identifier} but variable not found in model" }
               return false
             }
-          } 
+          }
         }
       }
     }
@@ -208,7 +213,7 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
 
   /** Function to generate the DTO from a model expression
    */
-  internal fun generateExpressionDto(lpExpression: LPExpression): LPExpressionDto {
+  private fun generateExpressionDto(lpExpression: LPExpression): LPExpressionDto {
     return LPExpressionDto(
       lpExpression.expression
         .map { term -> LPExpressionTermDto(term.coefficient, term.lpVarIdentifier, term.lpConstantIdentifier) }
@@ -217,7 +222,7 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
 
   /** Function to generate the model expression from the provided DTO
    */
-  internal fun generateExpression(lpExpressionDto: LPExpressionDto): LPExpression {
+  private fun generateExpression(lpExpressionDto: LPExpressionDto): LPExpression {
     val lpExpression = LPExpression()
     lpExpressionDto.terms.forEach {
       lpExpression.expression.add(LPExpressionTerm(it.coefficient, it.varName, it.constant))

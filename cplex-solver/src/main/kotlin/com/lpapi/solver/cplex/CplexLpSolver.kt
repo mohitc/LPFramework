@@ -61,10 +61,10 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
         // add model results
         extractResults()
         model.solution = LPModelResult(
-            solutionStatus,
-            cplexModel?.getValue(cplexObjective),
-            executionTime,
-            cplexModel?.mipRelativeGap
+          solutionStatus,
+          cplexModel?.getValue(cplexObjective),
+          executionTime,
+          cplexModel?.mipRelativeGap
         )
         log.info { "${model.solution}" }
       } else {
@@ -118,8 +118,10 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
         if (cplexVar != null) {
           variableMap[lpVar.identifier] = cplexVar
         } else {
-          log.error { "Variable not initialized when attempting to create cplexModel?.numVar(" +
-              "${lpVar.lbound}, ${lpVar.ubound}, ${getCplexVarType(lpVar.type)}, ${lpVar.identifier})" }
+          log.error {
+            "Variable not initialized when attempting to create cplexModel?.numVar(" +
+              "${lpVar.lbound}, ${lpVar.ubound}, ${getCplexVarType(lpVar.type)}, ${lpVar.identifier})"
+          }
           return false
         }
       } catch (e: Exception) {
@@ -133,14 +135,14 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
   override fun initObjectiveFunction(): Boolean {
     log.info { "Initializing Objective Function" }
     try {
-      //Initialize cplex objective, to be used later to extract value of the objective function
+      // Initialize cplex objective, to be used later to extract value of the objective function
       val reducedExpression = model.reduce(model.objective.expression)
-      if (reducedExpression==null) {
+      if (reducedExpression == null) {
         log.error { "Objective function ${model.objective} could not be reduced" }
         return false
       }
       cplexObjective = generateExpression(reducedExpression)
-      if (cplexObjective==null) {
+      if (cplexObjective == null) {
         log.error { "Error while generating objective function" }
         return false
       }
@@ -151,7 +153,7 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
           log.error { "Mechanism not implemented to support objective type ${model.objective.objective}" }
           null
         }
-        //If objective if not created, return false otherwise return true
+        // If objective if not created, return false otherwise return true
       } ?: return false
       return true
     } catch (e: Exception) {

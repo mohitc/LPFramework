@@ -2,7 +2,7 @@ package com.lpapi.spi
 
 import com.lpapi.model.LPModel
 import com.lpapi.solver.LPSolver
-import java.util.*
+import java.util.ServiceLoader
 
 /** LpSpi is the Service provider interface that implementations of the LPSolver can implement to automatically pick up
  * a solver from the classpath. If a solver with the LpSpi is provided in the classpath, the Solver singleton can be

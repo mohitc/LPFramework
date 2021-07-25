@@ -41,5 +41,4 @@ class LPConstraint constructor(
     result = 31 * result + rhs.hashCode()
     return result
   }
-
 }

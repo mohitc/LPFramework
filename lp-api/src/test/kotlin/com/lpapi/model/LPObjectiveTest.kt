@@ -15,7 +15,7 @@ class LPObjectiveTest {
   @DisplayName("Test equality for LPObjective")
   fun testEquals() {
     // default constructor is initialized with objective maximize
-    val expressionUnderTest : LPExpression = LPExpression().addTerm("x").add("2")
+    val expressionUnderTest: LPExpression = LPExpression().addTerm("x").add("2")
     val objectiveUnderTest = LPObjective(LPObjectiveType.MAXIMIZE, expressionUnderTest)
 
     log.info { "Objective function under test $objectiveUnderTest" }
@@ -27,10 +27,14 @@ class LPObjectiveTest {
 
     var testObjective = LPObjective(LPObjectiveType.MAXIMIZE)
     testObjective.expression.add(expressionUnderTest)
-    assertEquals(objectiveUnderTest, testObjective,
-        "Different objectives with the same direction and expression result in true ")
-    assertEquals(objectiveUnderTest.hashCode(), testObjective.hashCode(),
-        "Different objectives with the same direction and expression result in equal hash code")
+    assertEquals(
+      objectiveUnderTest, testObjective,
+      "Different objectives with the same direction and expression result in true "
+    )
+    assertEquals(
+      objectiveUnderTest.hashCode(), testObjective.hashCode(),
+      "Different objectives with the same direction and expression result in equal hash code"
+    )
 
     testObjective = LPObjective(LPObjectiveType.MINIMIZE)
     testObjective.expression.add(expressionUnderTest)
@@ -52,12 +56,16 @@ class LPObjectiveTest {
     testObjective.expression.add(expressionUnderTest)
     assertNotEquals(objectiveUnderTest, testObjective, "Default optimization direction is MAXIMIZE")
     testObjective.objective = objectiveUnderTest.objective
-    assertEquals(objectiveUnderTest, testObjective,
-        "Default optimization direction is MAXIMIZE, and set changes the values correctly")
+    assertEquals(
+      objectiveUnderTest, testObjective,
+      "Default optimization direction is MAXIMIZE, and set changes the values correctly"
+    )
 
     testObjective = LPObjective(LPObjectiveType.MINIMIZE)
     testObjective.expression = expressionUnderTest
-    assertEquals(objectiveUnderTest, testObjective,
-        "Explicitly setting objective in the constructor results in a match")
+    assertEquals(
+      objectiveUnderTest, testObjective,
+      "Explicitly setting objective in the constructor results in a match"
+    )
   }
 }
