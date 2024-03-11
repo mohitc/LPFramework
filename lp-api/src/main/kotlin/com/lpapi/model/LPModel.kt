@@ -6,6 +6,7 @@ import com.lpapi.model.validators.LPParamIdValidator
 import com.lpapi.model.validators.LPParameterValidator
 import com.lpapi.model.validators.LPVarValidator
 import mu.KotlinLogging
+import java.util.*
 
 class LPModel(val identifier: String) {
   private val log = KotlinLogging.logger("LPModel")
@@ -156,7 +157,7 @@ class LPModel(val identifier: String) {
       paramGroup: LPParameterGroup<T>,
       displayType: String
     ): Boolean {
-      log.debug { "Validating all ${displayType.toLowerCase()} in the model" }
+      log.debug { "Validating all ${displayType.lowercase(Locale.getDefault())} in the model" }
       val validationResult = validatorList.map { validator ->
         paramGroup.allValues().stream()
           .map { v -> validator.validate(v, this) }
@@ -203,7 +204,7 @@ class LPModel(val identifier: String) {
   }
 }
 
-/** Parameters in the LP model (variables, constraints, Constants, can all be modeled as groups of parameters.
+/** Parameters in the LP model (variables, constraints, Constants), can all be modeled as groups of parameters.
  * A parameter may belong to the default group (identified in the constructor), if not specified, and otherwise
  * belongs to the group that is specified explicitly. The grouping is useful only for accessing the model parameters
  * easily after the creation of the model
@@ -269,7 +270,7 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
 }
 
 /** Class to store the results from an LP computation */
-class LPModelResult constructor(
+class LPModelResult(
   val status: LPSolutionStatus,
   val objective: Double?,
   val computationTime: Long?,

@@ -495,7 +495,7 @@ class GlpkLpSolverTest {
       val gotStatus = solver.solve()
       assertEquals(wantStatus, gotStatus, "solver.solve()")
       val gotResults = model.variables.allValues()
-        .filter { it.resultSet }.map { Pair(it.identifier, it.result) }.toMap()
+          .filter { it.resultSet }.associate { Pair(it.identifier, it.result) }
       assertEquals(wantResults, gotResults, "model.results")
     } finally {
       cleanup()

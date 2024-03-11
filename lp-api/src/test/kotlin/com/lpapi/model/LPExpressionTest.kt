@@ -11,7 +11,7 @@ import org.junit.jupiter.api.TestInstance
 class LPExpressionTest {
   private val log = KotlinLogging.logger("LPExpressionTest")
 
-  class TestCaseDesc constructor(
+  class TestCaseDesc(
     val case: String,
     val testCase: ((LPExpression) -> Unit),
     val invalidCase: ((LPExpression) -> Unit),

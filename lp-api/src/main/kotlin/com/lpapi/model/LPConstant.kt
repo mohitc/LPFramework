@@ -4,7 +4,7 @@ package com.lpapi.model
  * of static values is that the values of the constant can be updated in the model, and will be populated only during
  * the process of solving the model
  */
-class LPConstant constructor(override val identifier: String, var value: Double) : LPParameter {
+class LPConstant(override val identifier: String, var value: Double) : LPParameter {
 
   constructor(identifier: String) : this(identifier, 0.0)
 

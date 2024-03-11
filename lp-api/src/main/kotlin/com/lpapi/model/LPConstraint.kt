@@ -7,7 +7,7 @@ import com.lpapi.model.enums.LPOperator
  * should be
  * lhs OPERATOR rhs
  */
-class LPConstraint constructor(
+class LPConstraint(
   override val identifier: String,
   val lhs: LPExpression,
   var operator: LPOperator,
