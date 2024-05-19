@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>linear-programming</artifactId>
+    <groupId>com.lpapi</groupId>
+    <version>${revision}</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>scip-solver</artifactId>
+  <packaging>jar</packaging>
+
+  <properties>
+    <scip.version>9.0.0</scip.version>
+    <java-library-path-arg>/opt/scip/lib64</java-library-path-arg>
+    <ld-library-path>/opt/scip/lib64</ld-library-path>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.lpapi</groupId>
+      <artifactId>lp-solver</artifactId>
+      <version>${revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scip</groupId>
+      <artifactId>jscipopt</artifactId>
+      <version>${scip.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lpapi</groupId>
+      <artifactId>lp-solver-sample</artifactId>
+      <version>${revision}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito.kotlin</groupId>
+      <artifactId>mockito-kotlin</artifactId>
+      <version>${mockito-kotlin.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build-helper.version}</version>
+        <executions>
+          <!-- Add the integration test directory to the build -->
+          <execution>
+            <id>add-integration-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/integration-test/kotlin</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Failsafe plugin to run integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe.version}</version>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <skipTests>${scip.skiptests}</skipTests>
+              <!-- Provide environment variables -->
+              <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
+              <environmentVariables>
+                <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+              </environmentVariables>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Surefire plugin to run Junit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <configuration>
+          <!-- Provide environment variables -->
+          <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
+          <environmentVariables>
+            <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+          </environmentVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
