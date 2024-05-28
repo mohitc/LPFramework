@@ -4,6 +4,7 @@ import com.lpapi.model.LPConstant
 import com.lpapi.model.LPConstraint
 import com.lpapi.model.LPModel
 import com.lpapi.model.LPVar
+import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPVarType
 import jscip.Constraint
@@ -36,6 +37,7 @@ class ScipLpSolverTest {
     val mockedConstraint1 = mock<Constraint> {}
     val mockedConstraint2 = mock<Constraint> {}
     val createdConstraints = mutableSetOf<Constraint>()
+    val createdObjectiveCoefficients = mutableMapOf<Variable, Number>()
     const val SCIP_INF = 1E20
   }
 
@@ -422,5 +424,157 @@ class ScipLpSolverTest {
     assertEquals(gotVarMap, wantVarMap, "solver.variableMap")
     assertEquals(gotConstraintMap, wantConstraintMap, "solver.constraintMap")
     assertEquals(createdConstraints, wantConstraintMap.values.toSet(), "solver.create calls")
+  }
+
+  private fun argsForInitObjective() = Stream.of(
+      Arguments.of(
+          "Exception while initializing the objective function",
+          fun(): Scip {
+            val mockedModel = mock<Scip>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.changeVarObj(mockedVarX, 1.0)).thenThrow(RuntimeException())
+            return mockedModel
+          },
+          fun(): LPModel {
+            val model = LPModel("test")
+            model.variables.add(LPVar("X", LPVarType.BOOLEAN))
+            model.objective.expression.addTerm("X")
+            return model
+          },
+          false,
+          mutableMapOf(
+              Pair("X", mockedVarX)
+          ),
+          mutableMapOf<Variable, Number>()
+      ),
+      Arguments.of(
+          "Exception while initializing the objective direction",
+          fun(): Scip {
+            val mockedModel = mock<Scip>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.changeVarObj(mockedVarX, 1.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 1.0) }
+            `when`(mockedModel.setMaximize()).thenThrow(RuntimeException())
+            return mockedModel
+          },
+          fun(): LPModel {
+            val model = LPModel("test")
+            model.variables.add(LPVar("X", LPVarType.BOOLEAN))
+            model.objective.expression.addTerm("X")
+            model.objective.objective = LPObjectiveType.MAXIMIZE
+            return model
+          },
+          false,
+          mutableMapOf(
+              Pair("X", mockedVarX)
+          ),
+          mutableMapOf<Variable, Number>(Pair(mockedVarX, 1.0))
+      ),
+      Arguments.of(
+          "Reduced expression with maximization objective  5x + 2y -2x + 2y",
+          fun(): Scip {
+            val mockedModel = mock<Scip>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.changeVarObj(mockedVarX, 3.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 3.0) }
+            `when`(mockedModel.changeVarObj(mockedVarY, 4.0)).then{ createdObjectiveCoefficients.put(mockedVarY, 4.0) }
+            // Throw exception on invalid call
+            `when`(mockedModel.setMinimize()).thenThrow(RuntimeException())
+            return mockedModel
+          },
+          fun(): LPModel {
+            val model = LPModel("test")
+            model.variables.add(LPVar("X", LPVarType.BOOLEAN))
+            model.variables.add(LPVar("Y", LPVarType.BOOLEAN))
+            model.objective.expression.addTerm(5, "X").addTerm(2, "Y").addTerm(-2, "X").addTerm(2, "Y")
+            model.objective.objective = LPObjectiveType.MAXIMIZE
+            return model
+          },
+          true,
+          mutableMapOf(
+              Pair("X", mockedVarX),
+                  Pair("Y", mockedVarY)
+          ),
+          mutableMapOf<Variable, Number>(
+              Pair(mockedVarX, 3.0),
+              Pair(mockedVarY, 4.0),
+              )
+      ),
+      Arguments.of(
+          "Reduced expression with minimization objective  5x + 2y -2x - 2y",
+          fun(): Scip {
+            val mockedModel = mock<Scip>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.changeVarObj(mockedVarX, 3.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 3.0) }
+            // Throw exception on invalid call
+            `when`(mockedModel.setMaximize()).thenThrow(RuntimeException())
+            return mockedModel
+          },
+          fun(): LPModel {
+            val model = LPModel("test")
+            model.variables.add(LPVar("X", LPVarType.BOOLEAN))
+            model.variables.add(LPVar("Y", LPVarType.BOOLEAN))
+            model.objective.expression.addTerm(5, "X").addTerm(2, "Y").addTerm(-2, "X").addTerm(-2, "Y")
+            model.objective.objective = LPObjectiveType.MINIMIZE
+            return model
+          },
+          true,
+          mutableMapOf(
+              Pair("X", mockedVarX),
+              Pair("Y", mockedVarY)
+          ),
+          mutableMapOf<Variable, Number>(
+              Pair(mockedVarX, 3.0),
+          )
+      ),
+      Arguments.of(
+          "Empty Objective function (feasibility problem)",
+          fun(): Scip {
+            val mockedModel = mock<Scip>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            return mockedModel
+          },
+          fun(): LPModel {
+            val model = LPModel("test")
+            model.variables.add(LPVar("X", LPVarType.BOOLEAN))
+            model.variables.add(LPVar("Y", LPVarType.BOOLEAN))
+            return model
+          },
+          true,
+          mutableMapOf(
+              Pair("X", mockedVarX),
+              Pair("Y", mockedVarY)
+          ),
+          mutableMapOf<Variable, Number>()
+      )
+  )
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("argsForInitObjective")
+  fun testInitObjective(
+      desc: String,
+      initMock: () -> Scip,
+      initModel: () -> LPModel,
+      wantSuccess: Boolean,
+      wantVarMap: Map<String, Variable>,
+      wantObjectiveCoefficients: Map<Variable, Number>
+  ) {
+    log.info { "Test Case $desc" }
+    createdObjectiveCoefficients.clear()
+    val mockedScipModel = initMock()
+    val model = initModel()
+    val solver = ScipLpSolver(model)
+    setScipModel(solver, mockedScipModel)
+    solver.initModel()
+    val gotVarMap = mutableMapOf<String, Variable>().apply {
+      setVariableMap(solver, this)
+    }
+    val varSuccess = solver.initVars()
+    assertEquals(varSuccess, true, "solver.initVars")
+    val gotSuccess = solver.initObjectiveFunction()
+    assertEquals(wantSuccess, gotSuccess, "solver.initObjectiveFunction()")
+    assertEquals(gotVarMap, wantVarMap, "solver.variableMap")
+    assertEquals(createdObjectiveCoefficients, wantObjectiveCoefficients, "solver.changeObjVal calls")
   }
 }
