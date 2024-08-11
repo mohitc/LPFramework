@@ -30,7 +30,7 @@ class LPExpression {
   /** Add a variable term specified as an LP Variable (e.g. 1.X)
    */
   fun addTerm(variable: LPVar): LPExpression {
-    expression.add(LPExpressionTerm(null, variable.identifier, null))
+    expression.add(LPExpressionTerm(1.0, variable.identifier, null))
     return this
   }
 

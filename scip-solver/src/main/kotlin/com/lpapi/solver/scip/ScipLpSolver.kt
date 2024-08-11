@@ -140,6 +140,9 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
   }
 
   private fun extractObjectiveVal(): Double {
+    if (model.objective.expression.expression.isEmpty()) {
+      return 0.0
+    }
     return model.objective.expression.expression.map( fun(t: LPExpressionTerm): Double {
       return if (t.isConstant()) {
         t.coefficient!!

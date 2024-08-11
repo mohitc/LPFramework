@@ -16,6 +16,7 @@ abstract class LPSolver<T>(val model: LPModel) {
       if (!initModel() || !initVars() || !initConstraints()) {
         return false
       }
+      log.error { "Initializing Objective Function" }
       return initObjectiveFunction()
     } catch (e: Exception) {
       log.error { "Unexpected error while initializing model $e" }
