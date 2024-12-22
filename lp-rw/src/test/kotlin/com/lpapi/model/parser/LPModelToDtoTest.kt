@@ -123,10 +123,10 @@ class LPModelToDtoTest {
     log.info { "Generated Model DTO: $modelResultDto" }
     assertTrue(modelResultDto.vars!!.size == 1, "Model should only have one variable $group")
     assertTrue(
-      modelResultDto.vars!!.contains(expected),
+      modelResultDto.vars.contains(expected),
       "DTO under group identifier $group do not match, want $expected found ${modelResultDto.vars}"
     )
-    val got = modelResultDto.vars!!.firstOrNull { it.identifier == varToAdd.identifier }
+    val got = modelResultDto.vars.firstOrNull { it.identifier == varToAdd.identifier }
     assertEquals(
       got?.identifier, expected.identifier,
       "Identifiers of the found and the expected value should match"
