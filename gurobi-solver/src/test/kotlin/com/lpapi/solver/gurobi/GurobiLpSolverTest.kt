@@ -8,12 +8,12 @@ import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
-import gurobi.GRB
-import gurobi.GRBConstr
-import gurobi.GRBException
-import gurobi.GRBLinExpr
-import gurobi.GRBModel
-import gurobi.GRBVar
+import com.gurobi.gurobi.GRB
+import com.gurobi.gurobi.GRBConstr
+import com.gurobi.gurobi.GRBException
+import com.gurobi.gurobi.GRBLinExpr
+import com.gurobi.gurobi.GRBModel
+import com.gurobi.gurobi.GRBVar
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -596,8 +596,7 @@ class GurobiLpSolverTest {
     assertEquals(wantResult.status, lpModel.solution?.status, "lpModel.solution.status")
     assertEquals(wantResult.objective, lpModel.solution?.objective, "lpModel.solution.objective")
     assertEquals(wantResult.mipGap, lpModel.solution?.mipGap, "lpModel.solution.mipGap")
-    val gotResultMap = lpModel.variables.allValues().filter { it.resultSet }
-      .map { Pair(it.identifier, it.result) }.toMap()
+    val gotResultMap = lpModel.variables.allValues().filter { it.resultSet }.associate { Pair(it.identifier, it.result) }
     assertEquals(wantResultMap, gotResultMap, "solver.solve() resultMap ${lpModel.variables.allValues()}")
   }
 }

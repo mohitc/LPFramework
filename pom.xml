@@ -14,7 +14,7 @@
   <modules>
     <module>lp-api</module>
     <module>lp-solver</module>
-<!--    <module>gurobi-solver</module>-->
+    <module>gurobi-solver</module>
     <module>glpk-solver</module>
     <module>glpk-ffm</module>
     <module>lp-solver-sample</module>
@@ -190,18 +190,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <repositories>
-    <repository>
-      <id>gurobi-repo</id>
-      <name>Repository for Gurobi Jar</name>
-      <url>http://cogcomp.org/m2repo/</url>
-    </repository>
-    <repository>
-      <id>glpk-repo</id>
-      <name>Repository for GLPK Jar</name>
-      <url>https://www.xypron.de/repository/</url>
-    </repository>
-  </repositories>
-
 </project>

@@ -9,13 +9,13 @@ import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
-import gurobi.GRB
-import gurobi.GRBConstr
-import gurobi.GRBEnv
-import gurobi.GRBException
-import gurobi.GRBLinExpr
-import gurobi.GRBModel
-import gurobi.GRBVar
+import com.gurobi.gurobi.GRB
+import com.gurobi.gurobi.GRBConstr
+import com.gurobi.gurobi.GRBEnv
+import com.gurobi.gurobi.GRBException
+import com.gurobi.gurobi.GRBLinExpr
+import com.gurobi.gurobi.GRBModel
+import com.gurobi.gurobi.GRBVar
 import kotlin.system.measureTimeMillis
 
 class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
