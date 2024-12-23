@@ -13,10 +13,6 @@
   <artifactId>glpk-ffm</artifactId>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <kotlin.code.style>official</kotlin.code.style>
-    <jextract-maven-plugin.version>0.4.1</jextract-maven-plugin.version>
-    <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
     <glpkc-header.path>/usr/local/include/</glpkc-header.path>
     <glpk-library>glpk</glpk-library>
   </properties>
