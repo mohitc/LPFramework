@@ -1,5 +1,6 @@
 package com.lpapi.solver.scip
 
+import com.lpapi.ffm.scip.*
 import com.lpapi.model.LPExpressionTerm
 import com.lpapi.model.LPModel
 import com.lpapi.model.LPModelResult
@@ -8,74 +9,102 @@ import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
-import jscip.*
-import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
 
-open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
+open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
 
   companion object {
-    init {
-      try {
-        System.loadLibrary("jscip")
-      } catch (e: Exception) {
-        val log = KotlinLogging.logger(this::class.java.simpleName)
-
-        /**
-         * Information string.
-         */
-        var info =
-            """
-            The dynamic link library for GLPK for Java could not be loaded.
-            Consider using java -Djava.library.path=
-            The current value of system property java.library.path is:
-            ${System.getProperty("java.library.path")}
-          
-          """
-
-        info +=
-            """    
-          java.vendor: ${System.getProperty("java.vendor")}
-          java.version: ${System.getProperty("java.version")}
-          java.vm.name: ${System.getProperty("java.vm.name")}
-          java.vm.version: ${System.getProperty("java.vm.version")}
-          java.runtime.version: ${System.getProperty("java.runtime.version")}
-
-
-          ${e.message}
-          """
-        log.error{ info }
-        throw e
+    internal fun getSolutionStatus(status: SCIPStatus): LPSolutionStatus {
+      return when (status) {
+        SCIPStatus.OPTIMAL -> return LPSolutionStatus.OPTIMAL
+        SCIPStatus.INFEASIBLE -> LPSolutionStatus.INFEASIBLE
+        SCIPStatus.UNBOUNDED -> LPSolutionStatus.UNBOUNDED
+        SCIPStatus.TIME_LIMIT -> LPSolutionStatus.TIME_LIMIT
+        SCIPStatus.INFEASIBLE_OR_UNBOUNDED -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+        SCIPStatus.SOLUTION_LIMIT,
+        SCIPStatus.GAP_LIMIT,
+        SCIPStatus.BEST_SOLUTION_LIMIT,
+        SCIPStatus.NODE_LIMIT,
+        SCIPStatus.TOTAL_NODE_LIMIT,
+        SCIPStatus.STALL_NODE_LIMIT,
+        SCIPStatus.DUAL_LIMIT,
+        SCIPStatus.MEMORY_LIMIT,
+        SCIPStatus.PRIMAL_LIMIT,
+        SCIPStatus.RESTART_LIMIT -> LPSolutionStatus.CUTOFF
+        SCIPStatus.UNKNOWN -> LPSolutionStatus.UNKNOWN
+        SCIPStatus.TERMINATED -> LPSolutionStatus.ERROR
+        SCIPStatus.USER_INTERRUPT -> LPSolutionStatus.ERROR
+        else -> {
+          LPSolutionStatus.UNKNOWN
+        }
       }
     }
+
+//    init {
+//      try {
+//        System.loadLibrary("scip")
+//      } catch (e: Exception) {
+//        val log = KotlinLogging.logger(this::class.java.simpleName)
+//
+//        /**
+//         * Information string.
+//         */
+//        var info =
+//            """
+//            The dynamic link library for SCIP could not be loaded.
+//            Consider using java -Djava.library.path=
+//            The current value of system property java.library.path is:
+//            ${System.getProperty("java.library.path")}
+//
+//          """
+//
+//        info +=
+//            """
+//          java.vendor: ${System.getProperty("java.vendor")}
+//          java.version: ${System.getProperty("java.version")}
+//          java.vm.name: ${System.getProperty("java.vm.name")}
+//          java.vm.version: ${System.getProperty("java.vm.version")}
+//          java.runtime.version: ${System.getProperty("java.runtime.version")}
+//
+//
+//          ${e.message}
+//          """
+//        log.error { info }
+//        throw e
+//      }
+//    }
   }
 
-  private var scipModel: Scip = Scip()
+  private var scipModel: SCIPProblem = SCIPProblem()
 
   private var variableMap: MutableMap<String, Variable> = mutableMapOf()
 
   private var constraintMap: MutableMap<String, Constraint> = mutableMapOf()
 
   override fun initModel(): Boolean {
-    return try {
-      scipModel.create(model.identifier)
-      true
+    try {
+      val createVarRetVal = scipModel.createProblem(model.identifier)
+      log.info { "createProblem(${model.identifier}) = $createVarRetVal" }
+      val includePluginsRetVal = scipModel.includeDefaultPlugins()
+      log.info { "includeDefaultPlugins() = $includePluginsRetVal" }
+      return createVarRetVal == SCIPRetCode.SCIP_OKAY && includePluginsRetVal == SCIPRetCode.SCIP_OKAY
     } catch (e: Exception) {
       log.error { "Error while initializing Scip problem instance $e" }
-      false
     }
+    return false
   }
 
-  override fun getBaseModel(): Scip? {
-    return scipModel
-  }
+  override fun getBaseModel() = scipModel
 
   private fun releaseModelVars() {
     log.info { "Releasing variables from SCIP" }
     variableMap.entries.forEach { p ->
       log.info { "Releasing variable ${p.key}" }
-      scipModel.releaseVar(p.value)
+      val retCode = scipModel.releaseVar(p.value)
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "releaseVar(${p.value}) want OKAY got $retCode" }
+      }
     }
   }
 
@@ -83,35 +112,40 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
     log.info { "Releasing constraints from SCIP" }
     constraintMap.entries.forEach { p ->
       log.info { "Releasing constraint ${p.key}" }
-      scipModel.releaseCons(p.value)
+      val retCode = scipModel.releaseConstraint(p.value)
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "releaseVar(${p.value}) want OKAY got $retCode" }
+      }
+
     }
   }
 
   override fun solve(): LPSolutionStatus {
     try {
       // set parameters
-      scipModel.setRealParam("limits/time", 100.0)
-      scipModel.setRealParam("limits/memory", 10000.0)
-      scipModel.setLongintParam("limits/totalnodes", 1000)
-      scipModel.hideOutput(false)
+      var retCode = scipModel.setRealParam("limits/time", 100.0)
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "setting time limits want OKAY got $retCode" }
+      }
+      retCode = scipModel.setRealParam("limits/memory", 10000.0)
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "setting memory limits want OKAY got $retCode" }
+      }
+      retCode = scipModel.setLongintParam("limits/totalnodes", 1000)
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "setting total node limits want OKAY got $retCode" }
+      }
+      scipModel.messageHandlerQuiet(false)
 
-      // Release variables and constraints as they are not required anymore
-
-      //releaseModelVars() -- Once released the results for the individual variables cannot be extracted anymore
       releaseModelConstraints()
       // solve problem
       val executionTime = measureTimeMillis {
-        scipModel.solve()
+        retCode = scipModel.solve()
+        log.info { "model.solve() return code $retCode" }
       }
 
-      if (scipModel.sols?.size == 0) {
-        log.info { "No feasible solutions found"}
-        model.solution = LPModelResult(LPSolutionStatus.INFEASIBLE)
-        return LPSolutionStatus.INFEASIBLE
-      }
-
-      val bestSol = scipModel.bestSol
-      if (bestSol==null) {
+      val bestSol = scipModel.getBestSol()
+      if (bestSol == null) {
         log.error { "Best solution not found" }
         model.solution = LPModelResult(LPSolutionStatus.ERROR)
         return LPSolutionStatus.ERROR
@@ -122,16 +156,19 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
         return LPSolutionStatus.ERROR
       }
 
-      val gap = scipModel.gap
+      val gap = scipModel.getGap()
       log.info { "final gap = $gap" }
       val objectiveVal = extractObjectiveVal()
       log.info { "Objective Val: $objectiveVal" }
-      var solnStatus = LPSolutionStatus.CUTOFF
-      if (gap == 0.0) {
-        solnStatus = LPSolutionStatus.OPTIMAL
+
+      val solutionStatus = getSolutionStatus(scipModel.getStatus())
+      model.solution = LPModelResult(solutionStatus, objectiveVal, executionTime, gap)
+      releaseModelVars()
+      retCode = scipModel.freeProblem()
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "freeProblem() want OKAY got $retCode" }
       }
-      model.solution = LPModelResult(solnStatus, objectiveVal, executionTime, gap)
-      return solnStatus
+      return solutionStatus
       // print all solutions
     } catch (e: Exception) {
       log.error { "Error while computing SCIP model: $e" }
@@ -143,13 +180,13 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
     if (model.objective.expression.expression.isEmpty()) {
       return 0.0
     }
-    return model.objective.expression.expression.map( fun(t: LPExpressionTerm): Double {
+    return model.objective.expression.expression.map(fun(t: LPExpressionTerm): Double {
       return if (t.isConstant()) {
         t.coefficient!!
       } else {
         t.coefficient!!.times(model.variables.get(t.lpVarIdentifier!!)!!.result.toDouble())
       }
-    }).reduce{sum, element -> sum + element}
+    }).reduce { sum, element -> sum + element }
   }
 
   private fun extractResults(sol: Solution): Boolean {
@@ -165,7 +202,7 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
   override fun initVars(): Boolean {
     log.info { "Initializing variables" }
 
-    model.variables.allValues().forEach{ lpVar ->
+    model.variables.allValues().forEach { lpVar ->
       try {
         log.debug { "Initializing variable ($lpVar)" }
         val scipVarType = getScipVarType(lpVar.type)
@@ -180,11 +217,13 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
           log.error { "Could not create variable for $lpVar" }
           return false
         }
+        log.info { "Variable $lpVar created successfully" }
       } catch (e: Exception) {
         log.error { "Error while initializing Scip Variable ($lpVar) : $e" }
         return false
       }
     }
+    log.info { "Variables initialized successfully" }
     return true
   }
 
@@ -192,17 +231,16 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
     log.error { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.error { "Initializing constraint ($lpConstraint)" }
+        log.info { "Initializing constraint ($lpConstraint)" }
         val reducedConstraint = model.reduce(lpConstraint)
-        if (reducedConstraint==null) {
+        if (reducedConstraint == null) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
           return false
         }
         log.error { "Reduced Constraint: $reducedConstraint" }
         val variables: MutableList<Variable> = mutableListOf()
         val coefficient: MutableList<Double> = mutableListOf()
-        reducedConstraint.lhs.expression.filter { t -> !t.isConstant() && variableMap[t.lpVarIdentifier]!=null && t.coefficient != null }.map { t -> Pair(variableMap[t.lpVarIdentifier], t.coefficient) }.forEach {
-          p ->
+        reducedConstraint.lhs.expression.filter { t -> !t.isConstant() && variableMap[t.lpVarIdentifier] != null && t.coefficient != null }.map { t -> Pair(variableMap[t.lpVarIdentifier], t.coefficient) }.forEach { p ->
           variables.add(p.first!!)
           coefficient.add(p.second!!)
         }
@@ -217,14 +255,12 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
           LPOperator.GREATER_EQUAL -> Pair(constant, scipModel.infinity())
         }
         log.error { "Bound for Constraints $bound" }
-        val scipConstr = scipModel.createConsLinear(lpConstraint.identifier, variables.toTypedArray(), coefficient.toTypedArray().toDoubleArray(), bound.first, bound.second)
-        if (scipConstr == null) {
+        val scipConstraint = scipModel.createConstraint(lpConstraint.identifier, variables, coefficient, bound.first, bound.second)
+        if (scipConstraint == null) {
           log.error { "Error while initializing SCIP constraint $lpConstraint" }
           return false
         }
-        log.info { "Adding constraint $lpConstraint to the model" }
-        scipModel.addCons(scipConstr)
-        constraintMap[lpConstraint.identifier] = scipConstr
+        constraintMap[lpConstraint.identifier] = scipConstraint
       } catch (e: Exception) {
         log.error { "Error while initializing constraint $lpConstraint : $e" }
         return false
@@ -237,26 +273,29 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
     log.info { "Initializing Objective Function" }
     try {
       val reducedObjectiveFn = model.reduce(model.objective.expression)
-      if (reducedObjectiveFn?.expression==null) {
+      log.info {"Reduced Objective Function: $reducedObjectiveFn"}
+      if (reducedObjectiveFn?.expression == null) {
         return false
       }
       reducedObjectiveFn.expression.forEach { term ->
         if (!term.isConstant()) {
+          log.info { "Adding capability for term $term" }
           val scipVar = variableMap[term.lpVarIdentifier]
           if (scipVar == null) {
             log.error { "Found variable in objective ${term.lpVarIdentifier} that was not initialized" }
             return false
           }
           log.info { "Updating coefficient of variable ${term.lpVarIdentifier} to ${term.coefficient}" }
-          scipModel.changeVarObj(scipVar, term.coefficient!!)
+          scipModel.setVariableObjective(scipVar, term.coefficient!!)
         } else {
           log.error { "Constant parameter handling to be added to objective function by re-evaluating in result" }
         }
       }
       when (model.objective.objective) {
-        LPObjectiveType.MAXIMIZE -> scipModel.setMaximize()
-        LPObjectiveType.MINIMIZE -> scipModel.setMinimize()
+        LPObjectiveType.MAXIMIZE -> scipModel.maximize()
+        LPObjectiveType.MINIMIZE -> scipModel.minimize()
       }
+      log.info { "Objective Initialized" }
       return true
     } catch (e: Exception) {
       log.error { "Exception while configuring the SCIP objective function: $e" }
@@ -264,12 +303,15 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
     }
   }
 
-  internal fun getScipVarType(type: LPVarType): SCIP_Vartype? {
-    return when(type) {
-      LPVarType.INTEGER -> return SCIP_Vartype.SCIP_VARTYPE_INTEGER
-      LPVarType.BOOLEAN -> return SCIP_Vartype.SCIP_VARTYPE_BINARY
-      LPVarType.DOUBLE -> return SCIP_Vartype.SCIP_VARTYPE_CONTINUOUS
-      else -> { null }
+  internal fun getScipVarType(type: LPVarType): SCIPVarType? {
+    return when (type) {
+      LPVarType.INTEGER -> return SCIPVarType.SCIP_VARTYPE_INTEGER
+      LPVarType.BOOLEAN -> return SCIPVarType.SCIP_VARTYPE_BINARY
+      LPVarType.DOUBLE -> return SCIPVarType.SCIP_VARTYPE_CONTINUOUS
+      else -> {
+        null
+      }
     }
   }
+
 }
