@@ -1,0 +1,5 @@
+In order to run optimizations with the GLPK solver, please include the line
+
+-Djava.library.path=/usr/local/lib/jni
+
+in the Java VM options
