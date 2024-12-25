@@ -2,7 +2,7 @@
 
 The GLPK solver converts the programmed model to be solved using the [GNU Linear Programming Kit](https://www.gnu.org/software/glpk/) 
 which is an open source alternative for solving linear programming models. GLPK is written in C, and in order to call methods 
-from Java/Kotlin, the project uses the [GLPK Java] (http://glpk-java.sourceforge.net/) project 
+from Java/Kotlin, the project uses the [GLPK Java](http://glpk-java.sourceforge.net/) project. 
 
 ##Installation Instructions
 In order to evaluate models using this solver, we need to install both the GLPK project and the GLPK Java bindings. 
