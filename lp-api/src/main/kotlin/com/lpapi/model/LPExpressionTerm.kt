@@ -4,7 +4,7 @@ package com.lpapi.model
  * (defined either by the identifier of the constant defined in the model, or a fixed value) or a dot product of
  * a constant value and a variable as defined in the model
  */
-class LPExpressionTerm constructor(
+class LPExpressionTerm(
   val coefficient: Double?,
   val lpVarIdentifier: String?,
   val lpConstantIdentifier: String?

@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 
 open class PrimitiveSolverSample {
 
-  val log = KotlinLogging.logger(this.javaClass.simpleName)
+  private val log = KotlinLogging.logger(this.javaClass.simpleName)
 
   val modelGenerator: () -> LPModel = {
     val model = LPModel("Test Instance")

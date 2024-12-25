@@ -37,7 +37,7 @@ class LPModelTest {
       .addTerm(3, "x")
       .addTerm(4, "y")
 
-    LPObjectiveType.values().forEach {
+    LPObjectiveType.entries.forEach {
       objective.objective = it
       expectedObjective.objective = it
       Assertions.assertEquals(
@@ -183,7 +183,7 @@ class LPModelTest {
       .addTerm("y") // (3-2) y
     expectedConstraint.rhs.add(1) // (2-d)
 
-    LPOperator.values().forEach {
+    LPOperator.entries.forEach {
       constraint.operator = it
       expectedConstraint.operator = it
       Assertions.assertEquals(

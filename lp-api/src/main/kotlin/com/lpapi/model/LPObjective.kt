@@ -5,7 +5,7 @@ import com.lpapi.model.enums.LPObjectiveType
 /** The LP Objective defines the objective function used in the model. The objective function is defined as a linear
  * expression that should be minimized or maximized (as defined by the objective type)
  */
-class LPObjective constructor(
+class LPObjective(
   var objective: LPObjectiveType = LPObjectiveType.MAXIMIZE,
   var expression: LPExpression = LPExpression()
 ) {

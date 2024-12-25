@@ -19,7 +19,7 @@ class LPVar(
 
   constructor(identifier: String, type: LPVarType) : this(
     identifier, type,
-    // If variable is defined as boolean then upper bound is automatically set to 1 otherwise is defaulted to 0
+    // If variable is defined as boolean, the upper bound is automatically set to 1 otherwise is defaulted to 0
     0.0, if (type == LPVarType.BOOLEAN) 1.0 else 0.0
   )
 
