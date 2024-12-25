@@ -35,8 +35,8 @@ public abstract class LPGroup {
       initializer.setGroup(this);
 
     } else {
-      initializer = new LPEmptyGroupInitializer();
-      initializer.setGroup(this);
+      this.initializer = new LPEmptyGroupInitializer();
+      this.initializer.setGroup(this);
     }
   }
 
