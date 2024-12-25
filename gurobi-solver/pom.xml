@@ -27,5 +27,11 @@
       <artifactId>gurobi</artifactId>
       <version>${gurobi.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.lpapi</groupId>
+      <artifactId>lp-solver-sample</artifactId>
+      <version>${revision}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

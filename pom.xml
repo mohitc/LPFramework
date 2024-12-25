@@ -17,7 +17,7 @@
     <module>gurobi-solver</module>
     <module>glpk-solver</module>
     <module>lp-solver-sample</module>
-<!--    <module>cplex-solver</module>-->
+    <module>cplex-solver</module>
     <module>lp-rw</module>
   </modules>
 
@@ -29,8 +29,8 @@
     <logger.version>1.7.7</logger.version>
     <slf4j.version>1.7.29</slf4j.version>
     <revision>1.0-SNAPSHOT</revision>
-    <glpk.skiptests>true</glpk.skiptests>
-    <cplex.skiptests>true</cplex.skiptests>
+    <glpk.skiptests>false</glpk.skiptests>
+    <cplex.skiptests>false</cplex.skiptests>
     <gurobi.skiptests>true</gurobi.skiptests>
   </properties>
 

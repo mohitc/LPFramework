@@ -2,14 +2,12 @@ package com.lpapi.solver.sample
 
 import com.lpapi.model.LPModel
 import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.solver.glpk.GlpkLpSolver
-import org.junit.jupiter.api.Tag
+import com.lpapi.solver.gurobi.GurobiLpSolver
 
-@Tag("integrationTest")
-class GplkPrimitiveSolverSampleTest : PrimitiveSolverSample() {
+class GurobiPrimititiveSolverSampleTest : PrimitiveSolverSample() {
 
   override fun initAndSolveModel(model: LPModel): LPModel? {
-    val solver = GlpkLpSolver(model)
+    val solver = GurobiLpSolver(model)
     solver.initialize()
     val status = solver.solve()
     return if (status!= LPSolutionStatus.UNKNOWN &&
