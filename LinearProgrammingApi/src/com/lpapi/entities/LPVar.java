@@ -26,7 +26,7 @@ public abstract class LPVar<T> {
   private boolean resultSet = false;
 
   protected LPVar(LPModel model, String identifier, LPVarType type) throws LPVarException {
-    log.info(marker, "Validating input parameters and generating new LP Var");
+    log.debug(marker, "Validating input parameters and generating new LP Var");
     if (model==null) {
       throw new LPVarException("Provided model cannot be null");
     }
