@@ -11,6 +11,9 @@ import com.lpapi.export.jsonfile.exportdto.LPConstantGroupDTO;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class JSONFileConstantGroupExporter extends LPConstantGroupExporter {
@@ -27,8 +30,9 @@ public class JSONFileConstantGroupExporter extends LPConstantGroupExporter {
     try {
       //overwrite file if exists
       LPConstantGroupDTO constantGroupDTO = new LPConstantGroupDTO(getModel(), getGroup());
-      BufferedWriter writer = new BufferedWriter(new FileWriter(folderPath + getModel().getIdentifier() +
-          JSONFileConstants.CONSTANT_GROUP_SUFFIX + getGroup().getIdentifier() + JSONFileConstants.MODEL_EXTENSION, false));
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
+          JSONFileConstants.CONSTANT_GROUP_SUFFIX + getGroup().getIdentifier() + JSONFileConstants.MODEL_EXTENSION);
+      BufferedWriter writer = Files.newBufferedWriter(path, JSONFileConstants.ENCODING);
       //Write model parameters to map
       ObjectMapper mapper = new ObjectMapper();
       mapper.writeValue(writer, constantGroupDTO);

@@ -13,6 +13,9 @@ import com.lpapi.export.jsonfile.exportdto.LPVarGroupDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JSONFileVarGroupImporter extends LPVarGroupImporter {
 
@@ -26,12 +29,13 @@ public class JSONFileVarGroupImporter extends LPVarGroupImporter {
   @Override
   public void importGroup() throws LPImportException {
     try {
-      File file = new File(folderPath + getModel().getIdentifier() +
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
           JSONFileConstants.VAR_GROUP_SUFFIX + getGroupID() + JSONFileConstants.MODEL_EXTENSION);
 
       //Read model parameters to DTO
       ObjectMapper mapper = new ObjectMapper();
-      LPVarGroupDTO groupDTO = mapper.readValue(file, LPVarGroupDTO.class);
+      LPVarGroupDTO groupDTO = mapper.readValue(Files.newBufferedReader(path, JSONFileConstants.ENCODING),
+          LPVarGroupDTO.class);
 
       LPVarGroup group;
 

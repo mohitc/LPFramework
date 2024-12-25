@@ -16,6 +16,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 public class JSONFileLPModelExporter extends LPModelExporter {
@@ -57,8 +60,9 @@ public class JSONFileLPModelExporter extends LPModelExporter {
     try {
       //overwrite file if exists
       LPModelDTO modelDTO = new LPModelDTO(getModel());
-      BufferedWriter writer = new BufferedWriter(new FileWriter(folderPath + getModel().getIdentifier() +
-          JSONFileConstants.MODEL_EXTENSION, false));
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
+          JSONFileConstants.MODEL_EXTENSION);
+      BufferedWriter writer = Files.newBufferedWriter(path, JSONFileConstants.ENCODING);
       //Write model parameters to map
       ObjectMapper mapper = new ObjectMapper();
       mapper.writeValue(writer, modelDTO);

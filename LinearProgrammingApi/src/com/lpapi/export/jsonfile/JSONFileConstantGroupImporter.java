@@ -14,6 +14,9 @@ import com.lpapi.export.jsonfile.exportdto.LPConstantGroupDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JSONFileConstantGroupImporter extends LPConstantGroupImporter {
 
@@ -27,12 +30,13 @@ public class JSONFileConstantGroupImporter extends LPConstantGroupImporter {
   @Override
   public void importGroup() throws LPImportException {
     try {
-      File file = new File(folderPath + getModel().getIdentifier() +
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
           JSONFileConstants.CONSTANT_GROUP_SUFFIX + getGroupID() + JSONFileConstants.MODEL_EXTENSION);
 
       //Read model parameters to DTO
       ObjectMapper mapper = new ObjectMapper();
-      LPConstantGroupDTO groupDTO = mapper.readValue(file, LPConstantGroupDTO.class);
+      LPConstantGroupDTO groupDTO = mapper.readValue(Files.newBufferedReader(path, JSONFileConstants.ENCODING),
+          LPConstantGroupDTO.class);
 
       LPConstantGroup group;
 

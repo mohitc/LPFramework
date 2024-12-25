@@ -11,6 +11,9 @@ import com.lpapi.export.jsonfile.exportdto.LPVarGroupDTO;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JSONFileVarGroupExporter extends LPVarGroupExporter {
 
@@ -26,8 +29,9 @@ public class JSONFileVarGroupExporter extends LPVarGroupExporter {
     try {
       //overwrite file if exists
       LPVarGroupDTO varGroupDTO = new LPVarGroupDTO(getModel(), getGroup());
-      BufferedWriter writer = new BufferedWriter(new FileWriter(folderPath + getModel().getIdentifier() +
-          JSONFileConstants.VAR_GROUP_SUFFIX + getGroup().getIdentifier() + JSONFileConstants.MODEL_EXTENSION, false));
+      Path path = Paths.get(folderPath + getModel().getIdentifier() +
+          JSONFileConstants.VAR_GROUP_SUFFIX + getGroup().getIdentifier() + JSONFileConstants.MODEL_EXTENSION);
+      BufferedWriter writer = Files.newBufferedWriter(path, JSONFileConstants.ENCODING);
       //Write model parameters to map
       ObjectMapper mapper = new ObjectMapper();
       mapper.writeValue(writer, varGroupDTO);
