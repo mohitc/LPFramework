@@ -74,15 +74,16 @@ public abstract class LPNameGeneratorImpl<T> implements LPNameGenerator <T> {
     validatePrefixes(objects);
 
     //Generate name String
-    String out = prefix;
+    StringBuffer buf = new StringBuffer();
+    buf.append(prefix);
     for (int i=0;i<indexCount;i++) {
-      out = out + separator + objects[i];
+      buf.append(separator).append(objects[i]);
     }
-    return out;
+    return buf.toString();
   }
 
   protected void validatePrefixes(T... objects) throws LPNameException {
-    if (((objects==null) && (indexCount>0)) || (objects.length!=indexCount)){
+    if ((objects==null)  || (objects.length!=indexCount)){
       throw new LPNameParamException("Number of parameters provided does not match index count " + indexCount);
     }
     List<T> outList = Arrays.asList(objects);
