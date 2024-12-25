@@ -5,10 +5,7 @@ import com.lpapi.entities.exception.LPVarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LPExpression {
 
@@ -101,5 +98,9 @@ public class LPExpression {
       }
     }
     return varContributionMap;
+  }
+
+  public List<LPExpressionTerm> getTermList() {
+    return Collections.unmodifiableList(expressionList);
   }
 }
