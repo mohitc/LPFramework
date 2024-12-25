@@ -116,9 +116,9 @@ public abstract class LPModel <X, Y, Z> {
         throw new LPConstantException("Constant with identifier (" + identifier + ") already exists");
 
       constant = new LPConstant(identifier, value);
-      //If no exception was throws, variable is valid, add to model
+      //If no exception was throws, constant is valid, add to model
       lpConstantIdentifiers.put(identifier, constant);
-      //add variable to set of corresponding var group
+      //add variable to set of corresponding constant group
       Set<LPConstant> constants = lpConstants.get(used);
       constants.add(constant);
       log.info("Constant created {}", this);
@@ -137,7 +137,7 @@ public abstract class LPModel <X, Y, Z> {
   }
 
   public Set<LPConstant> getLPConstants(String constGrpIdentifier) throws LPConstantGroupException {
-    //check if var Group exists
+    //check if constant Group exists
     LPConstantGroup localGrp = getLPConstantGroup(constGrpIdentifier);
     return Collections.unmodifiableSet(lpConstants.get(localGrp));
   }
