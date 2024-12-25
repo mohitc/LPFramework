@@ -32,12 +32,12 @@ class LPParamIdValidator<T : LPParameter> : LPParameterValidator<T> {
     // a reference to the instance identifier. 
     val paramType = instance.javaClass.simpleName
     val parameterGrouping =
-        when {
-          instance.javaClass.isAssignableFrom(constantInstance.javaClass) -> model.constants
-          instance.javaClass.isAssignableFrom(varInstance.javaClass) -> model.variables
-          instance.javaClass.isAssignableFrom(constraintInstance.javaClass) -> model.constraints
-          else -> null
-        }
+      when {
+        instance.javaClass.isAssignableFrom(constantInstance.javaClass) -> model.constants
+        instance.javaClass.isAssignableFrom(varInstance.javaClass) -> model.variables
+        instance.javaClass.isAssignableFrom(constraintInstance.javaClass) -> model.constraints
+        else -> null
+      }
 
     if (parameterGrouping == null) {
       log.error { "$paramType is not supported in the Parameter ID Validation check (ID: ${instance.identifier})" }
@@ -51,7 +51,7 @@ class LPParamIdValidator<T : LPParameter> : LPParameterValidator<T> {
     }
 
     val noGroupingWithIdentifier = parameterGrouping.grouping.values.stream()
-        .noneMatch { v -> v.contains(instance.identifier) }
+      .noneMatch { v -> v.contains(instance.identifier) }
     if (noGroupingWithIdentifier) {
       log.error { "No grouping for $paramType contains parameter with ID ${instance.identifier}" }
       return false
@@ -71,7 +71,7 @@ class LPVarValidator : LPParameterValidator<LPVar> {
       (instance.lbound > instance.ubound) -> {
         log.error {
           "Variable ${instance.identifier} has a lower bound ${instance.lbound} greater than the upper bound " +
-              "${instance.ubound}"
+            "${instance.ubound}"
         }
         validationFails
       }
@@ -83,12 +83,15 @@ class LPVarValidator : LPParameterValidator<LPVar> {
         log.error { "Boolean Variable ${instance.identifier} has an upper bound ${instance.ubound} less than 0" }
         validationFails
       }
-      (instance.type != LPVarType.DOUBLE &&
-          ((instance.ubound + 0.5).roundToInt() - (instance.lbound + 0.5).roundToInt() ==0)
-          ) -> {
-        log.error { "${if (instance.type == LPVarType.INTEGER) "Integer" else "Boolean"} " +
+      (
+        instance.type != LPVarType.DOUBLE &&
+          ((instance.ubound + 0.5).roundToInt() - (instance.lbound + 0.5).roundToInt() == 0)
+        ) -> {
+        log.error {
+          "${if (instance.type == LPVarType.INTEGER) "Integer" else "Boolean"} " +
             "Variable ${instance.identifier} has no integer value in the covered bounds " +
-            "(${instance.lbound}, ${instance.ubound}" }
+            "(${instance.lbound}, ${instance.ubound}"
+        }
         return validationFails
       }
       else -> { true }
@@ -105,7 +108,8 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
   override fun validate(instance: LPConstraint, model: LPModel): Boolean {
     // in a constraint, both expressions should contain at least one terms
     if (instance.lhs.expression.size == 0 || instance.rhs.expression.size == 0) {
-      log.error { "Constraint ${instance.identifier} has no terms defined in the " +
+      log.error {
+        "Constraint ${instance.identifier} has no terms defined in the " +
           if (instance.lhs.expression.size == 0) "LHS" else "RHS"
       }
       return false
@@ -113,26 +117,40 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
 
     // Validate all terms in the expression of a constraint
     if (!listOf(instance.lhs, instance.rhs)
-            .flatMap { v -> v.expression }
-            .map {
-              if (it.coefficient == null && it.lpConstantIdentifier == null) {
-                log.error { "Constraint ${instance.identifier} has term with no constant reference or value defined" }
-                false
-              } else if (it.coefficient != null && it.lpConstantIdentifier != null) {
-                log.error { "Constraint ${instance.identifier} has term that has both constant reference " +
-                    "${it.lpConstantIdentifier} and fixed value coefficient ${it.coefficient}" }
-                false
-              } else if (it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier)) {
-                log.error { "Constraint ${instance.identifier} has term with constant reference " +
-                    "${it.lpConstantIdentifier} which is not defined in the model" }
-                false
-              } else if (it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier)) {
-                log.error { "Constraint ${instance.identifier} has term with variable reference " +
-                    "${it.lpVarIdentifier} which is not defined in the model" }
-                false
-              } else
-                true
-            }.reduce { u, v -> u && v }) {
+      .flatMap { v -> v.expression }
+      .map {
+        when {
+          it.coefficient == null && it.lpConstantIdentifier == null -> {
+            log.error { "Constraint ${instance.identifier} has term with no constant reference or value defined" }
+            false
+          }
+          it.coefficient != null && it.lpConstantIdentifier != null -> {
+            log.error {
+              "Constraint ${instance.identifier} has term that has both constant reference " +
+                "${it.lpConstantIdentifier} and fixed value coefficient ${it.coefficient}"
+            }
+            false
+          }
+          it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier) -> {
+            log.error {
+              "Constraint ${instance.identifier} has term with constant reference " +
+                "${it.lpConstantIdentifier} which is not defined in the model"
+            }
+            false
+          }
+          it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier) -> {
+            log.error {
+              "Constraint ${instance.identifier} has term with variable reference " +
+                "${it.lpVarIdentifier} which is not defined in the model"
+            }
+            false
+          }
+          else -> {
+            true
+          }
+        }
+      }.reduce { u, v -> u && v }
+    ) {
       return false
     }
 

@@ -3,8 +3,9 @@ style:
     active: false
   NoTabs:
     active: true
+  indentSize: 2
   ReturnCount:
-    max: 4
+    max: 5
   MagicNumber:
     excludes: ['**/test/**', 'lp-solver-sample/src/main/**']
 

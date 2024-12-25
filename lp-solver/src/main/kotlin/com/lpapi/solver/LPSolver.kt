@@ -13,8 +13,9 @@ abstract class LPSolver<T>(val model: LPModel) {
    */
   fun initialize(): Boolean {
     try {
-      if (!initModel() || !initVars() || !initConstraints())
+      if (!initModel() || !initVars() || !initConstraints()) {
         return false
+      }
       return initObjectiveFunction()
     } catch (e: Exception) {
       log.error { "Unexpected error while initializing model $e" }

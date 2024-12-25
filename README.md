@@ -30,7 +30,7 @@ later point in time:
 ```kotlin 
 model.variables.add("some-group", LPVar("Z", LPVarType.DOUBLE, -2.5, 6))
 ```
-Constraints can be defined by setting up terms on the Left/Right-Hand Side (LHS) expressions, coupled with an opeartor:
+Constraints can be defined by setting up terms on the Left/Right-Hand Side (LHS) expressions, coupled with an operator:
 ```kotlin
 // Constraint : X + Y >= 2Z + 3
 val c = LPConstraint("Constraint 1")

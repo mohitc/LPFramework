@@ -25,8 +25,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <java.version>11</java.version>
-    <kotlin.version>1.5.10</kotlin.version>
-    <logger.version>2.0.6</logger.version>
+    <kotlin.version>1.5.21</kotlin.version>
+    <logger.version>2.0.10</logger.version>
     <slf4j.version>1.7.29</slf4j.version>
     <revision>1.0-SNAPSHOT</revision>
     <glpk.skiptests>true</glpk.skiptests>
@@ -38,7 +38,8 @@
     <surefire.version>3.0.0-M5</surefire.version>
     <build-helper.version>1.9.1</build-helper.version>
     <failsafe.version>2.18</failsafe.version>
-    <mockito.version>3.2.0</mockito.version>
+    <mockito-kotlin.version>3.2.0</mockito-kotlin.version>
+    <mockito.version>3.9.0</mockito.version>
   </properties>
 
   <dependencies>
@@ -119,7 +120,7 @@
           </execution>
         </executions>
       </plugin>
-      <!-- Kotlin Linter -->
+      <!-- Kotlin Linter. To run use mvn ktlint:format -->
       <plugin>
         <groupId>com.github.gantsign.maven</groupId>
         <artifactId>ktlint-maven-plugin</artifactId>
@@ -157,6 +158,7 @@
       </plugin>
       <!-- Surefire plugin to run Junit tests -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
         <configuration>

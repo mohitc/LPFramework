@@ -100,5 +100,4 @@ class LPExpression {
   override fun hashCode(): Int {
     return expression.toSet().hashCode()
   }
-
 }

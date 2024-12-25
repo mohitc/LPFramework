@@ -3,14 +3,19 @@ package com.lpapi.model
 import com.lpapi.model.enums.LPVarType
 import kotlin.math.roundToInt
 
-class LPVar(override val identifier: String, val type: LPVarType, var lbound: Double, var ubound: Double) : LPParameter{
+class LPVar(
+  override val identifier: String,
+  val type: LPVarType,
+  var lbound: Double,
+  var ubound: Double
+) : LPParameter {
 
   var result: Number = 0
 
   var resultSet: Boolean = false
 
   constructor(identifier: String, type: LPVarType, lbound: Number, ubound: Number) :
-      this(identifier, type, lbound.toDouble(), ubound.toDouble())
+    this(identifier, type, lbound.toDouble(), ubound.toDouble())
 
   constructor(identifier: String, type: LPVarType) : this(
     identifier, type,

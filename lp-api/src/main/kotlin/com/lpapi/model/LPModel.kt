@@ -25,7 +25,7 @@ class LPModel(val identifier: String) {
   companion object {
     /** Names of the default groups used when not defined explicitly */
     const val DEFAULT_CONSTANT_GROUP = "Default"
-    const val  DEFAULT_VARIABLE_GROUP = "Default"
+    const val DEFAULT_VARIABLE_GROUP = "Default"
     const val DEFAULT_CONSTRAINT_GROUP = "Default"
   }
 
@@ -34,7 +34,7 @@ class LPModel(val identifier: String) {
   private val variableValidator: List<LPParameterValidator<LPVar>> = listOf(LPParamIdValidator(), LPVarValidator())
 
   private val constraintValidator: List<LPParameterValidator<LPConstraint>> =
-      listOf(LPParamIdValidator(), LPConstraintValidator())
+    listOf(LPParamIdValidator(), LPConstraintValidator())
 
   /**Default to empty objective */
   val objective: LPObjective = LPObjective()
@@ -49,10 +49,11 @@ class LPModel(val identifier: String) {
   fun reduce(objective: LPObjective): LPObjective? {
     val reducedObjectiveExpression = reduce(objective.expression)
     // If a reduced expression is available for the objective, use that to generate the objective function
-    return if (reducedObjectiveExpression != null)
+    return if (reducedObjectiveExpression != null) {
       LPObjective(objective.objective, reducedObjectiveExpression)
-    else
+    } else {
       null
+    }
   }
 
   /** Function to reduce the constraint to the format where all variable terms are on the LHS, with single instances of
@@ -79,14 +80,14 @@ class LPModel(val identifier: String) {
       } else {
         // For each term in the LHS, create a map that includes the variable identifier and the computed double value
         varMap[term.lpVarIdentifier!!] = (
-            varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
-               varMultiplier * constantTerm
-            )
+          varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
+            varMultiplier * constantTerm
+          )
       }
     }
 
-    reducedLhs.expression.forEach { processTerm(it, isLhs = true)}
-    reducedRhs.expression.forEach {processTerm(it, isLhs = false)}
+    reducedLhs.expression.forEach { processTerm(it, isLhs = true) }
+    reducedRhs.expression.forEach { processTerm(it, isLhs = false) }
 
     if (varMap.isEmpty()) {
       log.error { "Constraint ${constraint.identifier} has term with no variables which is not a valid constraint" }
@@ -110,8 +111,10 @@ class LPModel(val identifier: String) {
     var hasConstantTerm = false
     expression.expression.forEach { term ->
       if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
-        log.error { "Expression has term with constant identifier ${term.lpConstantIdentifier} which is not defined " +
-            "in the model" }
+        log.error {
+          "Expression has term with constant identifier ${term.lpConstantIdentifier} which is not defined " +
+            "in the model"
+        }
         return null
       } else if (term.lpConstantIdentifier == null && term.coefficient == null) {
         log.error { "term $term has both constant identifier and coefficient set to null" }
@@ -121,12 +124,13 @@ class LPModel(val identifier: String) {
         hasConstantTerm = true
         // Sum up all constant terms
         constant += term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!
-      } else
-      // For each expression term, create a map that includes the variable identifier and the computed double value
+      } else {
+        // For each expression term, create a map that includes the variable identifier and the computed double value
         varMap[term.lpVarIdentifier!!] = (
           varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
             (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!)
           )
+      }
     }
 
     // check that all variables have been initialized
@@ -138,23 +142,26 @@ class LPModel(val identifier: String) {
 
     // Initialize new expression
     val reducedExpression = LPExpression()
-    if (hasConstantTerm)
+    if (hasConstantTerm) {
       reducedExpression.add(constant)
+    }
     varMap.entries.forEach { entry -> reducedExpression.addTerm(entry.value, entry.key) }
     return reducedExpression
   }
 
   fun validate(): Boolean {
 
-    fun <T: LPParameter> parameterValidation(validatorList: List<LPParameterValidator<T>>,
-                                             paramGroup: LPParameterGroup<T>,
-                                             displayType: String) : Boolean {
+    fun <T : LPParameter> parameterValidation(
+      validatorList: List<LPParameterValidator<T>>,
+      paramGroup: LPParameterGroup<T>,
+      displayType: String
+    ): Boolean {
       log.debug { "Validating all ${displayType.toLowerCase()} in the model" }
       val validationResult = validatorList.map { validator ->
         paramGroup.allValues().stream()
-            .map { v -> validator.validate(v, this) }
-            .reduce { u, v -> u && v }
-            .orElse(true)
+          .map { v -> validator.validate(v, this) }
+          .reduce { u, v -> u && v }
+          .orElse(true)
       }.reduce { u, v -> u && v }
       log.debug { "$displayType validation result : $validationResult" }
       // idValidation being present means
@@ -165,8 +172,8 @@ class LPModel(val identifier: String) {
     }
 
     return parameterValidation(constantValidator, constants, "Constants") && // Constant validation
-        parameterValidation(variableValidator, variables, "Variable") && // Variable validation
-        parameterValidation(constraintValidator, constraints, "Constraint") // Constraint validation
+      parameterValidation(variableValidator, variables, "Variable") && // Variable validation
+      parameterValidation(constraintValidator, constraints, "Constraint") // Constraint validation
   }
 
   override fun equals(other: Any?): Boolean {
@@ -259,7 +266,6 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
     result = 31 * result + parameters.hashCode()
     return result
   }
-
 }
 
 /** Class to store the results from an LP computation */
@@ -270,7 +276,7 @@ class LPModelResult constructor(
   val mipGap: Double?
 ) {
 
-  constructor(solnStatus: LPSolutionStatus) : this(solnStatus, null, null, null)
+  constructor(status: LPSolutionStatus) : this(status, null, null, null)
 
   override fun toString(): String {
     return "LPModelResult(status=$status, objective=$objective, computationTime=$computationTime, mipGap=$mipGap)"
@@ -297,5 +303,4 @@ class LPModelResult constructor(
     result = 31 * result + (mipGap?.hashCode() ?: 0)
     return result
   }
-
 }

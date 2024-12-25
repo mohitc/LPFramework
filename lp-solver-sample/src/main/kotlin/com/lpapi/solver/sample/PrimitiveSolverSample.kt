@@ -10,10 +10,10 @@ import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.spi.Solver
 import mu.KotlinLogging
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 open class PrimitiveSolverSample {
 
@@ -75,20 +75,21 @@ open class PrimitiveSolverSample {
     val status = solver.solve()
     return if (status != LPSolutionStatus.UNKNOWN &&
       status != LPSolutionStatus.INFEASIBLE && status != LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
-    )
+    ) {
       solver.model
-    else
+    } else {
       null
+    }
   }
 
   /**Test function that validates the results computed by the model*/
   @Test
   fun testSolver() {
     val model = initAndSolveModel(model)
-    log.info { model?.solution}
+    log.info { model?.solution }
     assertNotNull(model, "Model should be computed successfully.")
-    assertEquals(model.variables.get("X")?.result, 1, "X should be = 1")
-    assertEquals(model.variables.get("Y")?.result, 1, "Y should be = 1")
-    assertEquals(model.variables.get("Z")?.result, 0, "Z should be = 0")
+    assertEquals(model?.variables?.get("X")?.result, 1, "X should be = 1")
+    assertEquals(model?.variables?.get("Y")?.result, 1, "Y should be = 1")
+    assertEquals(model?.variables?.get("Z")?.result, 0, "Z should be = 0")
   }
 }

@@ -50,7 +50,7 @@ can also take a look at the examples provided in the [lp-solve-sample](../lp-sol
 overview of the individual components, we also discuss the functionalities in the model to group the various components
 of the model in a meaningful fashion.
 
-### Variables: LPVar <a ame="lpvar"></a>
+### Variables: LPVar <a name="lpvar"></a>
 
 A variable is defined as an instance of the [`LPVar`](src/main/kotlin/com/lpapi/model/LPVar.kt) class, and essentially
 contains

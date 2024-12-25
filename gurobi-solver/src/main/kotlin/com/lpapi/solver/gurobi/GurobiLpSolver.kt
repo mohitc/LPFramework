@@ -22,10 +22,12 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
 
   companion object {
     val solutionStatesWithoutResults =
-        setOf(LPSolutionStatus.UNBOUNDED,
-            LPSolutionStatus.INFEASIBLE,
-            LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED,
-            LPSolutionStatus.UNKNOWN)
+      setOf(
+        LPSolutionStatus.UNBOUNDED,
+        LPSolutionStatus.INFEASIBLE,
+        LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED,
+        LPSolutionStatus.UNKNOWN
+      )
   }
 
   private var grbModel: GRBModel? = null
@@ -56,7 +58,7 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
         grbModel?.optimize()
       }
       val solutionStatus = getSolutionStatus(
-          grbModel?.get(GRB.IntAttr.Status)
+        grbModel?.get(GRB.IntAttr.Status)
       )
       log.info { "Computation terminated. Solution Status : $solutionStatus" }
       if (solutionStatus == LPSolutionStatus.ERROR) {
@@ -66,10 +68,10 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
         // add model results
         extractResults()
         model.solution = LPModelResult(
-            solutionStatus,
-            grbModel?.get(GRB.DoubleAttr.ObjVal),
-            executionTime,
-            grbModel?.get(GRB.DoubleAttr.MIPGap)
+          solutionStatus,
+          grbModel?.get(GRB.DoubleAttr.ObjVal),
+          executionTime,
+          grbModel?.get(GRB.DoubleAttr.MIPGap)
         )
         log.info { "${model.solution}" }
       } else {
@@ -178,11 +180,11 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
           return false
         }
         val modelConstraint: GRBConstr? =
-            grbModel?.addConstr(
-                generateExpression(lpConstraint.lhs),
-                gurobiOperator,
-                generateExpression(lpConstraint.rhs), lpConstraint.identifier
-            )
+          grbModel?.addConstr(
+            generateExpression(lpConstraint.lhs),
+            gurobiOperator,
+            generateExpression(lpConstraint.rhs), lpConstraint.identifier
+          )
         if (modelConstraint == null) {
           log.error { "Error while generating model constraint ${lpConstraint.identifier}" }
           return false
@@ -202,8 +204,9 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
       // Initialize cplex objective, to be used later to extract value of the objective function
       val gurobiObjective = generateExpression(model.objective.expression)
       val objectiveType = getGurobiObjectiveType(model.objective.objective)
-      if (gurobiObjective==null)
+      if (gurobiObjective == null) {
         return false
+      }
       grbModel?.setObjective(gurobiObjective, objectiveType)
       true
     } catch (e: Exception) {
@@ -224,7 +227,7 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
   /** Function to generate Gurobi linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
    */
-  internal fun generateExpression(expr: LPExpression): GRBLinExpr? {
+  private fun generateExpression(expr: LPExpression): GRBLinExpr? {
     try {
       val linExpr = GRBLinExpr()
       val reducedExpr = model.reduce(expr)
@@ -233,11 +236,13 @@ class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
         return null
       }
       reducedExpr.expression.forEach { term ->
-        term.coefficient?.let { const -> apply {
-            if (term.isConstant())
+        term.coefficient?.let { const ->
+          apply {
+            if (term.isConstant()) {
               linExpr.addConstant(const)
-            else
+            } else {
               linExpr.addTerm(const, variableMap[term.lpVarIdentifier])
+            }
           }
         }
       }
