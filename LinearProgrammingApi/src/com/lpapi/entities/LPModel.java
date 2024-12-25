@@ -1,5 +1,7 @@
 package com.lpapi.entities;
 
+import com.lpapi.entities.group.LPGroupInitializer;
+import com.lpapi.entities.group.LPNameGenerator;
 import com.lpapi.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,10 @@ public abstract class LPModel <X, Y, Z> {
   }
 
   public LPVarGroup createLPVarGroup(String identifier, String description) throws LPVarGroupException {
+    return createLPVarGroup(identifier, description, null, null);
+  }
+
+  public LPVarGroup createLPVarGroup(String identifier, String description, LPNameGenerator<?> generator, LPGroupInitializer initializer) throws LPVarGroupException {
     if (identifier==null) {
       throw new LPVarGroupException("Identifier cannot be null");
     }
@@ -58,12 +64,13 @@ public abstract class LPModel <X, Y, Z> {
       throw new LPVarGroupException("Identifier (" + identifier + ") already exists");
     }
 
-    LPVarGroup group = new LPVarGroup(identifier, description);
+    LPVarGroup group = new LPVarGroup(this, identifier, description, generator, initializer);
     log.info("Created new LP Variable Group {}", group);
     lpVarGroup.put(identifier, group);
     lpVars.put(group, new HashSet<LPVar>());
     return group;
   }
+
 
   public LPVarGroup getLPVarGroup(String identifier) throws LPVarGroupException {
     if (identifier==null) {
@@ -121,6 +128,10 @@ public abstract class LPModel <X, Y, Z> {
   }
 
   public LPConstraintGroup createLPConstraintGroup(String identifier, String description) throws LPConstraintGroupException {
+    return createLPConstraintGroup(identifier, description, null, null);
+  }
+
+  public LPConstraintGroup createLPConstraintGroup(String identifier, String description, LPNameGenerator<?> generator, LPGroupInitializer initializer) throws LPConstraintGroupException {
     if (identifier==null) {
       throw new LPConstraintGroupException("Identifier cannot be null");
     }
@@ -128,13 +139,14 @@ public abstract class LPModel <X, Y, Z> {
       throw new LPConstraintGroupException("Identifier (" + identifier + ") already exists");
     }
 
-    LPConstraintGroup group = new LPConstraintGroup(identifier, description);
+    LPConstraintGroup group = new LPConstraintGroup(this, identifier, description, generator, initializer);
     log.info("Created new LP Constraint Group {}", group);
     lpConstraintGroup.put(identifier, group);
     lpConstraints.put(group, new HashSet<LPConstraint>());
     return group;
 
   }
+
 
   public LPConstraintGroup getLPConstraintGroup(String identifier) throws LPConstraintGroupException {
     if (identifier==null) {
@@ -200,6 +212,14 @@ public abstract class LPModel <X, Y, Z> {
   //Method to initialize the model
   public abstract void initModel() throws LPModelException;
 
+  //method to invoke the initialization of all the var groups
+  public void initVarGroups() throws LPModelException {
+    log.info("Initializing Variable groups");
+    for (LPVarGroup group: lpVarGroup.values()) {
+      group.init();
+    }
+  }
+
   //Method to initialize the variables
   public void initVars() throws LPModelException {
     log.info("Initializing model vars");
@@ -212,6 +232,13 @@ public abstract class LPModel <X, Y, Z> {
 
   //Method to initialize the objective function
   public abstract void initObjectiveFunction() throws LPModelException;
+
+  //method to invoke the initialization of all constraint groups
+  public void initConstraintGroups() throws LPModelException {
+    log.info("Initializing Constraint Groups");
+    for (LPConstraintGroup group: lpConstraintGroup.values())
+      group.init();
+  }
 
   //method to initialize the constraints
   public void initConstraints() throws LPModelException {
@@ -274,6 +301,16 @@ public abstract class LPModel <X, Y, Z> {
       }
     } else
       throw new LPModelException(param.getDescription() + " not found in model");
+  }
+
+  //Initialize relevant entities in order
+  public void init() throws LPModelException {
+    this.initModel();
+    this.initVarGroups();
+    this.initVars();
+    this.initConstraintGroups();
+    this.initConstraints();
+    this.initObjectiveFunction();
   }
 
 }
