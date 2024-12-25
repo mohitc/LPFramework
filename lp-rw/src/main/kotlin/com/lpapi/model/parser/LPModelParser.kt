@@ -49,8 +49,7 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
           entry.key to entry.value.toList()
             .map { constant -> LPConstantDto(constant, model.constants.get(constant)?.value!!) }
           )
-      }
-        .toMap()
+      }.toMap()
     val varMap: Map<String, List<LPVarDto>> =
       model.variables.grouping.map { entry ->
         (
@@ -78,7 +77,7 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
   }
 
   /** Function to create the LP Model from a DTO */
-  private fun generateModel(dto: LPModelDto): LPModel {
+  fun generateModel(dto: LPModelDto): LPModel {
     val model = LPModel(dto.identifier)
 
     // Initialize constants
