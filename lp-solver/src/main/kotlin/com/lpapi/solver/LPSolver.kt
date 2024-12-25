@@ -1,7 +1,7 @@
 package com.lpapi.solver
 
 import com.lpapi.model.LPModel
-import com.lpapi.solver.enums.LPSolutionStatus
+import com.lpapi.model.enums.LPSolutionStatus
 import mu.KotlinLogging
 
 abstract class LPSolver<T>(val model: LPModel) {

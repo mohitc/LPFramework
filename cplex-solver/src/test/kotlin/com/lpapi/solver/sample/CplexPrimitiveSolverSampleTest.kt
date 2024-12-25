@@ -2,7 +2,7 @@ package com.lpapi.solver.sample
 
 import com.lpapi.model.LPModel
 import com.lpapi.solver.cplex.CplexLpSolver
-import com.lpapi.solver.enums.LPSolutionStatus
+import com.lpapi.model.enums.LPSolutionStatus
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

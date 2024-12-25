@@ -7,7 +7,7 @@ import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
-import com.lpapi.solver.enums.LPSolutionStatus
+import com.lpapi.model.enums.LPSolutionStatus
 import ilog.concert.*
 import ilog.cplex.IloCplex
 
