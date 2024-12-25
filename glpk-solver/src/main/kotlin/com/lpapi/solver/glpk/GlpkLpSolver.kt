@@ -9,6 +9,7 @@ import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
 import com.lpapi.model.enums.LPSolutionStatus
 import org.gnu.glpk.*
+import kotlin.system.measureTimeMillis
 
 open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
@@ -36,11 +37,13 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
   override fun solve(): LPSolutionStatus {
     try {
       log.info { "Starting computation of model" }
-      val iocp = glp_iocp()
-      GLPK.glp_init_iocp(iocp)
-      iocp.presolve = GLPKConstants.GLP_ON
-      GLPK.glp_write_lp(glpkModel, null, "model.lp")
-      GLPK.glp_intopt(glpkModel, iocp)
+      val executionTime = measureTimeMillis {
+        val iocp = glp_iocp()
+        GLPK.glp_init_iocp(iocp)
+        iocp.presolve = GLPKConstants.GLP_ON
+        GLPK.glp_write_lp(glpkModel, null, "model.lp")
+        GLPK.glp_intopt(glpkModel, iocp)
+      }
 
       GLPK.glp_mip_obj_val(glpkModel)
       val solnStatus: LPSolutionStatus = getSolutionStatus(GLPK.glp_mip_status(glpkModel))
@@ -49,7 +52,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       if (solnStatus !== LPSolutionStatus.UNKNOWN && solnStatus !== LPSolutionStatus.INFEASIBLE) {
         val result : Double = GLPK.glp_get_obj_val(glpkModel)
         log.info {"Objective : $result"}
-        model.solution = LPModelResult(solnStatus, result, null)
+        model.solution = LPModelResult(solnStatus, result, executionTime, null)
         //Extract results and set it to variables
         log.info { "Extracting computed results to the model variables" }
         variableMap.entries.forEach { entry ->
@@ -59,12 +62,13 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
         }
       } else {
         log.info { "Solution status : $solnStatus" }
-        model.solution = LPModelResult(solnStatus, null, null)
+        model.solution = LPModelResult(solnStatus)
       }
       return solnStatus
     } catch (e: Exception) {
       log.error { "Exception while computing the GLPK model : $e" }
-      return LPSolutionStatus.UNKNOWN
+      model.solution = LPModelResult(LPSolutionStatus.ERROR)
+      return LPSolutionStatus.ERROR
     }
   }
 
