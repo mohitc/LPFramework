@@ -9,46 +9,47 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPModelValidationTest {
-
   @Test
   @DisplayName("Validating constraint groups")
   fun testLpModelValidation() {
     val lpModel = LPModel("testModel")
     Assertions.assertNotNull(
       lpModel.constants.add("group1", LPConstant("constant1", 1.0)),
-      "Constant with unique identifier should be added in model"
+      "Constant with unique identifier should be added in model",
     )
     Assertions.assertNotNull(
       lpModel.constants.add("group2", LPConstant("constant2", 1.0)),
-      "Constant with unique identifier should be added in model"
+      "Constant with unique identifier should be added in model",
     )
 
     Assertions.assertEquals(
-      lpModel.constants.grouping.keys.size, 2,
-      "Constant should contain 2 groups"
+      lpModel.constants.grouping.keys.size,
+      2,
+      "Constant should contain 2 groups",
     )
 
     Assertions.assertNull(
       lpModel.constants.add(LPConstant("constant1", 1.0)),
-      "Constant with same identifier but different group should not be supported"
+      "Constant with same identifier but different group should not be supported",
     )
     Assertions.assertNotNull(
       lpModel.constants.add(LPConstant("constant3", 1.0)),
-      "Constant with unique identifier should be added in model"
+      "Constant with unique identifier should be added in model",
     )
 
     Assertions.assertEquals(
-      lpModel.constants.grouping.keys.size, 3,
-      "Constant with no group supplied should be added to default group"
+      lpModel.constants.grouping.keys.size,
+      3,
+      "Constant with no group supplied should be added to default group",
     )
     Assertions.assertNotNull(
       lpModel.constants.grouping[LPModel.DEFAULT_CONSTANT_GROUP],
-      "Default group should be created for constants if no group identifier is supplied"
+      "Default group should be created for constants if no group identifier is supplied",
     )
     lpModel.constants.grouping[LPModel.DEFAULT_CONSTANT_GROUP]?.contains("constant3")?.let {
       Assertions.assertTrue(
         it,
-        "Constant with no group supplied should be added to default group"
+        "Constant with no group supplied should be added to default group",
       )
     }
     Assertions.assertTrue(lpModel.validate(), "Model validation should pass with the provided constants")
@@ -68,7 +69,7 @@ class LPModelValidationTest {
     Assertions.assertFalse(
       lpModel.validate(),
       "Variable with lower bound greater than the upper bound should" +
-        " fail validation"
+        " fail validation",
     )
 
     lpModel = LPModel("testModel")
@@ -88,7 +89,7 @@ class LPModelValidationTest {
     Assertions.assertTrue(
       lpModel.validate(),
       "Integer bounding should pass if variables have at least one " +
-        "integer value between their bounds"
+        "integer value between their bounds",
     )
   }
 
@@ -100,11 +101,17 @@ class LPModelValidationTest {
     Assertions.assertFalse(lpModel.validate(), "Constraint with empty LHS or RHS should fail validation")
 
     lpModel = LPModel("testModel")
-    lpModel.constraints.add(LPConstraint("emptyConstraint"))?.lhs?.add(1.0)
+    lpModel.constraints
+      .add(LPConstraint("emptyConstraint"))
+      ?.lhs
+      ?.add(1.0)
     Assertions.assertFalse(lpModel.validate(), "Constraint with empty LHS or RHS should fail validation")
 
     lpModel = LPModel("testModel")
-    lpModel.constraints.add(LPConstraint("emptyConstraint"))?.rhs?.add(1.0)
+    lpModel.constraints
+      .add(LPConstraint("emptyConstraint"))
+      ?.rhs
+      ?.add(1.0)
     Assertions.assertFalse(lpModel.validate(), "Constraint with empty LHS or RHS should fail validation")
 
     lpModel = LPModel("testModel")
@@ -117,7 +124,7 @@ class LPModelValidationTest {
     Assertions.assertTrue(lpModel.validate(), "Constraint with non-empty LHS or RHS should pass validation")
     constr.lhs.expression.add(
       1,
-      LPExpressionTerm(lpVarIdentifier = "x", lpConstantIdentifier = null, coefficient = null)
+      LPExpressionTerm(lpVarIdentifier = "x", lpConstantIdentifier = null, coefficient = null),
     )
     Assertions.assertFalse(lpModel.validate(), "Constraint having term with (no coefficient or constant) fails")
 
@@ -128,7 +135,7 @@ class LPModelValidationTest {
     Assertions.assertFalse(
       lpModel.validate(),
       "Constraint with non-empty LHS and RHS but with no variables " +
-        "should fail validation"
+        "should fail validation",
     )
 
     lpModel = LPModel("testModel")
@@ -139,7 +146,7 @@ class LPModelValidationTest {
     Assertions.assertTrue(
       lpModel.validate(),
       "Constraint with non-empty LHS and RHS and with defined " +
-        "variable should pass validation"
+        "variable should pass validation",
     )
 
     // Constraint with both constant and identifier defined should fail validation
@@ -151,7 +158,7 @@ class LPModelValidationTest {
     Assertions.assertFalse(
       lpModel.validate(),
       "Constraint with both coefficient and identifier defined " +
-        "should fail validation"
+        "should fail validation",
     )
 
     // Conditional checks on expressions to check if all terms are defined
@@ -162,7 +169,7 @@ class LPModelValidationTest {
     Assertions.assertFalse(
       lpModel.validate(),
       "Constraint with no variables and constants defined should " +
-        "fail validation"
+        "fail validation",
     )
     lpModel.variables.add(LPVar("x", LPVarType.BOOLEAN))
     lpModel.variables.add(LPVar("y", LPVarType.BOOLEAN))
@@ -172,7 +179,7 @@ class LPModelValidationTest {
     Assertions.assertTrue(
       lpModel.validate(),
       "Constraint with all variables and constants defined should " +
-        "pass validation"
+        "pass validation",
     )
     val constant = LPConstant("c", 1.0)
     constraint?.rhs?.add(constant)
@@ -181,7 +188,7 @@ class LPModelValidationTest {
     Assertions.assertTrue(
       lpModel.validate(),
       "Constraint with all variables and constants defined should " +
-        "pass validation"
+        "pass validation",
     )
 
     // Conditional checks on expressions to check if all terms are defined when expressions use constants
@@ -194,7 +201,7 @@ class LPModelValidationTest {
     Assertions.assertTrue(
       lpModel.validate(),
       "Constraint with all variables and constants defined should " +
-        "pass validation"
+        "pass validation",
     )
   }
 }

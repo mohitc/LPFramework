@@ -1,11 +1,15 @@
 package com.lpapi.ffm.scip.example
 
-import com.lpapi.ffm.scip.*
+import com.lpapi.ffm.scip.SCIPProblem
+import com.lpapi.ffm.scip.SCIPRetCode
+import com.lpapi.ffm.scip.SCIPStatus
+import com.lpapi.ffm.scip.SCIPVarType
 import mu.KotlinLogging
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
-
 
 class ITLinearSolverTest {
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
@@ -25,7 +29,6 @@ class ITLinearSolverTest {
     assertNotNull(x, "createVar(x, ..) want not null got null")
     val y = model.createVar("y", 0.0, model.infinity(), -3.0, SCIPVarType.SCIP_VARTYPE_INTEGER)
     assertNotNull(x, "createVar(y, ..) want not null got null")
-
 
     log.info { "Creating constraint" }
     val vars = listOfNotNull(x, y)
@@ -48,7 +51,6 @@ class ITLinearSolverTest {
     model.setLongintParam("limits/totalnodes", 1000)
     assertEquals(retCode, SCIPRetCode.SCIP_OKAY, "Total Node limit could not be set successfully")
 
-
     // solve problem
     log.info { "Solving the problem" }
     retCode = model.solve()
@@ -66,10 +68,10 @@ class ITLinearSolverTest {
     log.info { "Extracting value of variable x" }
     val xVal = model.getSolVal(sol!!, x!!)
     log.info { "X = $xVal" }
-    assertTrue(abs( xVal - 2) <= 0.0001, "Solution Value: Want X~=2 got $xVal")
+    assertTrue(abs(xVal - 2) <= 0.0001, "Solution Value: Want X~=2 got $xVal")
     val yVal = model.getSolVal(sol, y!!)
     log.info { "Y = $yVal" }
-    assertTrue(abs( yVal - 4) <= 0.0001, "Solution Value: Want Y~=4 got $yVal")
+    assertTrue(abs(yVal - 4) <= 0.0001, "Solution Value: Want Y~=4 got $yVal")
 
     log.info { "Releasing variable" }
     retCode = model.releaseVar(x)

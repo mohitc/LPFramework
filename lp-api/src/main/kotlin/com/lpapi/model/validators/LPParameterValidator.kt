@@ -10,7 +10,10 @@ import mu.KotlinLogging
 import kotlin.math.roundToInt
 
 interface LPParameterValidator<T : LPParameter> {
-  fun validate(instance: T, model: LPModel): Boolean
+  fun validate(
+    instance: T,
+    model: LPModel,
+  ): Boolean
 }
 
 /** The LPParameterIdValidator checks if the entity is of the supported types, namely a constant, constraint or a
@@ -27,9 +30,12 @@ class LPParamIdValidator<T : LPParameter> : LPParameterValidator<T> {
   private val varInstance = LPVar("v", LPVarType.BOOLEAN)
   private val constraintInstance = LPConstraint("cn")
 
-  override fun validate(instance: T, model: LPModel): Boolean {
+  override fun validate(
+    instance: T,
+    model: LPModel,
+  ): Boolean {
     // Identify the grouping in the model, and if found make sure that both the identifier map and the grouping map have
-    // a reference to the instance identifier. 
+    // a reference to the instance identifier.
     val paramType = instance.javaClass.simpleName
     val parameterGrouping =
       when {
@@ -50,8 +56,10 @@ class LPParamIdValidator<T : LPParameter> : LPParameterValidator<T> {
       return false
     }
 
-    val noGroupingWithIdentifier = parameterGrouping.grouping.values.stream()
-      .noneMatch { v -> v.contains(instance.identifier) }
+    val noGroupingWithIdentifier =
+      parameterGrouping.grouping.values
+        .stream()
+        .noneMatch { v -> v.contains(instance.identifier) }
     if (noGroupingWithIdentifier) {
       log.error { "No grouping for $paramType contains parameter with ID ${instance.identifier}" }
       return false
@@ -65,7 +73,10 @@ class LPParamIdValidator<T : LPParameter> : LPParameterValidator<T> {
 class LPVarValidator : LPParameterValidator<LPVar> {
   private val log = KotlinLogging.logger("LPValidator")
 
-  override fun validate(instance: LPVar, model: LPModel): Boolean {
+  override fun validate(
+    instance: LPVar,
+    model: LPModel,
+  ): Boolean {
     val validationFails = false
     return when {
       (instance.lbound > instance.ubound) -> {
@@ -86,7 +97,7 @@ class LPVarValidator : LPParameterValidator<LPVar> {
       (
         instance.type != LPVarType.DOUBLE &&
           ((instance.ubound + 0.5).roundToInt() - (instance.lbound + 0.5).roundToInt() == 0)
-        ) -> {
+      ) -> {
         log.error {
           "${if (instance.type == LPVarType.INTEGER) "Integer" else "Boolean"} " +
             "Variable ${instance.identifier} has no integer value in the covered bounds " +
@@ -94,7 +105,9 @@ class LPVarValidator : LPParameterValidator<LPVar> {
         }
         return validationFails
       }
-      else -> { true }
+      else -> {
+        true
+      }
     }
   }
 }
@@ -102,10 +115,12 @@ class LPVarValidator : LPParameterValidator<LPVar> {
 /** Class to validate constraints provided in the model
  */
 class LPConstraintValidator : LPParameterValidator<LPConstraint> {
-
   private val log = KotlinLogging.logger("LPValidator")
 
-  override fun validate(instance: LPConstraint, model: LPModel): Boolean {
+  override fun validate(
+    instance: LPConstraint,
+    model: LPModel,
+  ): Boolean {
     // in a constraint, both expressions should contain at least one terms
     if (instance.lhs.expression.size == 0 || instance.rhs.expression.size == 0) {
       log.error {
@@ -117,39 +132,39 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
 
     // Validate all terms in the expression of a constraint
     if (!listOf(instance.lhs, instance.rhs)
-      .flatMap { v -> v.expression }
-      .map {
-        when {
-          it.coefficient == null && it.lpConstantIdentifier == null -> {
-            log.error { "Constraint ${instance.identifier} has term with no constant reference or value defined" }
-            false
-          }
-          it.coefficient != null && it.lpConstantIdentifier != null -> {
-            log.error {
-              "Constraint ${instance.identifier} has term that has both constant reference " +
-                "${it.lpConstantIdentifier} and fixed value coefficient ${it.coefficient}"
+        .flatMap { v -> v.expression }
+        .map {
+          when {
+            it.coefficient == null && it.lpConstantIdentifier == null -> {
+              log.error { "Constraint ${instance.identifier} has term with no constant reference or value defined" }
+              false
             }
-            false
-          }
-          it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier) -> {
-            log.error {
-              "Constraint ${instance.identifier} has term with constant reference " +
-                "${it.lpConstantIdentifier} which is not defined in the model"
+            it.coefficient != null && it.lpConstantIdentifier != null -> {
+              log.error {
+                "Constraint ${instance.identifier} has term that has both constant reference " +
+                  "${it.lpConstantIdentifier} and fixed value coefficient ${it.coefficient}"
+              }
+              false
             }
-            false
-          }
-          it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier) -> {
-            log.error {
-              "Constraint ${instance.identifier} has term with variable reference " +
-                "${it.lpVarIdentifier} which is not defined in the model"
+            it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier) -> {
+              log.error {
+                "Constraint ${instance.identifier} has term with constant reference " +
+                  "${it.lpConstantIdentifier} which is not defined in the model"
+              }
+              false
             }
-            false
+            it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier) -> {
+              log.error {
+                "Constraint ${instance.identifier} has term with variable reference " +
+                  "${it.lpVarIdentifier} which is not defined in the model"
+              }
+              false
+            }
+            else -> {
+              true
+            }
           }
-          else -> {
-            true
-          }
-        }
-      }.reduce { u, v -> u && v }
+        }.reduce { u, v -> u && v }
     ) {
       return false
     }

@@ -9,5 +9,5 @@ enum class LPSolutionStatus {
   CUTOFF,
   BOUNDED,
   UNKNOWN,
-  ERROR;
+  ERROR,
 }

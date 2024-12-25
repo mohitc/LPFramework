@@ -1,6 +1,12 @@
 package com.lpapi.solver.scip
 
-import com.lpapi.ffm.scip.*
+import com.lpapi.ffm.scip.Constraint
+import com.lpapi.ffm.scip.SCIPProblem
+import com.lpapi.ffm.scip.SCIPRetCode
+import com.lpapi.ffm.scip.SCIPStatus
+import com.lpapi.ffm.scip.SCIPVarType
+import com.lpapi.ffm.scip.Solution
+import com.lpapi.ffm.scip.Variable
 import com.lpapi.model.LPExpressionTerm
 import com.lpapi.model.LPModel
 import com.lpapi.model.LPModelResult
@@ -11,9 +17,9 @@ import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
 import kotlin.system.measureTimeMillis
 
-
-open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
-
+open class ScipLpSolver(
+  model: LPModel,
+) : LPSolver<SCIPProblem>(model) {
   companion object {
     internal fun getSolutionStatus(status: SCIPStatus): LPSolutionStatus {
       return when (status) {
@@ -31,7 +37,8 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
         SCIPStatus.DUAL_LIMIT,
         SCIPStatus.MEMORY_LIMIT,
         SCIPStatus.PRIMAL_LIMIT,
-        SCIPStatus.RESTART_LIMIT -> LPSolutionStatus.CUTOFF
+        SCIPStatus.RESTART_LIMIT,
+        -> LPSolutionStatus.CUTOFF
         SCIPStatus.UNKNOWN -> LPSolutionStatus.UNKNOWN
         SCIPStatus.TERMINATED -> LPSolutionStatus.ERROR
         SCIPStatus.USER_INTERRUPT -> LPSolutionStatus.ERROR
@@ -116,7 +123,6 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
       if (retCode != SCIPRetCode.SCIP_OKAY) {
         log.error { "releaseVar(${p.value}) want OKAY got $retCode" }
       }
-
     }
   }
 
@@ -139,10 +145,11 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
 
       releaseModelConstraints()
       // solve problem
-      val executionTime = measureTimeMillis {
-        retCode = scipModel.solve()
-        log.info { "model.solve() return code $retCode" }
-      }
+      val executionTime =
+        measureTimeMillis {
+          retCode = scipModel.solve()
+          log.info { "model.solve() return code $retCode" }
+        }
 
       val bestSol = scipModel.getBestSol()
       if (bestSol == null) {
@@ -177,16 +184,25 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
   }
 
   private fun extractObjectiveVal(): Double {
-    if (model.objective.expression.expression.isEmpty()) {
+    if (model.objective.expression.expression
+        .isEmpty()
+    ) {
       return 0.0
     }
-    return model.objective.expression.expression.map(fun(t: LPExpressionTerm): Double {
-      return if (t.isConstant()) {
-        t.coefficient!!
-      } else {
-        t.coefficient!!.times(model.variables.get(t.lpVarIdentifier!!)!!.result.toDouble())
-      }
-    }).reduce { sum, element -> sum + element }
+    return model.objective.expression.expression
+      .map(
+        fun(t: LPExpressionTerm): Double =
+          if (t.isConstant()) {
+            t.coefficient!!
+          } else {
+            t.coefficient!!.times(
+              model.variables
+                .get(t.lpVarIdentifier!!)!!
+                .result
+                .toDouble(),
+            )
+          },
+      ).reduce { sum, element -> sum + element }
   }
 
   private fun extractResults(sol: Solution): Boolean {
@@ -240,22 +256,45 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
         log.error { "Reduced Constraint: $reducedConstraint" }
         val variables: MutableList<Variable> = mutableListOf()
         val coefficient: MutableList<Double> = mutableListOf()
-        reducedConstraint.lhs.expression.filter { t -> !t.isConstant() && variableMap[t.lpVarIdentifier] != null && t.coefficient != null }.map { t -> Pair(variableMap[t.lpVarIdentifier], t.coefficient) }.forEach { p ->
-          variables.add(p.first!!)
-          coefficient.add(p.second!!)
-        }
+        reducedConstraint.lhs.expression
+          .filter { t ->
+            !t.isConstant() &&
+              variableMap[t.lpVarIdentifier] != null &&
+              t.coefficient != null
+          }.map { t -> Pair(variableMap[t.lpVarIdentifier], t.coefficient) }
+          .forEach { p ->
+            variables.add(p.first!!)
+            coefficient.add(p.second!!)
+          }
         if (variables.size != coefficient.size || variables.size != reducedConstraint.lhs.expression.size) {
-          log.error { "Inconsistent constraint initialization for LHS in reduced expression for constraints $lpConstraint" }
+          log.error {
+            "Inconsistent constraint initialization for LHS in reduced expression for constraints $lpConstraint"
+          }
         }
-        log.info { "Constraint variables ${variables} coefficients ${coefficient}" }
-        val constant = reducedConstraint.rhs.expression.stream().filter { t -> t.isConstant() }.map { t -> t.coefficient!! }.findFirst().orElse(0.0)
-        val bound: Pair<Double, Double> = when (reducedConstraint.operator) {
-          LPOperator.LESS_EQUAL -> Pair(-1.0 * scipModel.infinity(), constant)
-          LPOperator.EQUAL -> Pair(constant, constant)
-          LPOperator.GREATER_EQUAL -> Pair(constant, scipModel.infinity())
-        }
+        log.info { "Constraint variables $variables coefficients $coefficient" }
+        val constant =
+          reducedConstraint.rhs.expression
+            .stream()
+            .filter { t ->
+              t.isConstant()
+            }.map { t -> t.coefficient!! }
+            .findFirst()
+            .orElse(0.0)
+        val bound: Pair<Double, Double> =
+          when (reducedConstraint.operator) {
+            LPOperator.LESS_EQUAL -> Pair(-1.0 * scipModel.infinity(), constant)
+            LPOperator.EQUAL -> Pair(constant, constant)
+            LPOperator.GREATER_EQUAL -> Pair(constant, scipModel.infinity())
+          }
         log.error { "Bound for Constraints $bound" }
-        val scipConstraint = scipModel.createConstraint(lpConstraint.identifier, variables, coefficient, bound.first, bound.second)
+        val scipConstraint =
+          scipModel.createConstraint(
+            lpConstraint.identifier,
+            variables,
+            coefficient,
+            bound.first,
+            bound.second,
+          )
         if (scipConstraint == null) {
           log.error { "Error while initializing SCIP constraint $lpConstraint" }
           return false
@@ -273,7 +312,7 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
     log.info { "Initializing Objective Function" }
     try {
       val reducedObjectiveFn = model.reduce(model.objective.expression)
-      log.info {"Reduced Objective Function: $reducedObjectiveFn"}
+      log.info { "Reduced Objective Function: $reducedObjectiveFn" }
       if (reducedObjectiveFn?.expression == null) {
         return false
       }
@@ -313,5 +352,4 @@ open class ScipLpSolver(model: LPModel) : LPSolver<SCIPProblem>(model) {
       }
     }
   }
-
 }

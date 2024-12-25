@@ -7,9 +7,8 @@ package com.lpapi.model
 class LPExpressionTerm(
   val coefficient: Double?,
   val lpVarIdentifier: String?,
-  val lpConstantIdentifier: String?
+  val lpConstantIdentifier: String?,
 ) {
-
   fun isConstant(): Boolean = lpVarIdentifier == null
 
   override fun toString() = "(" + (lpConstantIdentifier ?: coefficient.toString()) + (lpVarIdentifier ?: "") + ")"

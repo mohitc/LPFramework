@@ -4,8 +4,9 @@ import com.lpapi.model.LPModel
 import com.lpapi.model.enums.LPSolutionStatus
 import mu.KotlinLogging
 
-abstract class LPSolver<T>(val model: LPModel) {
-
+abstract class LPSolver<T>(
+  val model: LPModel,
+) {
   val log = KotlinLogging.logger(this.javaClass.simpleName)
 
   /** Function to initialize the model in the solver based on the model specification in the LPModel

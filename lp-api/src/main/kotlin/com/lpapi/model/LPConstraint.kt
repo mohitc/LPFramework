@@ -11,9 +11,8 @@ class LPConstraint(
   override val identifier: String,
   val lhs: LPExpression,
   var operator: LPOperator,
-  val rhs: LPExpression
+  val rhs: LPExpression,
 ) : LPParameter {
-
   /** Default constructor that generates a constraint with a default operation where the LHS is greater than the RHS
    */
   constructor(identifier: String) : this(identifier, LPExpression(), LPOperator.GREATER_EQUAL, LPExpression())

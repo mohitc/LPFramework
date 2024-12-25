@@ -11,7 +11,6 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPModelTest {
-
   @Test
   @DisplayName("Test reduce for objective functions")
   fun testReduceObjective() {
@@ -27,7 +26,8 @@ class LPModelTest {
     model.variables.add(LPVar("x", LPVarType.BOOLEAN))
     model.variables.add(LPVar("y", LPVarType.BOOLEAN))
     model.constants.add(LPConstant("c", 2))
-    objective.expression.addTerm(2, "x")
+    objective.expression
+      .addTerm(2, "x")
       .add(3)
       .addTerm("c", "y")
       .addTerm(2, "y")
@@ -41,12 +41,14 @@ class LPModelTest {
       objective.objective = it
       expectedObjective.objective = it
       Assertions.assertEquals(
-        model.reduce(objective), expectedObjective,
-        "Reduced objective is set correctly in the model, and the objective type is maintained"
+        model.reduce(objective),
+        expectedObjective,
+        "Reduced objective is set correctly in the model, and the objective type is maintained",
       )
       Assertions.assertNotEquals(
-        model.reduce(objective), objective,
-        "Reduction does not alter original objective"
+        model.reduce(objective),
+        objective,
+        "Reduction does not alter original objective",
       )
     }
   }
@@ -59,18 +61,18 @@ class LPModelTest {
     var invalidExpr = LPExpression()
     invalidExpr.expression.add(
       0,
-      LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = null)
+      LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = null),
     )
     Assertions.assertNull(
       model.reduce(invalidExpr),
-      "Expressions with invalid terms (all values null) are not reduced"
+      "Expressions with invalid terms (all values null) are not reduced",
     )
     // Assume variable is present
     model.variables.add(LPVar("invalid-var", LPVarType.BOOLEAN))
     invalidExpr = LPExpression()
     invalidExpr.expression.add(
       0,
-      LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = "invalid-var")
+      LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = "invalid-var"),
     )
     Assertions.assertNull(model.reduce(invalidExpr), "Expressions with invalid coefficients are not reduced")
 
@@ -85,25 +87,26 @@ class LPModelTest {
     model.variables.add(LPVar("x", LPVarType.BOOLEAN))
     Assertions.assertNotNull(
       model.reduce(expr),
-      "Expressions where constant terms and vars are defined can be reduced"
+      "Expressions where constant terms and vars are defined can be reduced",
     )
     expr.addTerm("x")
     expectedExpression.addTerm(2, "x")
     Assertions.assertEquals(
-      model.reduce(expr), expectedExpression,
-      "Reduction combines multiple terms with constant values into a single term"
+      model.reduce(expr),
+      expectedExpression,
+      "Reduction combines multiple terms with constant values into a single term",
     )
 
     expr.add(1)
     Assertions.assertNotNull(
       model.reduce(expr),
-      "Expression with a numerical terms can be reduced"
+      "Expression with a numerical terms can be reduced",
     )
 
     expr.add("c")
     Assertions.assertNull(
       model.reduce(expr),
-      "Expression with a constant terms that is not defined is not reduced"
+      "Expression with a constant terms that is not defined is not reduced",
     )
     model.constants.add(LPConstant("c", 1))
 
@@ -113,30 +116,33 @@ class LPModelTest {
     model.constants.add(LPConstant("d", 2))
     expectedExpression.add(6)
     Assertions.assertEquals(
-      model.reduce(expr), expectedExpression,
-      "Reduction combines the constant identifiers and the fixed value into a single number"
+      model.reduce(expr),
+      expectedExpression,
+      "Reduction combines the constant identifiers and the fixed value into a single number",
     )
 
     model.variables.add(LPVar("y", LPVarType.BOOLEAN))
     expr.addTerm("b", "y")
     Assertions.assertNull(
       model.reduce(expr),
-      "Expression with an undefined constant identifier is not reduced"
+      "Expression with an undefined constant identifier is not reduced",
     )
     model.constants.add(LPConstant("b", 2))
     Assertions.assertNotNull(
       model.reduce(expr),
-      "Expression with all variables and constant identifiers defined is reduced"
+      "Expression with all variables and constant identifiers defined is reduced",
     )
     expr.addTerm(3, "y")
     expectedExpression.addTerm(5, "y")
     Assertions.assertEquals(
-      model.reduce(expr), expectedExpression,
-      "Reduction combines multiple terms with a combination of constant parameters and fixed values"
+      model.reduce(expr),
+      expectedExpression,
+      "Reduction combines multiple terms with a combination of constant parameters and fixed values",
     )
     Assertions.assertNotEquals(
-      model.reduce(expr), expr,
-      "Reduction does not alter original expression"
+      model.reduce(expr),
+      expr,
+      "Reduction does not alter original expression",
     )
   }
 
@@ -160,18 +166,18 @@ class LPModelTest {
     model.constants.add(LPConstant("d", 1))
     Assertions.assertNotNull(
       model.reduce(constraint),
-      "Constraint with var and constant/constant Identifier is reduced properly"
+      "Constraint with var and constant/constant Identifier is reduced properly",
     )
 
     constraint.lhs.addTerm("c", "x")
     Assertions.assertNull(
       model.reduce(constraint),
-      "Constraint with undefined constant identifier for variable fails"
+      "Constraint with undefined constant identifier for variable fails",
     )
     model.constants.add(LPConstant("c", 3))
     Assertions.assertNotNull(
       model.reduce(constraint),
-      "Constraint with var and constant/constant Identifier is reduced properly"
+      "Constraint with var and constant/constant Identifier is reduced properly",
     )
 
     model.variables.add(LPVar("y", LPVarType.BOOLEAN))
@@ -187,12 +193,14 @@ class LPModelTest {
       constraint.operator = it
       expectedConstraint.operator = it
       Assertions.assertEquals(
-        model.reduce(constraint), expectedConstraint,
-        "Constraint is reduced correctly, and preserves the direction of change"
+        model.reduce(constraint),
+        expectedConstraint,
+        "Constraint is reduced correctly, and preserves the direction of change",
       )
       Assertions.assertNotEquals(
-        model.reduce(constraint), constraint,
-        "Reduced value is not a copy of the original constraint"
+        model.reduce(constraint),
+        constraint,
+        "Reduced value is not a copy of the original constraint",
       )
     }
   }
@@ -208,11 +216,19 @@ class LPModelTest {
     constraint.lhs.addTerm("a", "x").add("b")
     constraint.rhs.add(3)
 
-    val assertEquals = fun (a: LPModel, b: LPModel, message: String) {
+    val assertEquals = fun (
+      a: LPModel,
+      b: LPModel,
+      message: String,
+    ) {
       Assertions.assertEquals(a, b, "equals(): $message")
       Assertions.assertEquals(a.hashCode(), b.hashCode(), "hashCode(): $message")
     }
-    val assertNotEquals = fun (a: LPModel, b: LPModel, message: String) {
+    val assertNotEquals = fun (
+      a: LPModel,
+      b: LPModel,
+      message: String,
+    ) {
       Assertions.assertNotEquals(a, b, "not equals(): $message")
       Assertions.assertNotEquals(a.hashCode(), b.hashCode(), "not equals hashCode(): $message")
     }
@@ -251,26 +267,29 @@ class LPModelTest {
 
     assertEquals(model, testModel, "Models with same objectives are equal")
 
-    model.solution = LPModelResult(
-      status = LPSolutionStatus.UNKNOWN,
-      objective = null,
-      computationTime = null,
-      mipGap = null
-    )
-    testModel.solution = LPModelResult(
-      status = LPSolutionStatus.OPTIMAL,
-      objective = 1.0,
-      computationTime = 2,
-      mipGap = null
-    )
+    model.solution =
+      LPModelResult(
+        status = LPSolutionStatus.UNKNOWN,
+        objective = null,
+        computationTime = null,
+        mipGap = null,
+      )
+    testModel.solution =
+      LPModelResult(
+        status = LPSolutionStatus.OPTIMAL,
+        objective = 1.0,
+        computationTime = 2,
+        mipGap = null,
+      )
     assertNotEquals(model, testModel, "Models with different solution status are not equal")
 
-    model.solution = LPModelResult(
-      status = LPSolutionStatus.OPTIMAL,
-      objective = 1.0,
-      computationTime = 2,
-      mipGap = null
-    )
+    model.solution =
+      LPModelResult(
+        status = LPSolutionStatus.OPTIMAL,
+        objective = 1.0,
+        computationTime = 2,
+        mipGap = null,
+      )
     assertEquals(model, testModel, "Models with same solution status are equal")
   }
 }

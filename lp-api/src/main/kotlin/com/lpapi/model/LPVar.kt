@@ -7,9 +7,8 @@ class LPVar(
   override val identifier: String,
   val type: LPVarType,
   var lbound: Double,
-  var ubound: Double
+  var ubound: Double,
 ) : LPParameter {
-
   var result: Number = 0
 
   var resultSet: Boolean = false
@@ -18,12 +17,17 @@ class LPVar(
     this(identifier, type, lbound.toDouble(), ubound.toDouble())
 
   constructor(identifier: String, type: LPVarType) : this(
-    identifier, type,
+    identifier,
+    type,
     // If variable is defined as boolean, the upper bound is automatically set to 1 otherwise is defaulted to 0
-    0.0, if (type == LPVarType.BOOLEAN) 1.0 else 0.0
+    0.0,
+    if (type == LPVarType.BOOLEAN) 1.0 else 0.0,
   )
 
-  fun bounds(lBound: Double, uBound: Double): LPVar {
+  fun bounds(
+    lBound: Double,
+    uBound: Double,
+  ): LPVar {
     this.lbound = lBound
     this.ubound = uBound
     return this
@@ -65,7 +69,5 @@ class LPVar(
     return result1
   }
 
-  override fun toString(): String {
-    return "[identifier: $identifier, type: $type]"
-  }
+  override fun toString(): String = "[identifier: $identifier, type: $type]"
 }

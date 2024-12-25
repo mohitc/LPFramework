@@ -1,4 +1,3 @@
 package com.lpapi.solver.sample
 
-class ITScipSudokuSolverSample : SudokuSolverSample() {
-}
+class ITScipSudokuSolverSample : SudokuSolverSample()

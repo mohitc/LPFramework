@@ -7,9 +7,8 @@ import com.lpapi.model.enums.LPObjectiveType
  */
 class LPObjective(
   var objective: LPObjectiveType = LPObjectiveType.MAXIMIZE,
-  var expression: LPExpression = LPExpression()
+  var expression: LPExpression = LPExpression(),
 ) {
-
   override fun toString(): String = objective.shortDesc + "(" + expression.toString() + ")"
 
   override fun equals(other: Any?): Boolean {

@@ -2,7 +2,9 @@ package com.lpapi.model
 
 import com.lpapi.model.enums.LPObjectiveType
 import mu.KotlinLogging
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -28,12 +30,14 @@ class LPObjectiveTest {
     var testObjective = LPObjective(LPObjectiveType.MAXIMIZE)
     testObjective.expression.add(expressionUnderTest)
     assertEquals(
-      objectiveUnderTest, testObjective,
-      "Different objectives with the same direction and expression result in true "
+      objectiveUnderTest,
+      testObjective,
+      "Different objectives with the same direction and expression result in true ",
     )
     assertEquals(
-      objectiveUnderTest.hashCode(), testObjective.hashCode(),
-      "Different objectives with the same direction and expression result in equal hash code"
+      objectiveUnderTest.hashCode(),
+      testObjective.hashCode(),
+      "Different objectives with the same direction and expression result in equal hash code",
     )
 
     testObjective = LPObjective(LPObjectiveType.MINIMIZE)
@@ -57,15 +61,17 @@ class LPObjectiveTest {
     assertNotEquals(objectiveUnderTest, testObjective, "Default optimization direction is MAXIMIZE")
     testObjective.objective = objectiveUnderTest.objective
     assertEquals(
-      objectiveUnderTest, testObjective,
-      "Default optimization direction is MAXIMIZE, and set changes the values correctly"
+      objectiveUnderTest,
+      testObjective,
+      "Default optimization direction is MAXIMIZE, and set changes the values correctly",
     )
 
     testObjective = LPObjective(LPObjectiveType.MINIMIZE)
     testObjective.expression = expressionUnderTest
     assertEquals(
-      objectiveUnderTest, testObjective,
-      "Explicitly setting objective in the constructor results in a match"
+      objectiveUnderTest,
+      testObjective,
+      "Explicitly setting objective in the constructor results in a match",
     )
   }
 }

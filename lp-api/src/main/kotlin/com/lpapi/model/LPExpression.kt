@@ -43,28 +43,40 @@ class LPExpression {
 
   /** Add a variable term specified as an LP Constant and Variable (e.g. c.X)
    */
-  fun addTerm(constant: LPConstant, variable: LPVar): LPExpression {
+  fun addTerm(
+    constant: LPConstant,
+    variable: LPVar,
+  ): LPExpression {
     expression.add(LPExpressionTerm(null, variable.identifier, constant.identifier))
     return this
   }
 
   /** Add a variable term specified as an LP Constant identifier and Variable identifier (e.g. c.X)
    */
-  fun addTerm(constantIdentifier: String, variableIdentifier: String): LPExpression {
+  fun addTerm(
+    constantIdentifier: String,
+    variableIdentifier: String,
+  ): LPExpression {
     expression.add(LPExpressionTerm(null, variableIdentifier, constantIdentifier))
     return this
   }
 
   /** Add a variable term specified as a double and LP Variable (e.g. 3.X)
    */
-  fun addTerm(constant: Number, variable: LPVar): LPExpression {
+  fun addTerm(
+    constant: Number,
+    variable: LPVar,
+  ): LPExpression {
     expression.add(LPExpressionTerm(constant.toDouble(), variable.identifier, null))
     return this
   }
 
   /** Add a variable term specified as a double  and Variable identifier (e.g. 3.X)
    */
-  fun addTerm(constant: Number, variableIdentifier: String): LPExpression {
+  fun addTerm(
+    constant: Number,
+    variableIdentifier: String,
+  ): LPExpression {
     expression.add(LPExpressionTerm(constant.toDouble(), variableIdentifier, null))
     return this
   }
@@ -84,9 +96,12 @@ class LPExpression {
     return newExpression
   }
 
-  override fun toString(): String = expression.stream().map { v -> v.toString() }
-    .reduce { acc, expTerm -> "$acc + $expTerm" }
-    .orElse("")
+  override fun toString(): String =
+    expression
+      .stream()
+      .map { v -> v.toString() }
+      .reduce { acc, expTerm -> "$acc + $expTerm" }
+      .orElse("")
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -97,7 +112,5 @@ class LPExpression {
     return expression.toSet() == other.expression.toSet()
   }
 
-  override fun hashCode(): Int {
-    return expression.toSet().hashCode()
-  }
+  override fun hashCode(): Int = expression.toSet().hashCode()
 }

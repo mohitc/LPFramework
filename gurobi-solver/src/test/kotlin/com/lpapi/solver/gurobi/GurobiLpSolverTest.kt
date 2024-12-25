@@ -1,5 +1,11 @@
 package com.lpapi.solver.gurobi
 
+import com.gurobi.gurobi.GRB
+import com.gurobi.gurobi.GRBConstr
+import com.gurobi.gurobi.GRBException
+import com.gurobi.gurobi.GRBLinExpr
+import com.gurobi.gurobi.GRBModel
+import com.gurobi.gurobi.GRBVar
 import com.lpapi.model.LPConstraint
 import com.lpapi.model.LPModel
 import com.lpapi.model.LPModelResult
@@ -8,12 +14,6 @@ import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
-import com.gurobi.gurobi.GRB
-import com.gurobi.gurobi.GRBConstr
-import com.gurobi.gurobi.GRBException
-import com.gurobi.gurobi.GRBLinExpr
-import com.gurobi.gurobi.GRBModel
-import com.gurobi.gurobi.GRBVar
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -32,7 +32,6 @@ import kotlin.math.roundToInt
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GurobiLpSolverTest {
-
   private val log = KotlinLogging.logger { this.javaClass.name }
 
   companion object {
@@ -40,20 +39,31 @@ class GurobiLpSolverTest {
     val mockedConstraint = mock<GRBConstr> {}
   }
 
-  private fun setParameter(solver: GurobiLpSolver, field: String, value: Any?) {
+  private fun setParameter(
+    solver: GurobiLpSolver,
+    field: String,
+    value: Any?,
+  ) {
     solver.javaClass.getDeclaredField(field).let {
       it.isAccessible = true
       it.set(solver, value)
     }
   }
-  private fun setModel(solver: GurobiLpSolver, model: GRBModel?) =
-    setParameter(solver, "grbModel", model)
 
-  private fun setVariableMap(solver: GurobiLpSolver, variableMap: MutableMap<String, GRBVar>) =
-    setParameter(solver, "variableMap", variableMap)
+  private fun setModel(
+    solver: GurobiLpSolver,
+    model: GRBModel?,
+  ) = setParameter(solver, "grbModel", model)
 
-  private fun setConstraintMap(solver: GurobiLpSolver, variableMap: MutableMap<String, GRBConstr>) =
-    setParameter(solver, "constraintMap", variableMap)
+  private fun setVariableMap(
+    solver: GurobiLpSolver,
+    variableMap: MutableMap<String, GRBVar>,
+  ) = setParameter(solver, "variableMap", variableMap)
+
+  private fun setConstraintMap(
+    solver: GurobiLpSolver,
+    variableMap: MutableMap<String, GRBConstr>,
+  ) = setParameter(solver, "constraintMap", variableMap)
 
   @Test
   fun testGetBaseModel() {
@@ -70,7 +80,7 @@ class GurobiLpSolverTest {
       assertNotNull(
         model.getGurobiVarType(lpVarType),
         "Gurobi Model variable type not found for LP " +
-          "type $lpVarType"
+          "type $lpVarType",
       )
     }
   }
@@ -82,7 +92,7 @@ class GurobiLpSolverTest {
       assertNotNull(
         model.getGurobiOperator(lpOperator),
         "Gurobi Model operator type not found for LP " +
-          "Operator $lpOperator"
+          "Operator $lpOperator",
       )
     }
   }
@@ -94,93 +104,95 @@ class GurobiLpSolverTest {
       assertNotNull(
         model.getGurobiObjectiveType(lpObjectiveType),
         "Gurobi Model Objective Type node found " +
-          "for LP Objective Type $lpObjectiveType"
+          "for LP Objective Type $lpObjectiveType",
       )
     }
   }
 
   @Test
   fun testGrbSolutionStatusTest() {
-    val solutionStatusMap: Map<Int?, LPSolutionStatus> = mapOf(
-      Pair(GRB.Status.OPTIMAL, LPSolutionStatus.OPTIMAL),
-      Pair(GRB.Status.UNBOUNDED, LPSolutionStatus.UNBOUNDED),
-      Pair(GRB.Status.INFEASIBLE, LPSolutionStatus.INFEASIBLE),
-      Pair(GRB.Status.INF_OR_UNBD, LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED),
-      Pair(GRB.Status.TIME_LIMIT, LPSolutionStatus.TIME_LIMIT),
-      Pair(GRB.Status.CUTOFF, LPSolutionStatus.CUTOFF),
-      Pair(null, LPSolutionStatus.ERROR),
-      Pair(GRB.Status.INPROGRESS, LPSolutionStatus.UNKNOWN),
-      Pair(GRB.Status.INTERRUPTED, LPSolutionStatus.UNKNOWN),
-      Pair(GRB.Status.ITERATION_LIMIT, LPSolutionStatus.UNKNOWN),
-      Pair(GRB.Status.NODE_LIMIT, LPSolutionStatus.UNKNOWN),
-      Pair(GRB.Status.SOLUTION_LIMIT, LPSolutionStatus.UNKNOWN),
-      Pair(GRB.Status.USER_OBJ_LIMIT, LPSolutionStatus.UNKNOWN)
-    )
+    val solutionStatusMap: Map<Int?, LPSolutionStatus> =
+      mapOf(
+        Pair(GRB.Status.OPTIMAL, LPSolutionStatus.OPTIMAL),
+        Pair(GRB.Status.UNBOUNDED, LPSolutionStatus.UNBOUNDED),
+        Pair(GRB.Status.INFEASIBLE, LPSolutionStatus.INFEASIBLE),
+        Pair(GRB.Status.INF_OR_UNBD, LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED),
+        Pair(GRB.Status.TIME_LIMIT, LPSolutionStatus.TIME_LIMIT),
+        Pair(GRB.Status.CUTOFF, LPSolutionStatus.CUTOFF),
+        Pair(null, LPSolutionStatus.ERROR),
+        Pair(GRB.Status.INPROGRESS, LPSolutionStatus.UNKNOWN),
+        Pair(GRB.Status.INTERRUPTED, LPSolutionStatus.UNKNOWN),
+        Pair(GRB.Status.ITERATION_LIMIT, LPSolutionStatus.UNKNOWN),
+        Pair(GRB.Status.NODE_LIMIT, LPSolutionStatus.UNKNOWN),
+        Pair(GRB.Status.SOLUTION_LIMIT, LPSolutionStatus.UNKNOWN),
+        Pair(GRB.Status.USER_OBJ_LIMIT, LPSolutionStatus.UNKNOWN),
+      )
 
     val solver = GurobiLpSolver(LPModel())
     solutionStatusMap.entries.forEach { entry ->
       assertEquals(
-        entry.value, solver.getSolutionStatus(entry.key),
-        "Gurobi status ${entry.key} not translated correctly to ${entry.value}"
+        entry.value,
+        solver.getSolutionStatus(entry.key),
+        "Gurobi status ${entry.key} not translated correctly to ${entry.value}",
       )
     }
   }
 
-  private fun argsForInitVars() = Stream.of(
-    Arguments.of(
-      "null model results in false",
-      null,
-      LPVar("x", LPVarType.BOOLEAN),
-      false,
-      mutableMapOf<String, GRBVar>(),
-    ),
-    Arguments.of(
-      "Add variable results in an exception",
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenThrow(GRBException("exception"))
-      },
-      LPVar("x", LPVarType.BOOLEAN),
-      false,
-      mutableMapOf<String, GRBVar>(),
-    ),
-    Arguments.of(
-      "Add variable results in a null value",
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(null)
-      },
-      LPVar("x", LPVarType.BOOLEAN),
-      false,
-      mutableMapOf<String, GRBVar>(),
-    ),
-    Arguments.of(
-      "Boolean variable added successfully",
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
-      },
-      LPVar("x", LPVarType.BOOLEAN),
-      true,
-      mutableMapOf(Pair("x", mockedVar)),
-    ),
-    Arguments.of(
-      "Integer variable added successfully",
-      mock<GRBModel> {
-        on { addVar(1.0, 10.0, 0.0, GRB.INTEGER, "y") }.thenReturn(mockedVar)
-      },
-      LPVar("y", LPVarType.INTEGER, 1, 10),
-      true,
-      mutableMapOf(Pair("y", mockedVar)),
-    ),
-    Arguments.of(
-      "Continuous variable added successfully",
-      mock<GRBModel> {
-        on { addVar(3.2, 5.7, 0.0, GRB.CONTINUOUS, "z") }.thenReturn(mockedVar)
-      },
-      LPVar("z", LPVarType.DOUBLE, 3.2, 5.7),
-      true,
-      mutableMapOf(Pair("z", mockedVar)),
+  private fun argsForInitVars() =
+    Stream.of(
+      Arguments.of(
+        "null model results in false",
+        null,
+        LPVar("x", LPVarType.BOOLEAN),
+        false,
+        mutableMapOf<String, GRBVar>(),
+      ),
+      Arguments.of(
+        "Add variable results in an exception",
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenThrow(GRBException("exception"))
+        },
+        LPVar("x", LPVarType.BOOLEAN),
+        false,
+        mutableMapOf<String, GRBVar>(),
+      ),
+      Arguments.of(
+        "Add variable results in a null value",
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(null)
+        },
+        LPVar("x", LPVarType.BOOLEAN),
+        false,
+        mutableMapOf<String, GRBVar>(),
+      ),
+      Arguments.of(
+        "Boolean variable added successfully",
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
+        },
+        LPVar("x", LPVarType.BOOLEAN),
+        true,
+        mutableMapOf(Pair("x", mockedVar)),
+      ),
+      Arguments.of(
+        "Integer variable added successfully",
+        mock<GRBModel> {
+          on { addVar(1.0, 10.0, 0.0, GRB.INTEGER, "y") }.thenReturn(mockedVar)
+        },
+        LPVar("y", LPVarType.INTEGER, 1, 10),
+        true,
+        mutableMapOf(Pair("y", mockedVar)),
+      ),
+      Arguments.of(
+        "Continuous variable added successfully",
+        mock<GRBModel> {
+          on { addVar(3.2, 5.7, 0.0, GRB.CONTINUOUS, "z") }.thenReturn(mockedVar)
+        },
+        LPVar("z", LPVarType.DOUBLE, 3.2, 5.7),
+        true,
+        mutableMapOf(Pair("z", mockedVar)),
+      ),
     )
-
-  )
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("argsForInitVars")
@@ -189,7 +201,7 @@ class GurobiLpSolverTest {
     model: GRBModel?,
     lpVar: LPVar,
     wantSuccess: Boolean,
-    wantVarMap: Map<String, GRBVar>
+    wantVarMap: Map<String, GRBVar>,
   ) {
     log.info { "Test case: $desc" }
     val lpModel = LPModel("test").apply { this.variables.add(lpVar) }
@@ -200,63 +212,72 @@ class GurobiLpSolverTest {
     assertEquals(gotVarMap, wantVarMap, "solver.variableMap")
   }
 
-  private fun argsForInitObjectiveFunction() = Stream.of(
-    Arguments.of(
-      "Irreducible objective results in error",
-      LPModel("test").apply {
-        this.variables.add(LPVar("x", LPVarType.BOOLEAN))
-        this.objective.expression.addTerm("a", "x").add("b")
-      },
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
-      },
-      false,
-      null,
-      null
-    ),
-    Arguments.of(
-      "Exception on setObjective results in false",
-      LPModel("test").apply {
-        this.variables.add(LPVar("x", LPVarType.BOOLEAN))
-        this.objective.expression.addTerm(2, "x").add(3)
-      },
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
-        on { setObjective(any(), any()) }.thenThrow(GRBException(""))
-      },
-      false,
-      null,
-      null
-    ),
-    Arguments.of(
-      "Objective is initialized correctly (Maximize)",
-      LPModel("test").apply {
-        this.variables.add(LPVar("x", LPVarType.BOOLEAN))
-        this.objective.objective = LPObjectiveType.MAXIMIZE
-        this.objective.expression.addTerm(2, "x").add(3)
-      },
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
-      },
-      true,
-      GrbExprSummary(3.0, mapOf(Pair(mockedVar, 2.0))),
-      GRB.MAXIMIZE
-    ),
-    Arguments.of(
-      "Objective is initialized correctly (Minimize)",
-      LPModel("test").apply {
-        this.variables.add(LPVar("x", LPVarType.BOOLEAN))
-        this.objective.objective = LPObjectiveType.MINIMIZE
-        this.objective.expression.addTerm(3, "x").add(2)
-      },
-      mock<GRBModel> {
-        on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
-      },
-      true,
-      GrbExprSummary(2.0, mapOf(Pair(mockedVar, 3.0))),
-      GRB.MINIMIZE
-    ),
-  )
+  private fun argsForInitObjectiveFunction() =
+    Stream.of(
+      Arguments.of(
+        "Irreducible objective results in error",
+        LPModel("test").apply {
+          this.variables.add(LPVar("x", LPVarType.BOOLEAN))
+          this.objective.expression
+            .addTerm("a", "x")
+            .add("b")
+        },
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
+        },
+        false,
+        null,
+        null,
+      ),
+      Arguments.of(
+        "Exception on setObjective results in false",
+        LPModel("test").apply {
+          this.variables.add(LPVar("x", LPVarType.BOOLEAN))
+          this.objective.expression
+            .addTerm(2, "x")
+            .add(3)
+        },
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
+          on { setObjective(any(), any()) }.thenThrow(GRBException(""))
+        },
+        false,
+        null,
+        null,
+      ),
+      Arguments.of(
+        "Objective is initialized correctly (Maximize)",
+        LPModel("test").apply {
+          this.variables.add(LPVar("x", LPVarType.BOOLEAN))
+          this.objective.objective = LPObjectiveType.MAXIMIZE
+          this.objective.expression
+            .addTerm(2, "x")
+            .add(3)
+        },
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
+        },
+        true,
+        GrbExprSummary(3.0, mapOf(Pair(mockedVar, 2.0))),
+        GRB.MAXIMIZE,
+      ),
+      Arguments.of(
+        "Objective is initialized correctly (Minimize)",
+        LPModel("test").apply {
+          this.variables.add(LPVar("x", LPVarType.BOOLEAN))
+          this.objective.objective = LPObjectiveType.MINIMIZE
+          this.objective.expression
+            .addTerm(3, "x")
+            .add(2)
+        },
+        mock<GRBModel> {
+          on { addVar(0.0, 1.0, 0.0, GRB.BINARY, "x") }.thenReturn(mockedVar)
+        },
+        true,
+        GrbExprSummary(2.0, mapOf(Pair(mockedVar, 3.0))),
+        GRB.MINIMIZE,
+      ),
+    )
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("argsForInitObjectiveFunction")
@@ -297,11 +318,12 @@ class GurobiLpSolverTest {
           this.variables.add(LPVar("x", LPVarType.BOOLEAN))
           this.variables.add(LPVar("y", LPVarType.BOOLEAN))
           this.constraints.add(
-            LPConstraint("test-constraint").apply { // generate constraint ax >= 3 - by
+            LPConstraint("test-constraint").apply {
+              // generate constraint ax >= 3 - by
               this.lhs.addTerm("a", "x")
               this.operator = LPOperator.GREATER_EQUAL
               this.rhs.add(3).addTerm("b", "y")
-            }
+            },
           )
         },
         mock<GRBModel> {
@@ -312,7 +334,10 @@ class GurobiLpSolverTest {
         },
         false,
         mutableMapOf<String, GRBConstr>(),
-        null, null, null, null
+        null,
+        null,
+        null,
+        null,
       ),
       Arguments.of(
         "Null base model results in false",
@@ -320,17 +345,21 @@ class GurobiLpSolverTest {
           this.variables.add(LPVar("x", LPVarType.BOOLEAN))
           this.variables.add(LPVar("y", LPVarType.BOOLEAN))
           this.constraints.add(
-            LPConstraint("test-constraint").apply { // generate constraint 2x >= 3 + 4y
+            LPConstraint("test-constraint").apply {
+              // generate constraint 2x >= 3 + 4y
               this.lhs.addTerm(2, "x")
               this.operator = LPOperator.GREATER_EQUAL
               this.rhs.add(3).addTerm(4, "y")
-            }
+            },
           )
         },
         null,
         false,
         mutableMapOf<String, GRBConstr>(),
-        null, null, null, null
+        null,
+        null,
+        null,
+        null,
       ),
       Arguments.of(
         "Null on addConstr() results in false",
@@ -338,11 +367,12 @@ class GurobiLpSolverTest {
           this.variables.add(LPVar("x", LPVarType.BOOLEAN))
           this.variables.add(LPVar("y", LPVarType.BOOLEAN))
           this.constraints.add(
-            LPConstraint("test-constraint").apply { // generate constraint 2x >= 3 + 4y
+            LPConstraint("test-constraint").apply {
+              // generate constraint 2x >= 3 + 4y
               this.lhs.addTerm(2, "x")
               this.operator = LPOperator.GREATER_EQUAL
               this.rhs.add(3).addTerm(4, "y")
-            }
+            },
           )
         },
         mock<GRBModel> {
@@ -351,7 +381,10 @@ class GurobiLpSolverTest {
         },
         false,
         mutableMapOf<String, GRBConstr>(),
-        null, null, null, null
+        null,
+        null,
+        null,
+        null,
       ),
       Arguments.of(
         "Exception on addConstr() results in false",
@@ -359,11 +392,12 @@ class GurobiLpSolverTest {
           this.variables.add(LPVar("x", LPVarType.BOOLEAN))
           this.variables.add(LPVar("y", LPVarType.BOOLEAN))
           this.constraints.add(
-            LPConstraint("test-constraint").apply { // generate constraint ax >= 3 - by
+            LPConstraint("test-constraint").apply {
+              // generate constraint ax >= 3 - by
               this.lhs.addTerm(2, "x")
               this.operator = LPOperator.GREATER_EQUAL
               this.rhs.add(3).addTerm(4, "y")
-            }
+            },
           )
         },
         mock<GRBModel> {
@@ -374,7 +408,10 @@ class GurobiLpSolverTest {
         },
         false,
         mutableMapOf<String, GRBConstr>(),
-        null, null, null, null
+        null,
+        null,
+        null,
+        null,
       ),
       Arguments.of(
         "Success with <= operation",
@@ -382,11 +419,12 @@ class GurobiLpSolverTest {
           this.variables.add(LPVar("x", LPVarType.BOOLEAN))
           this.variables.add(LPVar("y", LPVarType.BOOLEAN))
           this.constraints.add(
-            LPConstraint("test-constraint").apply { // generate constraint 2x <= 3 + 4y
+            LPConstraint("test-constraint").apply {
+              // generate constraint 2x <= 3 + 4y
               this.lhs.addTerm(2, "x")
               this.operator = LPOperator.LESS_EQUAL
               this.rhs.add(3).addTerm(4, "y")
-            }
+            },
           )
         },
         mock<GRBModel> {
@@ -400,7 +438,7 @@ class GurobiLpSolverTest {
         GrbExprSummary(0.0, mapOf(Pair(mockedX, 2.0))),
         GRB.LESS_EQUAL,
         GrbExprSummary(3.0, mapOf(Pair(mockedY, 4.0))),
-        "test-constraint"
+        "test-constraint",
       ),
       Arguments.of(
         "Success with == operation",
@@ -408,11 +446,12 @@ class GurobiLpSolverTest {
           this.variables.add(LPVar("x", LPVarType.BOOLEAN))
           this.variables.add(LPVar("y", LPVarType.BOOLEAN))
           this.constraints.add(
-            LPConstraint("test-constraint").apply { // generate constraint 3y = 3 + 4x
+            LPConstraint("test-constraint").apply {
+              // generate constraint 3y = 3 + 4x
               this.lhs.addTerm(3, "y")
               this.operator = LPOperator.EQUAL
               this.rhs.add(3).addTerm(4, "x")
-            }
+            },
           )
         },
         mock<GRBModel> {
@@ -426,7 +465,7 @@ class GurobiLpSolverTest {
         GrbExprSummary(0.0, mapOf(Pair(mockedY, 3.0))),
         GRB.EQUAL,
         GrbExprSummary(3.0, mapOf(Pair(mockedX, 4.0))),
-        "test-constraint"
+        "test-constraint",
       ),
       Arguments.of(
         "Success with >= operation",
@@ -436,10 +475,16 @@ class GurobiLpSolverTest {
           this.constraints.add(
             LPConstraint("test-constraint").apply {
               // generate constraint 2 (x+y) + x >= 3 + 4x - 2y
-              this.lhs.addTerm(2, "y").addTerm(2, "x").addTerm("x")
+              this.lhs
+                .addTerm(2, "y")
+                .addTerm(2, "x")
+                .addTerm("x")
               this.operator = LPOperator.GREATER_EQUAL
-              this.rhs.add(3).addTerm(4, "x").addTerm(-2, "y")
-            }
+              this.rhs
+                .add(3)
+                .addTerm(4, "x")
+                .addTerm(-2, "y")
+            },
           )
         },
         mock<GRBModel> {
@@ -453,7 +498,7 @@ class GurobiLpSolverTest {
         GrbExprSummary(0.0, mapOf(Pair(mockedX, 3.0), Pair(mockedY, 2.0))),
         GRB.GREATER_EQUAL,
         GrbExprSummary(3.0, mapOf(Pair(mockedX, 4.0), Pair(mockedY, -2.0))),
-        "test-constraint"
+        "test-constraint",
       ),
     )
   }
@@ -469,7 +514,7 @@ class GurobiLpSolverTest {
     wantLhsSummary: GrbExprSummary?,
     wantOperator: Char?,
     wantRhsSummary: GrbExprSummary?,
-    wantConstraintId: String?
+    wantConstraintId: String?,
   ) {
     log.info { "Test Case: $desc" }
     val gotConstraintMap = mutableMapOf<String, GRBConstr>()
@@ -498,19 +543,23 @@ class GurobiLpSolverTest {
   private fun argsForSolve(): Stream<Arguments> {
     val xVal = 2.3
     val yVal = 4.5
-    val mockedX = mock<GRBVar> {
-      on { get(GRB.DoubleAttr.X) }.thenReturn(xVal)
-    }
-    val mockedY = mock<GRBVar> {
-      on { get(GRB.DoubleAttr.X) }.thenReturn(yVal)
-    }
-    val erroringMockedVar = mock<GRBVar> {
-      on { get(GRB.DoubleAttr.X) }.thenThrow(GRBException("error"))
-    }
-    val lpModel = LPModel("test").apply {
-      this.variables.add(LPVar("x", LPVarType.DOUBLE, 1, 5))
-      this.variables.add(LPVar("y", LPVarType.INTEGER, 0, 10))
-    }
+    val mockedX =
+      mock<GRBVar> {
+        on { get(GRB.DoubleAttr.X) }.thenReturn(xVal)
+      }
+    val mockedY =
+      mock<GRBVar> {
+        on { get(GRB.DoubleAttr.X) }.thenReturn(yVal)
+      }
+    val erroringMockedVar =
+      mock<GRBVar> {
+        on { get(GRB.DoubleAttr.X) }.thenThrow(GRBException("error"))
+      }
+    val lpModel =
+      LPModel("test").apply {
+        this.variables.add(LPVar("x", LPVarType.DOUBLE, 1, 5))
+        this.variables.add(LPVar("y", LPVarType.INTEGER, 0, 10))
+      }
 
     return Stream.of(
       Arguments.of(
@@ -523,7 +572,7 @@ class GurobiLpSolverTest {
         },
         LPSolutionStatus.ERROR,
         LPModelResult(LPSolutionStatus.ERROR),
-        mutableMapOf<String, Number>()
+        mutableMapOf<String, Number>(),
       ),
       Arguments.of(
         "Error status results in error",
@@ -531,7 +580,7 @@ class GurobiLpSolverTest {
         null,
         LPSolutionStatus.ERROR,
         LPModelResult(status = LPSolutionStatus.ERROR),
-        mutableMapOf<String, Number>()
+        mutableMapOf<String, Number>(),
       ),
       Arguments.of(
         "Unknown Return status results in error",
@@ -543,7 +592,7 @@ class GurobiLpSolverTest {
         },
         LPSolutionStatus.UNKNOWN,
         LPModelResult(status = LPSolutionStatus.UNKNOWN),
-        mutableMapOf<String, Number>()
+        mutableMapOf<String, Number>(),
       ),
       Arguments.of(
         "Status with known result results in a result value",
@@ -557,7 +606,7 @@ class GurobiLpSolverTest {
         },
         LPSolutionStatus.OPTIMAL,
         LPModelResult(status = LPSolutionStatus.OPTIMAL, mipGap = 0.2, objective = 23.2, computationTime = null),
-        mutableMapOf<String, Number>(Pair("x", xVal), Pair("y", yVal.roundToInt()))
+        mutableMapOf<String, Number>(Pair("x", xVal), Pair("y", yVal.roundToInt())),
       ),
       Arguments.of(
         "Error during result extraction should result in an error",
@@ -571,9 +620,8 @@ class GurobiLpSolverTest {
         },
         LPSolutionStatus.ERROR,
         LPModelResult(status = LPSolutionStatus.ERROR),
-        mutableMapOf<String, Number>()
-      )
-
+        mutableMapOf<String, Number>(),
+      ),
     )
   }
 
@@ -585,7 +633,7 @@ class GurobiLpSolverTest {
     grbModel: GRBModel?,
     wantStatus: LPSolutionStatus,
     wantResult: LPModelResult,
-    wantResultMap: Map<String, Number>
+    wantResultMap: Map<String, Number>,
   ) {
     log.info { "Test Case: $desc" }
     val solver = GurobiLpSolver(lpModel)
@@ -596,7 +644,13 @@ class GurobiLpSolverTest {
     assertEquals(wantResult.status, lpModel.solution?.status, "lpModel.solution.status")
     assertEquals(wantResult.objective, lpModel.solution?.objective, "lpModel.solution.objective")
     assertEquals(wantResult.mipGap, lpModel.solution?.mipGap, "lpModel.solution.mipGap")
-    val gotResultMap = lpModel.variables.allValues().filter { it.resultSet }.associate { Pair(it.identifier, it.result) }
+    val gotResultMap =
+      lpModel.variables.allValues().filter { it.resultSet }.associate {
+        Pair(
+          it.identifier,
+          it.result,
+        )
+      }
     assertEquals(wantResultMap, gotResultMap, "solver.solve() resultMap ${lpModel.variables.allValues()}")
   }
 }

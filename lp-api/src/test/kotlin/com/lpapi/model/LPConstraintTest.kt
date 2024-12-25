@@ -10,7 +10,6 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPConstraintTest : LPParameterTest<LPConstraint>() {
-
   private val log = KotlinLogging.logger(LPConstraintTest::javaClass.name)
 
   @Test
@@ -27,38 +26,44 @@ class LPConstraintTest : LPParameterTest<LPConstraint>() {
     log.info { "Testing with constant $c" }
     Assertions.assertEquals(c, c, "Same object instance should return true")
     Assertions.assertFalse(
-        c.equals(null),
-        "Equal comparison with a null value fails"
+      c.equals(null),
+      "Equal comparison with a null value fails",
     )
     Assertions.assertFalse(
-        c.equals(LPVar("constraint", LPVarType.BOOLEAN)),
-        "Different param types  with same identifiers are not equal"
+      c.equals(LPVar("constraint", LPVarType.BOOLEAN)),
+      "Different param types  with same identifiers are not equal",
     )
 
     assertEquals(
-        c, LPConstraint("constraint", lhs, LPOperator.GREATER_EQUAL, rhs),
-        "Default operation in the constructor is greater equal"
+      c,
+      LPConstraint("constraint", lhs, LPOperator.GREATER_EQUAL, rhs),
+      "Default operation in the constructor is greater equal",
     )
     assertNotEquals(
-        c, LPConstraint("not-constraint", lhs, LPOperator.GREATER_EQUAL, rhs),
-        "Constraints with different identifiers are not equal"
+      c,
+      LPConstraint("not-constraint", lhs, LPOperator.GREATER_EQUAL, rhs),
+      "Constraints with different identifiers are not equal",
     )
     assertNotEquals(
-        c, LPConstraint("constraint", LPExpression(), LPOperator.GREATER_EQUAL, rhs),
-        "Constraints with different LHS are not equal"
+      c,
+      LPConstraint("constraint", LPExpression(), LPOperator.GREATER_EQUAL, rhs),
+      "Constraints with different LHS are not equal",
     )
     assertNotEquals(
-        c, LPConstraint("constraint", lhs, LPOperator.EQUAL, rhs),
-        "Constraints with different operators are not equal"
+      c,
+      LPConstraint("constraint", lhs, LPOperator.EQUAL, rhs),
+      "Constraints with different operators are not equal",
     )
     assertNotEquals(
-        c, LPConstraint("constraint", LPExpression(), LPOperator.GREATER_EQUAL, LPExpression()),
-        "Constraints with different RHS are not equal"
+      c,
+      LPConstraint("constraint", LPExpression(), LPOperator.GREATER_EQUAL, LPExpression()),
+      "Constraints with different RHS are not equal",
     )
     c.operator = LPOperator.EQUAL
     assertEquals(
-        c, LPConstraint("constraint", lhs, LPOperator.EQUAL, rhs),
-        "Setting the operator changes the constraint"
+      c,
+      LPConstraint("constraint", lhs, LPOperator.EQUAL, rhs),
+      "Setting the operator changes the constraint",
     )
   }
 }

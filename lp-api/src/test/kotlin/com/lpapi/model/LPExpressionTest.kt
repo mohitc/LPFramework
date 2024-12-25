@@ -2,7 +2,9 @@ package com.lpapi.model
 
 import com.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -16,58 +18,60 @@ class LPExpressionTest {
     val testCase: ((LPExpression) -> Unit),
     val invalidCase: ((LPExpression) -> Unit),
   )
-  private val testCase = listOf(
-    TestCaseDesc(
-      "Fixed constant term",
-      testCase = { t -> t.add(2) },
-      invalidCase = { t -> t.add(3) }
-    ),
-    TestCaseDesc(
-      "LPConstant term",
-      testCase = { t -> t.add(LPConstant("c")) },
-      invalidCase = { t -> t.add(LPConstant("not-c")) }
-    ),
-    TestCaseDesc(
-      "LPConstant identifier",
-      testCase = { t -> t.add("d") },
-      invalidCase = { t -> t.add("again-not-d") }
-    ),
-    TestCaseDesc(
-      "LPConstant identifier",
-      testCase = { t -> t.add("d") },
-      invalidCase = { t -> t.add("again-not-d") }
-    ),
-    TestCaseDesc(
-      "LPVar",
-      testCase = { t -> t.addTerm(LPVar("x", LPVarType.BOOLEAN)) },
-      invalidCase = { t -> t.addTerm(LPVar("not-x", LPVarType.BOOLEAN)) }
-    ),
-    TestCaseDesc(
-      "LPVarIdentifier",
-      testCase = { t -> t.addTerm("y") },
-      invalidCase = { t -> t.addTerm("not-y") }
-    ),
-    TestCaseDesc(
-      "LPConstant and LPVar",
-      testCase = { t -> t.addTerm(LPConstant("a"), LPVar("z", LPVarType.DOUBLE)) },
-      invalidCase = { t -> t.addTerm(LPConstant("not-a"), LPVar("z", LPVarType.DOUBLE)) }
-    ),
-    TestCaseDesc(
-      "LPConstantIdentifier and LPVarIdentifier",
-      testCase = { t -> t.addTerm("b", "w") },
-      invalidCase = { t -> t.addTerm("b", "not-w") }
-    ),
-    TestCaseDesc(
-      "Constant and LPVar",
-      testCase = { t -> t.addTerm(2, LPVar("p", LPVarType.INTEGER)) },
-      invalidCase = { t -> t.addTerm(2, LPVar("not-p", LPVarType.INTEGER)) }
-    ),
-    TestCaseDesc(
-      "Constant and LPVarIdentifier",
-      testCase = { t -> t.addTerm(2, "q") },
-      invalidCase = { t -> t.addTerm(3, "q") }
-    ),
-  )
+
+  private val testCase =
+    listOf(
+      TestCaseDesc(
+        "Fixed constant term",
+        testCase = { t -> t.add(2) },
+        invalidCase = { t -> t.add(3) },
+      ),
+      TestCaseDesc(
+        "LPConstant term",
+        testCase = { t -> t.add(LPConstant("c")) },
+        invalidCase = { t -> t.add(LPConstant("not-c")) },
+      ),
+      TestCaseDesc(
+        "LPConstant identifier",
+        testCase = { t -> t.add("d") },
+        invalidCase = { t -> t.add("again-not-d") },
+      ),
+      TestCaseDesc(
+        "LPConstant identifier",
+        testCase = { t -> t.add("d") },
+        invalidCase = { t -> t.add("again-not-d") },
+      ),
+      TestCaseDesc(
+        "LPVar",
+        testCase = { t -> t.addTerm(LPVar("x", LPVarType.BOOLEAN)) },
+        invalidCase = { t -> t.addTerm(LPVar("not-x", LPVarType.BOOLEAN)) },
+      ),
+      TestCaseDesc(
+        "LPVarIdentifier",
+        testCase = { t -> t.addTerm("y") },
+        invalidCase = { t -> t.addTerm("not-y") },
+      ),
+      TestCaseDesc(
+        "LPConstant and LPVar",
+        testCase = { t -> t.addTerm(LPConstant("a"), LPVar("z", LPVarType.DOUBLE)) },
+        invalidCase = { t -> t.addTerm(LPConstant("not-a"), LPVar("z", LPVarType.DOUBLE)) },
+      ),
+      TestCaseDesc(
+        "LPConstantIdentifier and LPVarIdentifier",
+        testCase = { t -> t.addTerm("b", "w") },
+        invalidCase = { t -> t.addTerm("b", "not-w") },
+      ),
+      TestCaseDesc(
+        "Constant and LPVar",
+        testCase = { t -> t.addTerm(2, LPVar("p", LPVarType.INTEGER)) },
+        invalidCase = { t -> t.addTerm(2, LPVar("not-p", LPVarType.INTEGER)) },
+      ),
+      TestCaseDesc(
+        "Constant and LPVarIdentifier",
+        testCase = { t -> t.addTerm(2, "q") },
+        invalidCase = { t -> t.addTerm(3, "q") },
+      ),
+    )
 
   @Test
   @DisplayName("Test equality of LPExpression")
@@ -93,12 +97,14 @@ class LPExpressionTest {
       it.testCase(copy)
       assertEquals(expr, copy, "Expressions with same terms including ${it.case} are equal")
       assertEquals(
-        expr.hashCode(), copy.hashCode(),
-        "Expressions with same terms including ${it.case} have the same hashCode"
+        expr.hashCode(),
+        copy.hashCode(),
+        "Expressions with same terms including ${it.case} have the same hashCode",
       )
       assertNotEquals(
-        expr, invalidCopy,
-        "Expressions with different terms include ${it.case} are not equal"
+        expr,
+        invalidCopy,
+        "Expressions with different terms include ${it.case} are not equal",
       )
     }
 
@@ -110,8 +116,9 @@ class LPExpressionTest {
     testCase.reversed().forEach { it.testCase(newExpr) }
     assertEquals(expr, newExpr, "Equality is independent of the order of terms")
     assertEquals(
-      expr.hashCode(), newExpr.hashCode(),
-      "Hashcode equality is independent of the order of terms"
+      expr.hashCode(),
+      newExpr.hashCode(),
+      "Hashcode equality is independent of the order of terms",
     )
 
     // generate two expressions that split the terms into two expressions

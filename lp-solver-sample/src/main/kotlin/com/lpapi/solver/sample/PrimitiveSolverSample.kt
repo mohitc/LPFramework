@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 open class PrimitiveSolverSample {
-
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
 
   val modelGenerator: () -> LPModel = {
@@ -42,7 +41,8 @@ open class PrimitiveSolverSample {
     // Add Constraints
     // Constraint 1 : aX + bY + cZ <= 4
     val constraint1 = model.constraints.add(LPConstraint("Constraint 1"))
-    constraint1?.lhs
+    constraint1
+      ?.lhs
       ?.addTerm("a", "X")
       ?.addTerm("b", "Y")
       ?.addTerm("c", "Z")
@@ -51,7 +51,8 @@ open class PrimitiveSolverSample {
 
     // Constraint 2 : X + Y >= 2
     val constraint2 = model.constraints.add(LPConstraint("Constraint 2"))
-    constraint2?.lhs
+    constraint2
+      ?.lhs
       ?.addTerm("X")
       ?.addTerm("Y")
     constraint2?.rhs?.add(2)
@@ -74,7 +75,8 @@ open class PrimitiveSolverSample {
     solver.initialize()
     val status = solver.solve()
     return if (status != LPSolutionStatus.UNKNOWN &&
-      status != LPSolutionStatus.INFEASIBLE && status != LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+      status != LPSolutionStatus.INFEASIBLE &&
+      status != LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
     ) {
       solver.model
     } else {

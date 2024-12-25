@@ -7,7 +7,5 @@ import com.lpapi.solver.scip.ScipLpSolver
 import com.lpapi.spi.LPSpi
 
 class ScipLPSpi : LPSpi<SCIPProblem> {
-  override fun create(model: LPModel): LPSolver<SCIPProblem> {
-    return ScipLpSolver(model)
-  }
+  override fun create(model: LPModel): LPSolver<SCIPProblem> = ScipLpSolver(model)
 }

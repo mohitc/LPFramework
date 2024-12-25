@@ -7,7 +7,5 @@ import com.lpapi.solver.glpk.GlpkLpSolver
 import com.lpapi.spi.LPSpi
 
 class GlpkLPSpi : LPSpi<GLPKProblem> {
-  override fun create(model: LPModel): LPSolver<GLPKProblem> {
-    return GlpkLpSolver(model)
-  }
+  override fun create(model: LPModel): LPSolver<GLPKProblem> = GlpkLpSolver(model)
 }

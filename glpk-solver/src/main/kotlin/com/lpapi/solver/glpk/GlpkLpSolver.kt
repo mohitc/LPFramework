@@ -1,6 +1,13 @@
 package com.lpapi.solver.glpk
 
-import com.lpapi.ffm.glpk.*
+import com.lpapi.ffm.glpk.GLPKBoundType
+import com.lpapi.ffm.glpk.GLPKFeatureStatus
+import com.lpapi.ffm.glpk.GLPKMessageLevel
+import com.lpapi.ffm.glpk.GLPKMipStatus
+import com.lpapi.ffm.glpk.GLPKObjective
+import com.lpapi.ffm.glpk.GLPKProblem
+import com.lpapi.ffm.glpk.GLPKVarKind
+import com.lpapi.ffm.glpk.GlpIocp
 import com.lpapi.model.LPConstraint
 import com.lpapi.model.LPModel
 import com.lpapi.model.LPModelResult
@@ -9,11 +16,11 @@ import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
-
 import kotlin.system.measureTimeMillis
 
-open class GlpkLpSolver(model: LPModel) : LPSolver<GLPKProblem>(model) {
-
+open class GlpkLpSolver(
+  model: LPModel,
+) : LPSolver<GLPKProblem>(model) {
   companion object {
     val solutionStatesWithoutResults =
       setOf(LPSolutionStatus.UNBOUNDED, LPSolutionStatus.INFEASIBLE, LPSolutionStatus.UNKNOWN)
@@ -25,33 +32,32 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<GLPKProblem>(model) {
 
   private var constraintMap: MutableMap<String, Int> = mutableMapOf()
 
-  private var cfg: GlpIocp = GlpIocp(
+  private var cfg: GlpIocp =
+    GlpIocp(
       preSolve = GLPKFeatureStatus.ON,
       messageLevel = GLPKMessageLevel.MSG_ON,
       binarize = GLPKFeatureStatus.ON,
-  )
+    )
 
-  override fun initModel(): Boolean {
-    return try {
-      log.info{ "Creating new GLPK problem instance with name ${model.identifier}"}
+  override fun initModel(): Boolean =
+    try {
+      log.info { "Creating new GLPK problem instance with name ${model.identifier}" }
       glpkModel.setModelName(model.identifier)
       true
     } catch (e: Exception) {
       log.error { "Error while initializing GLPK Problem instance $e" }
       false
     }
-  }
 
-  override fun getBaseModel(): GLPKProblem {
-    return glpkModel
-  }
+  override fun getBaseModel(): GLPKProblem = glpkModel
 
   override fun solve(): LPSolutionStatus {
     try {
       log.info { "Starting computation of model" }
-      val executionTime = measureTimeMillis {
-        glpkModel.intopt(cfg)
-      }
+      val executionTime =
+        measureTimeMillis {
+          glpkModel.intopt(cfg)
+        }
 
       val solnStatus: LPSolutionStatus = getSolutionStatus(glpkModel.mipStatus())
       log.info {
@@ -90,9 +96,16 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<GLPKProblem>(model) {
       try {
         log.error { "Initializing variable ($lpVar)" }
         val index: Int = glpkModel.addCols(1)
-        glpkModel.setColName( index, lpVar.identifier)
-        glpkModel.setColKind( index, getGlpVarType(lpVar.type))
-        val boundType: GLPKBoundType = if (lpVar.lbound == lpVar.ubound) GLPKBoundType.FIXED else GLPKBoundType.DOUBLE_BOUNDED
+        glpkModel.setColName(index, lpVar.identifier)
+        glpkModel.setColKind(index, getGlpVarType(lpVar.type))
+        val boundType: GLPKBoundType =
+          if (lpVar.lbound ==
+            lpVar.ubound
+          ) {
+            GLPKBoundType.FIXED
+          } else {
+            GLPKBoundType.DOUBLE_BOUNDED
+          }
         glpkModel.setColBounds(index, boundType, lpVar.lbound, lpVar.ubound)
         variableMap[lpVar.identifier] = index
       } catch (e: Exception) {
@@ -116,14 +129,15 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<GLPKProblem>(model) {
         }
         // Initialize constraint row in the model
         val index = glpkModel.addRows(1)
-        log.error {"Initialized row (Index: $index)"}
+        log.error { "Initialized row (Index: $index)" }
         glpkModel.setRowName(index, lpConstraint.identifier)
-        log.error {"Set row name (Index: $index, ${lpConstraint.identifier})"}
+        log.error { "Set row name (Index: $index, ${lpConstraint.identifier})" }
 
         // Get the constant contribution from the RHS
-        val constant: Double? = reducedConstraint.rhs.expression
-          .map { term -> if (term.coefficient != null) term.coefficient else 0.0 }
-          .reduce { u, v -> u!! + v!! }
+        val constant: Double? =
+          reducedConstraint.rhs.expression
+            .map { term -> if (term.coefficient != null) term.coefficient else 0.0 }
+            .reduce { u, v -> u!! + v!! }
 
         if (constant == null) {
           log.error {
@@ -200,22 +214,22 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<GLPKProblem>(model) {
     }
   }
 
-  internal fun getGlpVarType(type: LPVarType): GLPKVarKind {
-    return when (type) {
+  internal fun getGlpVarType(type: LPVarType): GLPKVarKind =
+    when (type) {
       LPVarType.BOOLEAN -> GLPKVarKind.BOOLEAN
       LPVarType.INTEGER -> GLPKVarKind.INTEGER
       LPVarType.DOUBLE -> GLPKVarKind.CONTINUOUS
       else -> GLPKVarKind.CONTINUOUS
     }
-  }
 
-  internal fun getSolutionStatus(solutionStatus: GLPKMipStatus?): LPSolutionStatus {
-    return when (solutionStatus) {
+  internal fun getSolutionStatus(solutionStatus: GLPKMipStatus?): LPSolutionStatus =
+    when (solutionStatus) {
       GLPKMipStatus.UNDEFINED -> LPSolutionStatus.UNKNOWN
       GLPKMipStatus.OPTIMAL -> LPSolutionStatus.OPTIMAL
       GLPKMipStatus.FEASIBLE -> LPSolutionStatus.TIME_LIMIT
       GLPKMipStatus.NOFEASIBLE -> LPSolutionStatus.INFEASIBLE
-      else -> { LPSolutionStatus.UNKNOWN }
+      else -> {
+        LPSolutionStatus.UNKNOWN
+      }
     }
-  }
 }

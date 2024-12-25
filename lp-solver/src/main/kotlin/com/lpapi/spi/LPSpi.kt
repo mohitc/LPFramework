@@ -23,7 +23,10 @@ object Solver {
   /** Function to look up SPI from the classpath and pick one to initialize a solver. In case no SPIs are found, the
    * method throws a RuntimeException
    */
-  fun create(model: LPModel): LPSolver<*> {
-    return loader.findFirst().map { spi -> spi.create(model) }.orElseThrow { RuntimeException(SOLVER_NOT_FOUND) }
-  }
+  fun create(model: LPModel): LPSolver<*> =
+    loader
+      .findFirst()
+      .map { spi ->
+        spi.create(model)
+      }.orElseThrow { RuntimeException(SOLVER_NOT_FOUND) }
 }
