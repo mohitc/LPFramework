@@ -17,7 +17,7 @@
     <module>gurobi-solver</module>
     <module>glpk-solver</module>
     <module>lp-solver-sample</module>
-<!--    <module>cplex-solver</module>-->
+    <!--    <module>cplex-solver</module>-->
     <module>lp-rw</module>
   </modules>
 
@@ -34,6 +34,8 @@
     <gurobi.skiptests>true</gurobi.skiptests>
     <ktlint.version>1.7.0</ktlint.version>
     <jacoco.version>0.8.6</jacoco.version>
+    <junit.version>5.7.0</junit.version>
+    <surefire.version>3.0.0-M5</surefire.version>
   </properties>
 
   <dependencies>
@@ -50,9 +52,9 @@
 
     <!--Test Dependencies -->
     <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-test-junit5</artifactId>
-      <version>${kotlin.version}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -71,6 +73,9 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
         <version>${kotlin.version}</version>
+        <configuration>
+          <jvmTarget>${java.version}</jvmTarget>
+        </configuration>
         <executions>
           <execution>
             <id>compile</id>
@@ -146,6 +151,11 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <!-- Surefire plugin to run Junit tests -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
       </plugin>
     </plugins>
   </build>

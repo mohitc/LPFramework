@@ -2,12 +2,10 @@ package com.lpapi.model
 
 import com.lpapi.model.enums.LPObjectiveType
 import mu.KotlinLogging
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPObjectiveTest {
@@ -57,12 +55,9 @@ class LPObjectiveTest {
     assertEquals(objectiveUnderTest, testObjective,
         "Default optimization direction is MAXIMIZE, and set changes the values correctly")
 
-
     testObjective = LPObjective(LPObjectiveType.MINIMIZE)
     testObjective.expression = expressionUnderTest
     assertEquals(objectiveUnderTest, testObjective,
         "Explicitly setting objective in the constructor results in a match")
-
-
   }
 }

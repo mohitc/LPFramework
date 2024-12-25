@@ -2,12 +2,10 @@ package com.lpapi.model
 
 import com.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPExpressionTest {
