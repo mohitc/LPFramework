@@ -33,11 +33,14 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     glp_iocp().apply {
       GLPK.glp_init_iocp(this)
       this.presolve = GLPKConstants.GLP_ON
+      this.msg_lev = GLPKConstants.GLP_MSG_ON
+      this.binarize = GLPKConstants.GLP_ON
     }
   }
 
   override fun initModel(): Boolean {
     return try {
+      log.info{ "Creating new GLPK problem instance with name ${model.identifier}"}
       glpkModel = GLPK.glp_create_prob()
       GLPK.glp_set_prob_name(glpkModel, model.identifier)
       true
@@ -56,7 +59,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       log.info { "Starting computation of model" }
       val executionTime = measureTimeMillis {
         val iocp = intOptConfig()
-        GLPK.glp_write_lp(glpkModel, null, "model.lp")
+//        GLPK.glp_write_lp(glpkModel, null, "model.lp")
         GLPK.glp_intopt(glpkModel, iocp)
       }
 
@@ -95,7 +98,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
-        log.debug { "Initializing variable ($lpVar)" }
+        log.error { "Initializing variable ($lpVar)" }
         val index: Int = GLPK.glp_add_cols(glpkModel, 1)
         GLPK.glp_set_col_name(glpkModel, index, lpVar.identifier)
         GLPK.glp_set_col_kind(glpkModel, index, getGlpVarType(lpVar.type))
@@ -115,7 +118,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.debug { "Initializing Constraint ($lpConstraint)" }
+        log.error { "Initializing Constraint ($lpConstraint)" }
         val reducedConstraint: LPConstraint? = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
@@ -179,6 +182,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
   override fun initObjectiveFunction(): Boolean {
     return try {
+      log.error { "Initializing objective function" }
       GLPK.glp_set_obj_name(glpkModel, "Objective Function")
       when (model.objective.objective) {
         LPObjectiveType.MINIMIZE -> GLPK.glp_set_obj_dir(glpkModel, GLPKConstants.GLP_MIN)
@@ -201,6 +205,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
           GLPK.glp_set_obj_coef(glpkModel, variableMap[it.lpVarIdentifier]!!, it.coefficient!!)
         }
       }
+      log.error { "Objective function Initialized" }
       true
     } catch (e: Exception) {
       log.error { "Error while initializing Objective function : $e" }

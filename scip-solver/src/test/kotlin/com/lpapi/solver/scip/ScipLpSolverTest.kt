@@ -10,6 +10,7 @@ import com.lpapi.model.enums.LPVarType
 import jscip.Constraint
 import jscip.SCIP_Vartype
 import jscip.Scip
+import jscip.Solution
 import jscip.Variable
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,6 +39,7 @@ class ScipLpSolverTest {
     val mockedConstraint2 = mock<Constraint> {}
     val createdConstraints = mutableSetOf<Constraint>()
     val createdObjectiveCoefficients = mutableMapOf<Variable, Number>()
+    val mockedSolution = mock<Solution> {}
     const val SCIP_INF = 1E20
   }
 
@@ -492,12 +494,12 @@ class ScipLpSolverTest {
           true,
           mutableMapOf(
               Pair("X", mockedVarX),
-                  Pair("Y", mockedVarY)
+              Pair("Y", mockedVarY)
           ),
           mutableMapOf<Variable, Number>(
               Pair(mockedVarX, 3.0),
               Pair(mockedVarY, 4.0),
-              )
+          )
       ),
       Arguments.of(
           "Reduced expression with minimization objective  5x + 2y -2x - 2y",
@@ -577,4 +579,8 @@ class ScipLpSolverTest {
     assertEquals(gotVarMap, wantVarMap, "solver.variableMap")
     assertEquals(createdObjectiveCoefficients, wantObjectiveCoefficients, "solver.changeObjVal calls")
   }
+}
+
+fun testExtractResults() {
+
 }
