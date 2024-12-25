@@ -21,10 +21,12 @@
     <!--    <module>cplex-solver</module>-->
     <module>scip-solver</module>
     <module>lp-rw</module>
+    <module>scip-ffm</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <kotlin.code.style>official</kotlin.code.style>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <java.version>23</java.version>
     <kotlin.version>2.1.0-RC</kotlin.version>
@@ -45,6 +47,8 @@
     <mockito.version>5.14.2</mockito.version>
     <maven-flatten-plugin.version>1.6.0</maven-flatten-plugin.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <jextract-maven-plugin.version>0.4.1</jextract-maven-plugin.version>
+    <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
   </properties>
 
   <dependencies>
