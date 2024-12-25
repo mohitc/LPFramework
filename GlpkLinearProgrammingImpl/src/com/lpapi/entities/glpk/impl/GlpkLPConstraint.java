@@ -80,4 +80,8 @@ public class GlpkLPConstraint extends LPConstraint<Integer> {
       throw new LPModelException("Error whilie initializing LP Variable: " + e.getMessage());
     }
   }
+
+  public String toString () {
+    return super.toString();
+  }
 }
