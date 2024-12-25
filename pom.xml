@@ -36,6 +36,8 @@
     <jacoco.version>0.8.6</jacoco.version>
     <junit.version>5.7.0</junit.version>
     <surefire.version>3.0.0-M5</surefire.version>
+    <build-helper.version>1.9.1</build-helper.version>
+    <failsafe.version>2.18</failsafe.version>
   </properties>
 
   <dependencies>
@@ -156,6 +158,12 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
+        <configuration>
+          <!-- Excludes integration tests when unit tests are run -->
+          <excludes>
+            <exclude>**/IT*.*</exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -49,11 +49,11 @@ example:
 
 ## Running Test Problem instances
 
-Sample problem instances can be found as tests in the cplex-solver project, and are disabled by default. In order to
-enable the tests, go to the parent pom and set the property:
+Sample problem instances can be found as integration tests in the cplex-solver project, and are disabled by default. In
+order to enable the tests, go to the parent pom and set the property:
 
 ```xml    
-<cplex.skiptests>true</cplex.skiptests>
+<cplex.skiptests>false</cplex.skiptests>
 ```
 
 In order to include the JVM arguments when running the tests, either include them as an environment variable, e.g.
@@ -66,11 +66,11 @@ export MAVEN_OPTS
 After the environment variables are set, run the target:
 
 ```
-mvn clean compile test
+mvn clean verify
 ```
 
 Another option is to include the path to the library directly in the command line:
 
 ```
-mvn clean compile test -DargLine="-Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux"
+mvn clean verify -DargLine="-Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux"
 ```
