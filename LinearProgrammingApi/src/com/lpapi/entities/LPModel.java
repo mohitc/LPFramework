@@ -52,6 +52,8 @@ public abstract class LPModel <X, Y, Z> {
 
   private LPSolutionStatus solutionStatus;
 
+  protected Map<LPSolutionParams, Object> solnParams = new HashMap<>();
+
   public LPModel(String identifier) throws LPModelException {
     createLPVarGroup(DEF_VAR_GROUP, "Default variable group used in the model");
     createLPConstraintGroup(DEF_CONSTR_GROUP, "Default constraint group used in the model");
@@ -297,6 +299,13 @@ public abstract class LPModel <X, Y, Z> {
     return Collections.unmodifiableCollection(lpConstraintIdentifiers.values());
   }
 
+  public Set<LPConstraint> getLPConstraints(String constrGrpIdentifier) throws LPConstraintGroupException {
+    //check if constraint Group exists
+    LPConstraintGroup localGrp = getLPConstraintGroup(constrGrpIdentifier);
+    return Collections.unmodifiableSet(lpConstraints.get(localGrp));
+  }
+
+
   public String getIdentifier() {
     return identifier;
   }
@@ -409,7 +418,16 @@ public abstract class LPModel <X, Y, Z> {
     return objType;
   }
 
-  protected abstract Map<LPSolutionParams, Object> getModelSolutionParams();
+  public Map<LPSolutionParams, Object> getModelSolutionParams() {
+    return Collections.unmodifiableMap(solnParams);
+  }
+
+  //method only to be used when importing results
+  public void setModelSolutionParams(Map<LPSolutionParams, Object> solnParams) {
+    if (solnParams!=null) {
+      this.solnParams = new HashMap<>(solnParams);
+    }
+  }
 
   public LPSolutionStatus getSolutionStatus() throws LPModelException {
     return getSolutionParam(LPSolutionParams.STATUS, LPSolutionStatus.class);

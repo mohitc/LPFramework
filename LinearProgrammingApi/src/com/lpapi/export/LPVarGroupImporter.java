@@ -13,31 +13,25 @@ public abstract class LPVarGroupImporter {
 
   private LPModel model;
 
-  private LPVarGroup lpVarGroup;
+  private String groupID;
 
-  public LPVarGroupImporter(LPModel model, String identifier, String description) throws LPImportException {
+  public LPVarGroupImporter(LPModel model, String identifier) throws LPImportException {
     if (model==null)
       throw new LPImportException("Model cannot be null");
     if (identifier==null)
       throw new LPImportException("Identifier cannot be null");
 
-    //check if LP constraints group by the identifier can be created
-    try {
-      lpVarGroup = model.createLPVarGroup(identifier, description);
-      this.model = model;
-    } catch (LPVarGroupException e) {
-      log.error("Error while creating the LP Variable group");
-      throw new LPImportException(e.getMessage());
-    }
+    this.groupID = identifier;
+    this.model = model;
   }
 
   public LPModel getModel() {
     return model;
   }
 
-  public LPVarGroup getLpVarGroup() {
-    return lpVarGroup;
-  }
-
   public abstract void importGroup() throws LPImportException;
+
+  public String getGroupID() {
+    return groupID;
+  }
 }

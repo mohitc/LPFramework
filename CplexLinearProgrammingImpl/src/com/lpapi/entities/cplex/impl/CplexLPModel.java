@@ -17,14 +17,10 @@ public class CplexLPModel extends LPModel<IloCplex, IloNumVar, IloConstraint> {
 
   private LPConstraintFactory<IloConstraint> cplexConstraintFactory;
 
-  private Map<LPSolutionParams, Object> solnParams;
-
   public CplexLPModel(String identifier) throws LPModelException {
     super(identifier);
     cplexVarFactory = new CplexLPVarFactory();
     cplexConstraintFactory = new CplexLPConstraintFactory();
-    solnParams = new HashMap<>();
-
   }
 
   @Override
@@ -124,8 +120,4 @@ public class CplexLPModel extends LPModel<IloCplex, IloNumVar, IloConstraint> {
     }
   }
 
-  @Override
-  protected Map<LPSolutionParams, Object> getModelSolutionParams() {
-    return Collections.unmodifiableMap(solnParams);
-  }
 }

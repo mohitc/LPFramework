@@ -18,8 +18,6 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
 
   private LPConstraintFactory<GRBConstr> grbConstraintFactory;
 
-  private Map<LPSolutionParams, Object> solnParams;
-
   public GurobiLPModel(String identifier) throws LPModelException {
     super(identifier);
     grbVarFactory = new GurobiLPVarFactory();
@@ -148,11 +146,6 @@ public class GurobiLPModel extends LPModel<GRBModel, GRBVar, GRBConstr> {
         }
       }
     }
-  }
-
-  @Override
-  protected Map<LPSolutionParams, Object> getModelSolutionParams() {
-    return Collections.unmodifiableMap(solnParams);
   }
 
 }

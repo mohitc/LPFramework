@@ -12,7 +12,7 @@ public class LPExpressionTermDTO {
 
   public LPExpressionTermDTO(LPExpressionTerm term) {
     this.coeff = term.getCoefficient();
-    this.varID = term.getVar().getIdentifier();
+    this.varID = (term.getVar()!=null)?term.getVar().getIdentifier():null;
   }
 
   public double getCoeff() {
