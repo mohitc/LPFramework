@@ -1,13 +1,12 @@
 package com.lpapi.export.jsonfile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lpapi.entities.LPConstraintGroup;
 import com.lpapi.entities.LPModel;
 import com.lpapi.exception.LPExportException;
 import com.lpapi.exception.LPModelException;
 import com.lpapi.export.LPConstraintGroupExporter;
 import com.lpapi.export.jsonfile.exportdto.LPConstraintGroupDTO;
-import com.lpapi.export.jsonfile.exportdto.LPVarGroupDTO;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

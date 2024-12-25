@@ -1,5 +1,6 @@
 package com.lpapi.export.jsonfile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lpapi.entities.LPConstantGroup;
 import com.lpapi.entities.LPConstraintGroup;
 import com.lpapi.entities.LPModel;
@@ -8,7 +9,6 @@ import com.lpapi.exception.LPExportException;
 import com.lpapi.exception.LPModelException;
 import com.lpapi.export.LPModelExporter;
 import com.lpapi.export.jsonfile.exportdto.LPModelDTO;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
