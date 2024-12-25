@@ -38,11 +38,19 @@ public class LPExpression {
     expressionList.add(new LPExpressionTerm(constant));
   }
 
+  public void addTerm (LPConstant constant) {
+    expressionList.add(new LPExpressionTerm(constant));
+  }
+
   public void addTerm (LPVar var) {
     expressionList.add(new LPExpressionTerm(1.0, var));
   }
 
   public void addTerm (double constant, LPVar var) throws LPExpressionException {
+    expressionList.add(new LPExpressionTerm(constant, var));
+  }
+
+  public void addTerm (LPConstant constant, LPVar var) {
     expressionList.add(new LPExpressionTerm(constant, var));
   }
 

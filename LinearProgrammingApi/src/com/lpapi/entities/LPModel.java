@@ -22,6 +22,8 @@ public abstract class LPModel <X, Y, Z> {
 
   private static final String DEF_CONSTR_GROUP = "Default_Constraints";
 
+  private static final String DEF_CONST_GROUP = "Default_Constants";
+
   private String identifier;
 
   private Map<String, LPVarGroup> lpVarGroup = new HashMap<>();
@@ -36,6 +38,12 @@ public abstract class LPModel <X, Y, Z> {
 
   private Map<LPConstraintGroup, Set<LPConstraint>> lpConstraints = new HashMap<>();
 
+  private Map<String, LPConstantGroup> lpConstantGroup = new HashMap<>();
+
+  private Map<String, LPConstant> lpConstantIdentifiers = new HashMap<>();
+
+  private Map<LPConstantGroup, Set<LPConstant>> lpConstants = new HashMap<>();
+
   private LPObjType objType;
 
   private LPExpression objFn;
@@ -45,11 +53,93 @@ public abstract class LPModel <X, Y, Z> {
   public LPModel(String identifier) throws LPModelException {
     createLPVarGroup(DEF_VAR_GROUP, "Default variable group used in the model");
     createLPConstraintGroup(DEF_CONSTR_GROUP, "Default constraint group used in the model");
+    createLPConstantGroup(DEF_CONST_GROUP, "Default constant group used in the model");
     if (identifier==null) {
       this.identifier = "";
     } else {
       this.identifier = identifier;
     }
+  }
+
+  public LPConstantGroup createLPConstantGroup(String identifier, String description) throws LPConstantGroupException {
+    return createLPConstantGroup(identifier, description, null, null);
+  }
+
+  public LPConstantGroup createLPConstantGroup(String identifier, String description, LPNameGenerator<?> generator, LPGroupInitializer initializer) throws LPConstantGroupException {
+    if (identifier==null) {
+      throw new LPConstantGroupException("Identifier cannot be null");
+    }
+    if (lpConstantGroup.containsKey(identifier)) {
+      throw new LPConstantGroupException("Identifier (" + identifier + ") already exists");
+    }
+
+    LPConstantGroup group = new LPConstantGroup(this, identifier, description, generator, initializer);
+    log.info("Created new LP Constant Group {}", group);
+    lpConstantGroup.put(identifier, group);
+    lpConstants.put(group, new HashSet<LPConstant>());
+    return group;
+  }
+
+  public LPConstantGroup getLPConstantGroup(String identifier) throws LPConstantGroupException {
+    if (identifier==null) {
+      throw new LPConstantGroupException("Identifier cannot be null");
+    }
+    if (lpConstantGroup.containsKey(identifier)) {
+      return lpConstantGroup.get(identifier);
+    } else
+      throw new LPConstantGroupException("Constant Group Identifier (" + identifier +") not found in the model");
+  }
+
+  public Set<String> getLPConstantGroupIDs() {
+    return Collections.unmodifiableSet(lpConstantGroup.keySet());
+  }
+
+  public LPConstant createLpConstant(String identifier, double value) throws LPConstantException {
+    try {
+      return createLpConstant(identifier, value, getLPConstantGroup(DEF_CONST_GROUP));
+    } catch (LPConstantGroupException e) {
+      log.error("Default Constant Group not created, exiting", e);
+      System.exit(1);
+      return null;
+    }
+
+  }
+
+  public LPConstant createLpConstant(String identifier, double value, LPConstantGroup group) throws LPConstantException, LPConstantGroupException {
+    //check if var group is valid
+    LPConstantGroup used = getLPConstantGroup(group.getIdentifier());
+    LPConstant constant;
+    synchronized (lpConstantIdentifiers) {
+      if (identifier==null)
+        throw new LPConstantException("Identifier cannot be null");
+      if (lpConstantIdentifiers.containsKey(identifier))
+        throw new LPConstantException("Constant with identifier (" + identifier + ") already exists");
+
+      constant = new LPConstant(identifier, value);
+      //If no exception was throws, variable is valid, add to model
+      lpConstantIdentifiers.put(identifier, constant);
+      //add variable to set of corresponding var group
+      Set<LPConstant> constants = lpConstants.get(used);
+      constants.add(constant);
+      log.info("Constant created {}", this);
+    }
+    return constant;
+  }
+
+  public LPConstant getLPConstant(String identifier) throws LPConstantException {
+    if (identifier==null)
+      throw new LPConstantException("Identifier cannot be null");
+    if (lpConstantIdentifiers.containsKey(identifier)) {
+      return lpConstantIdentifiers.get(identifier);
+    } else {
+      throw new LPConstantException("Constant with identifier " + identifier + " not found in model");
+    }
+  }
+
+  public Set<LPConstant> getLPConstants(String constGrpIdentifier) throws LPConstantGroupException {
+    //check if var Group exists
+    LPConstantGroup localGrp = getLPConstantGroup(constGrpIdentifier);
+    return Collections.unmodifiableSet(lpConstants.get(localGrp));
   }
 
   public LPVarGroup createLPVarGroup(String identifier, String description) throws LPVarGroupException {
