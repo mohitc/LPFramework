@@ -33,7 +33,7 @@ class GplkPrimitiveSolverSampleTest : PrimitiveSolverSample() {
     assertNotNull(model, "Model should be computed successfully.")
     assertEquals(model.variables.get("X")?.result, 1, "X should be = 1")
     assertEquals(model.variables.get("Y")?.result, 1, "Y should be = 1")
-    assertEquals(model.variables.get("Z")?.result, 0, "Z should be = 1")
+    assertEquals(model.variables.get("Z")?.result, 0, "Z should be = 0")
   }
 
 }
