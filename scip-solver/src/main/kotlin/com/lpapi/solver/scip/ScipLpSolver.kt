@@ -71,6 +71,22 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
     return scipModel
   }
 
+  private fun releaseModelVars() {
+    log.info { "Releasing variables from SCIP" }
+    variableMap.entries.forEach { p ->
+      log.info { "Releasing variable ${p.key}" }
+      scipModel.releaseVar(p.value)
+    }
+  }
+
+  private fun releaseModelConstraints() {
+    log.info { "Releasing constraints from SCIP" }
+    constraintMap.entries.forEach { p ->
+      log.info { "Releasing constraint ${p.key}" }
+      scipModel.releaseCons(p.value)
+    }
+  }
+
   override fun solve(): LPSolutionStatus {
     try {
       // set parameters
@@ -79,7 +95,10 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
       scipModel.setLongintParam("limits/totalnodes", 1000)
       scipModel.hideOutput(false)
 
+      // Release variables and constraints as they are not required anymore
 
+      //releaseModelVars() -- Once released the results for the individual variables cannot be extracted anymore
+      releaseModelConstraints()
       // solve problem
       val executionTime = measureTimeMillis {
         scipModel.solve()
@@ -208,7 +227,6 @@ open class ScipLpSolver(model: LPModel): LPSolver<Scip>(model) {
         return false
       }
     }
-//    constraintMap.values.forEach { constr -> scipModel.releaseCons(constr) }
     return true
   }
 
