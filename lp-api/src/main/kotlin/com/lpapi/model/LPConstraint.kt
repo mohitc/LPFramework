@@ -19,4 +19,27 @@ class LPConstraint constructor(
   constructor(identifier: String) : this(identifier, LPExpression(), LPOperator.GREATER_EQUAL, LPExpression())
 
   override fun toString(): String = "$identifier: $lhs ${operator.shortDesc} $rhs"
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as LPConstraint
+
+    if (identifier != other.identifier) return false
+    if (lhs != other.lhs) return false
+    if (operator != other.operator) return false
+    if (rhs != other.rhs) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = identifier.hashCode()
+    result = 31 * result + lhs.hashCode()
+    result = 31 * result + operator.hashCode()
+    result = 31 * result + rhs.hashCode()
+    return result
+  }
+
 }

@@ -1,5 +1,7 @@
 package com.lpapi.model
 
+import com.lpapi.model.enums.LPObjectiveType
+import com.lpapi.model.enums.LPOperator
 import com.lpapi.model.enums.LPVarType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -10,141 +12,150 @@ import org.junit.jupiter.api.TestInstance
 class LPModelTest {
 
   @Test
-  @DisplayName("Validating constraint groups")
-  fun lpModelValidationTest() {
-    val lpModel = LPModel("testModel")
-    Assertions.assertNotNull(
-      lpModel.constants.add("group1", LPConstant("constant1", 1.0)),
-      "Constant with unique identifier should be added in model"
-    )
-    Assertions.assertNotNull(
-      lpModel.constants.add("group2", LPConstant("constant2", 1.0)),
-      "Constant with unique identifier should be added in model"
-    )
+  @DisplayName("Test reduce for objective functions")
+  fun testReduceObjective() {
+    val objective = LPObjective()
+    val model = LPModel()
 
-    Assertions.assertEquals(
-      lpModel.constants.grouping.keys.size, 2,
-      "Constant should contain 2 groups"
-    )
 
-    Assertions.assertNull(
-      lpModel.constants.add(LPConstant("constant1", 1.0)),
-      "Constant with same identifier but different group should not be supported"
-    )
-    Assertions.assertNotNull(
-      lpModel.constants.add(LPConstant("constant3", 1.0)),
-      "Constant with unique identifier should be added in model"
-    )
+    // empty objective is reduced successfully
+    Assertions.assertNotNull(model.reduce(objective), "Empty objective can be reduced correctly")
 
-    Assertions.assertEquals(
-      lpModel.constants.grouping.keys.size, 3,
-      "Constant with no group supplied should be added to default group"
-    )
-    Assertions.assertNotNull(
-      lpModel.constants.grouping[LPModel.DEFAULT_CONSTANT_GROUP],
-      "Default group should be created for constants if no group identifier is supplied"
-    )
-    lpModel.constants.grouping[LPModel.DEFAULT_CONSTANT_GROUP]?.contains("constant3")?.let {
-      Assertions.assertTrue(
-        it,
-        "Constant with no group supplied should be added to default group"
-      )
+    objective.expression.addTerm("x")
+    Assertions.assertNull(model.reduce(objective), "Failed expression reduction should return null value")
+
+    model.variables.add(LPVar("x", LPVarType.BOOLEAN))
+    model.variables.add(LPVar("y", LPVarType.BOOLEAN))
+    model.constants.add(LPConstant("c", 2))
+    objective.expression.addTerm(2, "x")
+        .add(3)
+        .addTerm("c", "y")
+        .addTerm(2, "y")
+    val expectedObjective = LPObjective()
+    expectedObjective.expression
+        .add(3)
+        .addTerm(3, "x")
+        .addTerm(4, "y")
+
+    LPObjectiveType.values().forEach {
+      objective.objective = it
+      expectedObjective.objective = it
+      Assertions.assertEquals(model.reduce(objective), expectedObjective,
+          "Reduced objective is set correctly in the model, and the objective type is maintained")
+      Assertions.assertNotEquals(model.reduce(objective), objective,
+          "Reduction does not alter original objective")
     }
-    lpModel.validate()
   }
 
   @Test
-  @DisplayName("Validating variables in the model")
-  fun testVariables() {
-    var lpModel = LPModel("testModel")
-    lpModel.variables.add(LPVar("a", LPVarType.BOOLEAN, -2.0, -1.0))
-    Assertions.assertFalse(lpModel.validate(), "Boolean variable with invalid bounds should fail validation")
-    lpModel = LPModel("testModel")
-    lpModel.variables.add(LPVar("a", LPVarType.BOOLEAN, 1.1, 3.0))
-    Assertions.assertFalse(lpModel.validate(), "Boolean variable with invalid bounds should fail validation")
-    lpModel = LPModel("testModel")
-    lpModel.variables.add(LPVar("a", LPVarType.DOUBLE, 1.1, 1.0))
-    Assertions.assertFalse(lpModel.validate(), "Variable with lower bound greater than the upper bound should" +
-        " fail validation")
+  @DisplayName("Test reduce for expressions")
+  fun testReduceExpression() {
+    val model = LPModel()
 
-    lpModel = LPModel("testModel")
-    lpModel.variables.add(LPVar("a", LPVarType.INTEGER, 2.1, 2.2))
-    Assertions.assertFalse(lpModel.validate(), "Integer variable should have a value that is covered in ")
+    var invalidExpr = LPExpression()
+    invalidExpr.expression.add(0,
+        LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = null))
+    Assertions.assertNull(model.reduce(invalidExpr),
+        "Expressions with invalid terms (all values null) are not reduced")
+    // Assume variable is present
+    model.variables.add(LPVar("invalid-var", LPVarType.BOOLEAN))
+    invalidExpr = LPExpression()
+    invalidExpr.expression.add(0,
+        LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier ="invalid-var"))
+    Assertions.assertNull(model.reduce(invalidExpr), "Expressions with invalid coefficients are not reduced")
 
-    lpModel = LPModel("testModel")
-    lpModel.variables.add(LPVar("a", LPVarType.INTEGER, 1.9, 2.0))
-    Assertions.assertTrue(lpModel.validate(), "Integer bounding should pass if variables have at least one " +
-        "integer value between their bounds")
+    val expr = LPExpression()
+    val expectedExpression = LPExpression()
+
+    Assertions.assertNotNull(model.reduce(expr), "Empty expression can be reduced")
+
+    expr.addTerm("x")
+    Assertions.assertNull(model.reduce(expr), "Expression with undefined variables is not reduced")
+
+    model.variables.add(LPVar("x", LPVarType.BOOLEAN))
+    Assertions.assertNotNull(model.reduce(expr),
+        "Expressions where constant terms and vars are defined can be reduced")
+    expr.addTerm("x")
+    expectedExpression.addTerm(2, "x")
+    Assertions.assertEquals(model.reduce(expr), expectedExpression,
+        "Reduction combines multiple terms with constant values into a single term")
+
+    expr.add(1)
+    Assertions.assertNotNull(model.reduce(expr),
+        "Expression with a numerical terms can be reduced")
+
+    expr.add("c")
+    Assertions.assertNull(model.reduce(expr),
+        "Expression with a constant terms that is not defined is not reduced")
+    model.constants.add(LPConstant("c", 1))
+
+    Assertions.assertNotNull(model.reduce(expr), "Expressions where constant terms are defined can be reduced")
+
+    expr.add(2).add("d")
+    model.constants.add(LPConstant("d", 2))
+    expectedExpression.add(6)
+    Assertions.assertEquals(model.reduce(expr), expectedExpression,
+        "Reduction combines the constant identifiers and the fixed value into a single number")
+
+    model.variables.add(LPVar("y", LPVarType.BOOLEAN))
+    expr.addTerm("b", "y")
+    Assertions.assertNull(model.reduce(expr),
+        "Expression with an undefined constant identifier is not reduced")
+    model.constants.add(LPConstant("b", 2))
+    Assertions.assertNotNull(model.reduce(expr),
+        "Expression with all variables and constant identifiers defined is reduced")
+    expr.addTerm(3, "y")
+    expectedExpression.addTerm(5, "y")
+    Assertions.assertEquals(model.reduce(expr), expectedExpression,
+        "Reduction combines multiple terms with a combination of constant parameters and fixed values")
+    Assertions.assertNotEquals(model.reduce(expr), expr,
+        "Reduction does not alter original expression")
   }
 
   @Test
-  @DisplayName("Validating constraints in the model")
-  fun testConstraints() {
-    var lpModel = LPModel("testModel")
-    lpModel.constraints.add(LPConstraint("emptyConstraint"))
-    Assertions.assertFalse(lpModel.validate(), "Constraint with empty LHS or RHS should fail validation")
+  @DisplayName("Test reduce for constraints")
+  fun testReduceConstraint() {
+    val model = LPModel()
+    val constraint = LPConstraint("constraint")
+    val expectedConstraint = LPConstraint("constraint")
 
-    lpModel = LPModel("testModel")
-    lpModel.constraints.add(LPConstraint("emptyConstraint"))?.lhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with empty LHS or RHS should fail validation")
+    Assertions.assertNull(model.reduce(constraint), "Constraint with Empty terms on both sides fails")
+    constraint.lhs.add(-2)
+    Assertions.assertNull(model.reduce(constraint), "Constraint with no variables fails")
+    constraint.rhs.addTerm(-1.0, "x")
+    Assertions.assertNull(model.reduce(constraint), "Constraint with variable not defined in the model fails")
+    model.variables.add(LPVar("x", LPVarType.BOOLEAN))
+    Assertions.assertNotNull(model.reduce(constraint), "Constraint with var and constant is reduced properly")
 
-    lpModel = LPModel("testModel")
-    lpModel.constraints.add(LPConstraint("emptyConstraint"))?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with empty LHS or RHS should fail validation")
+    constraint.lhs.add("d")
+    Assertions.assertNull(model.reduce(constraint), "Constraint with undefined constant identifier fails")
+    model.constants.add(LPConstant("d", 1))
+    Assertions.assertNotNull(model.reduce(constraint),
+        "Constraint with var and constant/constant Identifier is reduced properly")
 
-    lpModel = LPModel("testModel")
-    var constraint: LPConstraint? = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
-    constraint?.lhs?.add(1.0)
-    constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with non-empty LHS and RHS but with no variables " +
-        "should fail validation")
+    constraint.lhs.addTerm("c", "x")
+    Assertions.assertNull(model.reduce(constraint),
+        "Constraint with undefined constant identifier for variable fails")
+    model.constants.add(LPConstant("c", 3))
+    Assertions.assertNotNull(model.reduce(constraint),
+        "Constraint with var and constant/constant Identifier is reduced properly")
 
-    lpModel = LPModel("testModel")
-    constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
-    lpModel.variables.add(LPVar("x", LPVarType.BOOLEAN))
-    constraint?.lhs?.add(1.0)?.addTerm(2.0, "x")
-    constraint?.rhs?.add(1.0)
-    Assertions.assertTrue(lpModel.validate(), "Constraint with non-empty LHS and RHS and with defined " +
-        "variable should pass validation")
+    model.variables.add(LPVar("y", LPVarType.BOOLEAN))
+    constraint.rhs.addTerm(2, "y")
+    constraint.lhs.addTerm(3, "y")
 
-    // Constraint with both constant and identifier defined should fail validation
-    lpModel = LPModel("testModel")
-    lpModel.constants.add(LPConstant("c", 1.1))
-    constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
-    constraint?.lhs?.expression?.add(LPExpressionTerm(1.0, null, "c"))
-    constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with both coefficient and identifier defined " +
-        "should fail validation")
+    expectedConstraint.lhs
+        .addTerm(4, "x") //(c+1) x
+        .addTerm("y")            // (3-2) y
+    expectedConstraint.rhs.add(1)             //(2-d)
 
-    // Conditional checks on expressions to check if all terms are defined
-    lpModel = LPModel("testModel")
-    constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
-    constraint?.lhs?.addTerm("a", "x")?.addTerm("b", "y")
-    constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with no variables and constants defined should " +
-        "fail validation")
-    lpModel.variables.add(LPVar("x", LPVarType.BOOLEAN))
-    lpModel.variables.add(LPVar("y", LPVarType.BOOLEAN))
-    Assertions.assertFalse(lpModel.validate(), "Constraint with no constants defined should fail validation")
-    lpModel.constants.add(LPConstant("a", 1.1))
-    lpModel.constants.add(LPConstant("b", 1.1))
-    Assertions.assertTrue(lpModel.validate(), "Constraint with all variables and constants defined should " +
-        "pass validation")
-    val constant = LPConstant("c", 1.0)
-    constraint?.rhs?.add(constant)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with no constants defined should fail validation")
-    lpModel.constants.add(constant)
-    Assertions.assertTrue(lpModel.validate(), "Constraint with all variables and constants defined should " +
-        "pass validation")
-
-    // Conditional checks on expressions to check if all terms are defined when expressions use constants
-    constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint2"))
-    constraint?.lhs?.addTerm(1.0, "x2")?.addTerm(2.0, "y2")
-    constraint?.rhs?.add(1.0)
-    Assertions.assertFalse(lpModel.validate(), "Constraint with no variables defined should fail validation")
-    lpModel.variables.add(LPVar("x2", LPVarType.BOOLEAN))
-    lpModel.variables.add(LPVar("y2", LPVarType.BOOLEAN))
-    Assertions.assertTrue(lpModel.validate(), "Constraint with all variables and constants defined should " +
-        "pass validation")
+    LPOperator.values().forEach {
+      constraint.operator = it
+      expectedConstraint.operator = it
+      Assertions.assertEquals(model.reduce(constraint), expectedConstraint,
+          "Constraint is reduced correctly, and preserves the direction of change")
+      Assertions.assertNotEquals(model.reduce(constraint), constraint,
+          "Reduced value is not a copy of the original constraint")
+    }
   }
 }

@@ -87,4 +87,18 @@ class LPExpression {
   override fun toString(): String = expression.stream().map { v -> v.toString() }
     .reduce { acc, expTerm -> "$acc + $expTerm" }
     .orElse("")
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as LPExpression
+
+    return expression.toSet() == other.expression.toSet()
+  }
+
+  override fun hashCode(): Int {
+    return expression.toSet().hashCode()
+  }
+
 }
