@@ -8,25 +8,26 @@ import gurobi.GRBException
 import gurobi.GRBModel
 import mu.KotlinLogging
 
-class GurobiLpSolver : LPSolver<GRBModel> {
+class GurobiLpSolver(model: LPModel) : LPSolver<GRBModel>(model) {
 
   private val log = KotlinLogging.logger("GurobiLpSolver")
 
-  private var model : GRBModel? = null
+  private var grbModel : GRBModel? = null
 
-  override fun initialize(model: LPModel) {
+  override fun initialize() : Boolean {
     try {
       val env = GRBEnv()
-      this.model = GRBModel(env)
+      this.grbModel = GRBModel(env)
 //      initVars(model)
 //      initConstraints(model)
     } catch (e: GRBException) {
       log.error("Error in generating Gurobi model", e)
     }
+    return false
   }
 
   override fun getBaseModel(): GRBModel? {
-    return model
+    return grbModel
   }
 
   override fun solve(): LPSolutionStatus {

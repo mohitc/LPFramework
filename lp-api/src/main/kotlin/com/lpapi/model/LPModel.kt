@@ -31,6 +31,88 @@ class LPModel (val identifier: String){
 
   private val constraintValidator : List<LPParameterValidator<LPConstraint>> = listOf(LPParamIdValidator(), LPConstraintValidator())
 
+  /**Default to empty objective */
+  val objective : LPObjective = LPObjective()
+
+  /** Function to reduce the objective function expression to the format where all variables have a single double coefficient,
+   * and a single constant term. In case the value for any constant identifier is not found in the model, a null value is returned
+   */
+  fun reduce(objective: LPObjective) : LPObjective? {
+    val varMap : MutableMap<String, Double> = mutableMapOf()
+    var constant = 0.0
+    var hasConstantTerm = false
+    objective.expression.expression.forEach{ term ->
+      if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
+        log.error { "Objective has term with constant identifier ${term.lpConstantIdentifier} which is not defined in the model" }
+        return null
+      }
+      if (term.isConstant()) {
+        hasConstantTerm = true
+        //Sum up all constant terms
+        constant += term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!
+      } else
+      // For each term in the expression, create a map that includes the variable identifier and the double value computed till now
+        varMap[term.lpVarIdentifier!!] = (varMap.getOrPut(term.lpVarIdentifier, { 0.0 })
+            + (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!))
+    }
+
+    //Initialize new objective function
+    val reducedObjective = LPObjective(objective.objective)
+    if (hasConstantTerm)
+      reducedObjective.expression.add(constant)
+    varMap.entries.forEach { entry -> reducedObjective.expression.addTerm(entry.value, entry.key) }
+    return reducedObjective
+  }
+
+  /** Function to reduce the constraint to the format where all variable terms are on the LHS, with single instances of a
+   * variable identifier, and the constant on the RHS. All fields with constant identifiers are replaced with the actual
+   * constant values. E.g. aX + bY + c < mX + n => (a-m)X + bY < n-C
+   * In case the value for any constant identifier is not found in the model, or if the expression does not have any
+   * variables, a null value is returned
+   */
+  fun reduce(constraint: LPConstraint) : LPConstraint? {
+    val varMap : MutableMap<String, Double> = mutableMapOf()
+    var constant = 0.0
+    constraint.lhs.expression.forEach{ term ->
+      if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
+        log.error { "Constraint ${constraint.identifier} has term with constant identifier ${term.lpConstantIdentifier} which is not defined in the model" }
+        return null
+      }
+      if (term.isConstant()) {
+        //LHS constant terms are moved to the RHS
+        constant -= term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!
+      } else
+        // For each term in the LHS, create a map that includes the variable identifier and the double value computed till now
+        varMap[term.lpVarIdentifier!!] = (varMap.getOrPut(term.lpVarIdentifier, { 0.0 })
+            + (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!))
+    }
+
+    constraint.rhs.expression.forEach{ term ->
+      if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
+        log.error { "Constraint ${constraint.identifier} has term with constant identifier ${term.lpConstantIdentifier} which is not defined in the model" }
+        return null
+      }
+      if (term.isConstant()) {
+        //RHS constant terms are kept on the right hand side
+        constant += term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!
+      } else
+      // Terms in the RHS are moved to the LHS
+        varMap[term.lpVarIdentifier!!] = (varMap.getOrPut(term.lpVarIdentifier, { 0.0 })
+            - (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!))
+    }
+
+    if (varMap.size==0) {
+      log.error { "Constraint ${constraint.identifier} has term with no variables which is not a valid constraint" }
+      return null
+    }
+    val newLPConstraint = LPConstraint(constraint.identifier)
+    newLPConstraint.operator = constraint.operator
+
+    varMap.entries.forEach { entry -> newLPConstraint.lhs.addTerm(entry.value, entry.key) }
+    newLPConstraint.rhs.add(constant)
+    return newLPConstraint
+  }
+
   fun validate() : Boolean {
 
     log.debug { "Validating all constants in the model" }

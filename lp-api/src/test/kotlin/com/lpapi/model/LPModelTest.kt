@@ -79,7 +79,14 @@ class LPModelTest {
     var constraint: LPConstraint? = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
     constraint?.lhs?.add(1.0)
     constraint?.rhs?.add(1.0)
-    Assertions.assertTrue(lpModel.validate(), "Constraint with non-empty LHS and RHS should pass validation")
+    Assertions.assertFalse(lpModel.validate(), "Constraint with non-empty LHS and RHS but with no variables should fail validation")
+
+    lpModel = LPModel("testModel")
+    constraint = lpModel.constraints.add(LPConstraint("nonEmptyConstraint"))
+    lpModel.variables.add(LPVar("x", LPVarType.BOOLEAN))
+    constraint?.lhs?.add(1.0)?.addTerm(2.0, "x")
+    constraint?.rhs?.add(1.0)
+    Assertions.assertTrue(lpModel.validate(), "Constraint with non-empty LHS and RHS and with defined variable should pass validation")
 
     //Constraint with both constant and identifier defined should fail validation
     lpModel = LPModel("testModel")

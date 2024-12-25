@@ -19,11 +19,6 @@
     <dependencies>
         <dependency>
             <groupId>com.lpapi</groupId>
-            <artifactId>lp-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lpapi</groupId>
             <artifactId>lp-solver</artifactId>
             <version>${revision}</version>
         </dependency>
