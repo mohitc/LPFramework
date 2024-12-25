@@ -10,9 +10,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>gurobi-solver</artifactId>
-  <packaging>jar</packaging>
 
   <properties>
+    <maven.test.skip>${gurobi.skiptests}</maven.test.skip>
     <gurobi.version>7.0.1</gurobi.version>
   </properties>
 

@@ -30,6 +30,7 @@
     <revision>1.0-SNAPSHOT</revision>
     <glpk.skiptests>true</glpk.skiptests>
     <cplex.skiptests>true</cplex.skiptests>
+    <gurobi.skiptests>true</gurobi.skiptests>
   </properties>
 
   <dependencies>
