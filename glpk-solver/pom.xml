@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>linear-programming</artifactId>
+        <groupId>com.lpapi</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>glpk-solver</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <glpk.version>1.12.0</glpk.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.lpapi</groupId>
+            <artifactId>lp-solver</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.gnu.glpk</groupId>
+            <artifactId>glpk-java</artifactId>
+            <version>${glpk.version}</version>
+        </dependency>
+    </dependencies>
+
+
+</project>

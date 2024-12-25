@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>linear-programming</artifactId>
+        <groupId>com.lpapi</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>gurobi-solver</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <gurobi.version>7.0.1</gurobi.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.lpapi</groupId>
+            <artifactId>lp-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.lpapi</groupId>
+            <artifactId>lp-solver</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gurobi</groupId>
+            <artifactId>gurobi</artifactId>
+            <version>${gurobi.version}</version>
+        </dependency>
+    </dependencies>
+</project>
