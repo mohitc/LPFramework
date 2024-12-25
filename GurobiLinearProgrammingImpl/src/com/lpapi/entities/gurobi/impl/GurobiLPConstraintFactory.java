@@ -1,7 +1,7 @@
 package com.lpapi.entities.gurobi.impl;
 
 import com.lpapi.entities.*;
-import com.lpapi.entities.exception.LPConstraintException;
+import com.lpapi.exception.LPConstraintException;
 import gurobi.GRBConstr;
 
 public class GurobiLPConstraintFactory implements LPConstraintFactory<GRBConstr> {

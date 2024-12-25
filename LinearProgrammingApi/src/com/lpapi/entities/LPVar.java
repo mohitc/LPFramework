@@ -1,11 +1,11 @@
 package com.lpapi.entities;
 
-import com.lpapi.entities.exception.LPModelException;
-import com.lpapi.entities.exception.LPVarException;
+import com.lpapi.exception.LPModelException;
+import com.lpapi.exception.LPVarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class LPVar<T extends Object> {
+public abstract class LPVar<T> {
 
   protected static final Logger log = LoggerFactory.getLogger(LPVar.class);
 
