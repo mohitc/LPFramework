@@ -14,8 +14,8 @@
 
   <properties>
     <scip.version>9.0.0</scip.version>
-    <java-library-path-arg>/opt/scip/lib64</java-library-path-arg>
-    <ld-library-path>/opt/scip/lib64</ld-library-path>
+    <java-library-path-arg>/usr/lib64</java-library-path-arg>
+    <ld-library-path>/usr/lib64</ld-library-path>
   </properties>
 
   <dependencies>
