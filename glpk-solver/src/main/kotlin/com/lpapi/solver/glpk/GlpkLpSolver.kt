@@ -5,19 +5,24 @@ import com.lpapi.model.LPModel
 import com.lpapi.model.LPModelResult
 import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
+import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
-import com.lpapi.model.enums.LPSolutionStatus
-import org.gnu.glpk.*
+import org.gnu.glpk.GLPK
+import org.gnu.glpk.GLPKConstants
+import org.gnu.glpk.SWIGTYPE_p_double
+import org.gnu.glpk.SWIGTYPE_p_int
+import org.gnu.glpk.glp_iocp
+import org.gnu.glpk.glp_prob
 import kotlin.system.measureTimeMillis
 
 open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
-  private var glpkModel : glp_prob? = null
+  private var glpkModel: glp_prob? = null
 
-  private var variableMap : MutableMap<String, Int> = mutableMapOf()
+  private var variableMap: MutableMap<String, Int> = mutableMapOf()
 
-  private var constraintMap : MutableMap<String, Int> = mutableMapOf()
+  private var constraintMap: MutableMap<String, Int> = mutableMapOf()
 
   override fun initModel(): Boolean {
     return try {
@@ -50,13 +55,13 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       log.info { "Computation terminated. Solution Status : $solnStatus " }
 
       if (solnStatus !== LPSolutionStatus.UNKNOWN && solnStatus !== LPSolutionStatus.INFEASIBLE) {
-        val result : Double = GLPK.glp_get_obj_val(glpkModel)
-        log.info {"Objective : $result"}
+        val result: Double = GLPK.glp_get_obj_val(glpkModel)
+        log.info { "Objective : $result" }
         model.solution = LPModelResult(solnStatus, result, executionTime, null)
-        //Extract results and set it to variables
+        // Extract results and set it to variables
         log.info { "Extracting computed results to the model variables" }
         variableMap.entries.forEach { entry ->
-          val varResult = GLPK.glp_mip_col_val (glpkModel, entry.value)
+          val varResult = GLPK.glp_mip_col_val(glpkModel, entry.value)
           model.variables.get(entry.key)?.populateResult(varResult)
           log.debug { "Variable ${entry.key} has value ${model.variables.get(entry.key)?.result}" }
         }
@@ -72,10 +77,9 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     }
   }
 
-
   /** Function to initialize all variables in the GLPK Model. Returns false in case any variable initialization fails
    */
-  override fun initVars() : Boolean {
+  override fun initVars(): Boolean {
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
@@ -94,47 +98,49 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     return true
   }
 
-  /** Function to initialize all constraints in the GLPK Model. Returns false in case any constraint initialization fails
-   */
-  override fun initConstraints() : Boolean {
+  /** Function to initialize constraints in the GLPK Model. Returns false in case any constraint initialization fails */
+  override fun initConstraints(): Boolean {
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
         log.debug { "Initializing Constraint ($lpConstraint)" }
-        val reducedConstraint : LPConstraint? = model.reduce(lpConstraint)
-        if (reducedConstraint==null) {
-          log.error { "Reduced constraint could not be computed for constriat ${lpConstraint.identifier}" }
+        val reducedConstraint: LPConstraint? = model.reduce(lpConstraint)
+        if (reducedConstraint == null) {
+          log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
           return false
         }
-        //Initialize constraint row in the model
+        // Initialize constraint row in the model
         val index = GLPK.glp_add_rows(glpkModel, 1)
         GLPK.glp_set_row_name(glpkModel, index, lpConstraint.identifier)
-        constraintMap.put(lpConstraint.identifier, index)
+        constraintMap[lpConstraint.identifier] = index
 
-        //Get the constant contribution from the RHS
-        val constant : Double? = reducedConstraint.rhs.expression
-            .map { term -> if (term.coefficient!=null) term.coefficient else 0.0 }
-            .reduce{ u, v -> u!! + v!! }
+        // Get the constant contribution from the RHS
+        val constant: Double? = reducedConstraint.rhs.expression
+            .map { term -> if (term.coefficient != null) term.coefficient else 0.0 }
+            .reduce { u, v -> u!! + v!! }
 
-        if (constant==null) {
-          log.error { "Constant contribution not found in the reduced expression for constraint ${lpConstraint.identifier}" }
+        if (constant == null) {
+          log.error { "Constant contribution not found in the reduced expression for constraint " +
+              lpConstraint.identifier
+          }
           return false
         }
 
-        //set bounds
+        // set bounds
         when (reducedConstraint.operator) {
           LPOperator.LESS_EQUAL -> GLPK.glp_set_row_bnds(glpkModel, index, GLPKConstants.GLP_UP, 0.0, constant)
           LPOperator.GREATER_EQUAL -> GLPK.glp_set_row_bnds(glpkModel, index, GLPKConstants.GLP_LO, constant, 0.0)
           LPOperator.EQUAL -> GLPK.glp_set_row_bnds(glpkModel, index, GLPKConstants.GLP_FX, constant, constant)
           else -> {
-            log.error { "Bound handling not supported in GLPK for operator ${reducedConstraint.operator} in constraint ${lpConstraint.identifier}" }
+            log.error { "Bound handling not supported in GLPK for operator ${reducedConstraint.operator} in " +
+                "constraint ${lpConstraint.identifier}" }
             return false
           }
         }
 
-        //initialize variables and coefficients
-        val ind : SWIGTYPE_p_int = GLPK.new_intArray(reducedConstraint.lhs.expression.size)
-        val coefficients : SWIGTYPE_p_double = GLPK.new_doubleArray(reducedConstraint.lhs.expression.size)
+        // initialize variables and coefficients
+        val ind: SWIGTYPE_p_int = GLPK.new_intArray(reducedConstraint.lhs.expression.size)
+        val coefficients: SWIGTYPE_p_double = GLPK.new_doubleArray(reducedConstraint.lhs.expression.size)
         var colIndex = 1
         for (term in reducedConstraint.lhs.expression) {
           GLPK.intArray_setitem(ind, colIndex, variableMap[term.lpVarIdentifier]!!)
@@ -143,8 +149,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
         }
         GLPK.glp_set_mat_row(glpkModel, index, reducedConstraint.lhs.expression.size, ind, coefficients)
 
-
-        //Cleanup temporary arrays initialized in GLPK
+        // Cleanup temporary arrays initialized in GLPK
         GLPK.delete_intArray(ind)
         GLPK.delete_doubleArray(coefficients)
       } catch (e: Exception) {
@@ -155,13 +160,13 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     return true
   }
 
-  override fun initObjectiveFunction() : Boolean {
-    try {
+  override fun initObjectiveFunction(): Boolean {
+    return try {
       GLPK.glp_set_obj_name(glpkModel, "Objective Function")
       when (model.objective.objective) {
         LPObjectiveType.MINIMIZE -> GLPK.glp_set_obj_dir(glpkModel, GLPKConstants.GLP_MIN)
         LPObjectiveType.MAXIMIZE -> GLPK.glp_set_obj_dir(glpkModel, GLPKConstants.GLP_MAX)
-        else ->  {
+        else -> {
           log.error { "Support not included to handle objective type ${model.objective.objective} in GLPK" }
           return false
         }
@@ -179,14 +184,14 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
           GLPK.glp_set_obj_coef(glpkModel, variableMap[it.lpVarIdentifier]!!, it.coefficient!!)
         }
       }
+      true
     } catch (e: Exception) {
       log.error { "Error while initializing Objective function : $e" }
-      return false
+      false
     }
-    return true
   }
 
-  internal fun getGlpVarType(type: LPVarType) : Int {
+  internal fun getGlpVarType(type: LPVarType): Int {
     return when (type) {
       LPVarType.BOOLEAN -> GLPKConstants.GLP_BV
       LPVarType.INTEGER -> GLPKConstants.GLP_IV
@@ -195,7 +200,7 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     }
   }
 
-  private fun getSolutionStatus(solutionStatus: Int) : LPSolutionStatus {
+  private fun getSolutionStatus(solutionStatus: Int): LPSolutionStatus {
     return when (solutionStatus) {
       GLPKConstants.GLP_UNDEF -> LPSolutionStatus.UNKNOWN
       GLPKConstants.GLP_OPT -> LPSolutionStatus.OPTIMAL
@@ -204,5 +209,4 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       else -> { LPSolutionStatus.UNKNOWN }
     }
   }
-
 }

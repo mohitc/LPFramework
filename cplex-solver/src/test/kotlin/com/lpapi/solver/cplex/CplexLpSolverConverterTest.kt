@@ -21,21 +21,23 @@ class CplexLpSolverConverterTest {
   @Test
   fun testGetCplexSolutionStatus() {
     val solutionStatusMap: Map<IloCplex.Status?, LPSolutionStatus> = mapOf(
-        Pair(IloCplex.Status.Optimal, LPSolutionStatus.OPTIMAL),
-        Pair(IloCplex.Status.Unbounded, LPSolutionStatus.UNBOUNDED),
-        Pair(IloCplex.Status.Infeasible, LPSolutionStatus.INFEASIBLE),
-        Pair(IloCplex.Status.InfeasibleOrUnbounded, LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED),
-        Pair(IloCplex.Status.Bounded, LPSolutionStatus.BOUNDED),
-        Pair(IloCplex.Status.Error, LPSolutionStatus.ERROR),
-        Pair(IloCplex.Status.Feasible, LPSolutionStatus.UNKNOWN),
-        Pair(IloCplex.Status.Unknown, LPSolutionStatus.UNKNOWN),
-        Pair(null, LPSolutionStatus.ERROR)
+      Pair(IloCplex.Status.Optimal, LPSolutionStatus.OPTIMAL),
+      Pair(IloCplex.Status.Unbounded, LPSolutionStatus.UNBOUNDED),
+      Pair(IloCplex.Status.Infeasible, LPSolutionStatus.INFEASIBLE),
+      Pair(IloCplex.Status.InfeasibleOrUnbounded, LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED),
+      Pair(IloCplex.Status.Bounded, LPSolutionStatus.BOUNDED),
+      Pair(IloCplex.Status.Error, LPSolutionStatus.ERROR),
+      Pair(IloCplex.Status.Feasible, LPSolutionStatus.UNKNOWN),
+      Pair(IloCplex.Status.Unknown, LPSolutionStatus.UNKNOWN),
+      Pair(null, LPSolutionStatus.ERROR)
     )
 
     val solver = CplexLpSolver(LPModel())
     solutionStatusMap.entries.forEach { entry ->
-      assertEquals(entry.value, solver.getSolutionStatus(entry.key),
-          "CPLEX status ${entry.key} not translated correctly to ${entry.value}")
+      assertEquals(
+        entry.value, solver.getSolutionStatus(entry.key),
+        "CPLEX status ${entry.key} not translated correctly to ${entry.value}"
+      )
     }
   }
 }

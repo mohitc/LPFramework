@@ -4,9 +4,13 @@ package com.lpapi.model
  * (defined either by the identifier of the constant defined in the model, or a fixed value) or a dot product of
  * a constant value and a variable as defined in the model
  */
-class LPExpressionTerm constructor(val coefficient: Double?, val lpVarIdentifier: String?, val lpConstantIdentifier: String?) {
+class LPExpressionTerm constructor(
+  val coefficient: Double?,
+  val lpVarIdentifier: String?,
+  val lpConstantIdentifier: String?
+) {
 
-  fun isConstant(): Boolean = lpVarIdentifier==null
+  fun isConstant(): Boolean = lpVarIdentifier == null
 
   override fun toString() = "(" + (lpConstantIdentifier ?: coefficient.toString()) + (lpVarIdentifier ?: "") + ")"
 
@@ -29,5 +33,4 @@ class LPExpressionTerm constructor(val coefficient: Double?, val lpVarIdentifier
     result = 31 * result + (lpConstantIdentifier?.hashCode() ?: 0)
     return result
   }
-
 }

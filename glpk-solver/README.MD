@@ -20,13 +20,13 @@ In order to evaluate models using this solver, we need to install both the GLPK 
   [https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8212233](https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8212233)
   In order to bypass this issue, after running configure, navigate to the <code>swig</code> directory and either disable 
   the plugin instances for <code>org.apache.maven.plugins:maven-javadoc-plugin</code> and 
-  <code>org.apache.maven.plugins:maven-site-plugin</code> or apply the workarounds as described in the bug report
+  <code>org.apache.maven.plugins:maven-site-plugin</code> or apply the workarounds as described in the bug report.
   
   
 ## Running Problem instances 
 The GLPK solver needs the references to the glpk-java jni references. In order to do so, please include the following 
 VM argument <code>-Djava.library.path=/usr/local/lib/jni:/usr/lib/jni</code>. Sample problem instances can be found as tests 
-in the glpk-solver project, and are disabled by default. In order to enable the tests, go to the parent pom and set the property 
+in the glpk-solver project, and are disabled by default. In order to enable the tests, go to the parent pom and set the property: 
 ```xml    
 <glpk.skiptests>true</glpk.skiptests>
 ```
