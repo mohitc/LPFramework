@@ -25,9 +25,9 @@
       <version>${revision}</version>
     </dependency>
     <dependency>
-      <groupId>org.gnu.glpk</groupId>
-      <artifactId>glpk-java</artifactId>
-      <version>${glpk.version}</version>
+      <groupId>com.lpapi</groupId>
+      <artifactId>glpk-ffm</artifactId>
+      <version>${revision}</version>
     </dependency>
     <dependency>
       <groupId>com.lpapi</groupId>
@@ -43,7 +43,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
+      <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>

@@ -11,7 +11,7 @@ class GlpkConversionTest {
   fun testVarTypeConversion() {
     val model = LPModel()
     val solver = GlpkLpSolver(model)
-    LPVarType.entries.forEach { v ->
+    LPVarType.values().forEach { v ->
       assertNotNull(solver.getGlpVarType(v))
     }
   }

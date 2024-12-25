@@ -1,3 +1,3 @@
 package com.lpapi.solver.sample
 
-//class ITGplkPrimitiveSolverSampleTest : PrimitiveSolverSample()
+class ITGplkPrimitiveSolverSampleTest : PrimitiveSolverSample()
