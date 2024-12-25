@@ -101,7 +101,7 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
     {
       name = GLPK.glp_get_col_name(model, i);
       val  = GLPK.glp_mip_col_val(model, i);
-      log.info(name + " = " + val);
+      log.debug(name + " = " + val);
     }
 
   }
