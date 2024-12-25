@@ -25,8 +25,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <java.version>11</java.version>
-    <kotlin.version>1.4.21</kotlin.version>
-    <logger.version>1.7.7</logger.version>
+    <kotlin.version>1.4.31</kotlin.version>
+    <logger.version>2.0.6</logger.version>
     <slf4j.version>1.7.29</slf4j.version>
     <revision>1.0-SNAPSHOT</revision>
     <glpk.skiptests>true</glpk.skiptests>
@@ -46,7 +46,7 @@
     </dependency>
     <dependency>
       <groupId>io.github.microutils</groupId>
-      <artifactId>kotlin-logging</artifactId>
+      <artifactId>kotlin-logging-jvm</artifactId>
       <version>${logger.version}</version>
     </dependency>
 
