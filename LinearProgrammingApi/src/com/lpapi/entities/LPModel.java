@@ -386,6 +386,9 @@ public abstract class LPModel <X, Y, Z> {
   //method to initialize the computation
   public abstract void computeModel() throws LPModelException;
 
+  //method to extract result values to variables
+  public abstract void extractResults() throws LPModelException;
+
   public LPExpression getObjFn() throws LPModelException {
     if (objFn==null)
       throw new LPModelException("Objective function has not been defined");
