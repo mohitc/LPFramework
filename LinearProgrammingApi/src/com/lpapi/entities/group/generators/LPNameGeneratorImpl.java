@@ -6,6 +6,9 @@ import com.lpapi.exception.LPNameParamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 public abstract class LPNameGeneratorImpl<T> implements LPNameGenerator <T> {
 
   protected String prefix;
@@ -68,9 +71,10 @@ public abstract class LPNameGeneratorImpl<T> implements LPNameGenerator <T> {
     if (((objects==null) && (indexCount>0)) || (objects.length!=indexCount)){
       throw new LPNameParamException("Number of parameters provided does not match index count " + indexCount);
     }
-    validatePrefixConstraint(objects);
+    List<T> outList = Arrays.asList(objects);
+    validatePrefixConstraint(outList);
   }
 
-  protected abstract void validatePrefixConstraint(T... objects) throws LPNameException;
+  protected abstract void validatePrefixConstraint(List<T> objects) throws LPNameException;
 
 }

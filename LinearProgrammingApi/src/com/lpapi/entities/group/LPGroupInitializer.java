@@ -12,6 +12,10 @@ public abstract class LPGroupInitializer {
     this.group = group;
   }
 
+  public LPGroup getGroup() {
+    return group;
+  }
+
   protected LPModel model() {
     return group.getModel();
   }
