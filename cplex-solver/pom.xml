@@ -10,6 +10,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>cplex-solver</artifactId>
+  <properties>
+    <maven.test.skip>${cplex.skiptests}</maven.test.skip>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -23,5 +26,13 @@
       <artifactId>cplex</artifactId>
       <version>1.0</version>
     </dependency>
+    <!--Abstract model samples used to generate test cases-->
+    <dependency>
+      <groupId>com.lpapi</groupId>
+      <artifactId>lp-solver-sample</artifactId>
+      <version>${revision}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 </project>
