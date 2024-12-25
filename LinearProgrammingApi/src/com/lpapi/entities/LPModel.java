@@ -17,7 +17,7 @@ import java.util.*;
  */
 public abstract class LPModel <X, Y, Z> {
 
-  private static final Logger log = LoggerFactory.getLogger(LPModel.class);
+  protected static final Logger log = LoggerFactory.getLogger(LPModel.class);
 
   private static final String DEF_VAR_GROUP = "Default";
 
@@ -136,10 +136,20 @@ public abstract class LPModel <X, Y, Z> {
 
 
   //Method to initialize the model
-  public abstract void initModel();
+  public abstract void initModel() throws LPModelException;
 
   //Method to initialize the variables
-  public abstract void initVars();
+  public void initVars() throws LPModelException {
+    if (objFn==null) {
+      throw new LPModelException("Objective function cannot be null");
+    } else {
+      log.info("Initializing model vars");
+      for (LPVar var: lpVarIdentifiers.values()) {
+        log.debug("Initializing variable: " + var.getIdentifier());
+        var.initModelVar();
+      }
+    }
+  }
 
   //method to initialize the constraints
   public abstract void initConstraints();

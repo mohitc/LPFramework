@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class LPVar<T extends Object> {
 
-  private static final Logger log = LoggerFactory.getLogger(LPVar.class);
+  protected static final Logger log = LoggerFactory.getLogger(LPVar.class);
 
   private static final String marker = "LP-Var: ";
 
@@ -85,7 +85,7 @@ public abstract class LPVar<T extends Object> {
 
   public abstract T getModelVar();
 
-  protected abstract void initModelVar(T var) throws LPModelException;
+  protected abstract void initModelVar() throws LPModelException;
 
   public double getObjContribution() {
     return objContribution;
