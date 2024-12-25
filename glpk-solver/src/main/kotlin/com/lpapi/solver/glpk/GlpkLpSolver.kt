@@ -18,11 +18,23 @@ import kotlin.system.measureTimeMillis
 
 open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
 
+  companion object {
+    val solutionStatesWithoutResults =
+        setOf(LPSolutionStatus.UNBOUNDED, LPSolutionStatus.INFEASIBLE, LPSolutionStatus.UNKNOWN)
+  }
+
   private var glpkModel: glp_prob? = null
 
   private var variableMap: MutableMap<String, Int> = mutableMapOf()
 
   private var constraintMap: MutableMap<String, Int> = mutableMapOf()
+
+  private val intOptConfig: () -> glp_iocp = {
+    glp_iocp().apply {
+      GLPK.glp_init_iocp(this)
+      this.presolve = GLPKConstants.GLP_ON
+    }
+  }
 
   override fun initModel(): Boolean {
     return try {
@@ -43,18 +55,16 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     try {
       log.info { "Starting computation of model" }
       val executionTime = measureTimeMillis {
-        val iocp = glp_iocp()
-        GLPK.glp_init_iocp(iocp)
-        iocp.presolve = GLPKConstants.GLP_ON
+        val iocp = intOptConfig()
         GLPK.glp_write_lp(glpkModel, null, "model.lp")
         GLPK.glp_intopt(glpkModel, iocp)
       }
 
-      GLPK.glp_mip_obj_val(glpkModel)
       val solnStatus: LPSolutionStatus = getSolutionStatus(GLPK.glp_mip_status(glpkModel))
-      log.info { "Computation terminated. Solution Status : $solnStatus " }
+      log.info { "Computation terminated. Solution Status : $solnStatus, mip objective: " +
+          "${GLPK.glp_mip_obj_val(glpkModel)} mip status: ${GLPK.glp_mip_status(glpkModel)}" }
 
-      if (solnStatus !== LPSolutionStatus.UNKNOWN && solnStatus !== LPSolutionStatus.INFEASIBLE) {
+      if (!solutionStatesWithoutResults.contains(solnStatus)) {
         val result: Double = GLPK.glp_get_obj_val(glpkModel)
         log.info { "Objective : $result" }
         model.solution = LPModelResult(solnStatus, result, executionTime, null)
@@ -85,11 +95,11 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
       try {
         log.debug { "Initializing variable ($lpVar)" }
         val index: Int = GLPK.glp_add_cols(glpkModel, 1)
-        variableMap[lpVar.identifier] = index
         GLPK.glp_set_col_name(glpkModel, index, lpVar.identifier)
         GLPK.glp_set_col_kind(glpkModel, index, getGlpVarType(lpVar.type))
-        val boundType: Int = if (lpVar.lbound == lpVar.ubound) GLPKConstants.GLP_FX else GLPKConstants.GLP_BV
+        val boundType: Int = if (lpVar.lbound == lpVar.ubound) GLPKConstants.GLP_FX else GLPKConstants.GLP_DB
         GLPK.glp_set_col_bnds(glpkModel, index, boundType, lpVar.lbound, lpVar.ubound)
+        variableMap[lpVar.identifier] = index
       } catch (e: Exception) {
         log.error { "Error while initializing GLPK Var ($lpVar) : $e" }
         return false
@@ -112,7 +122,6 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
         // Initialize constraint row in the model
         val index = GLPK.glp_add_rows(glpkModel, 1)
         GLPK.glp_set_row_name(glpkModel, index, lpConstraint.identifier)
-        constraintMap[lpConstraint.identifier] = index
 
         // Get the constant contribution from the RHS
         val constant: Double? = reducedConstraint.rhs.expression
@@ -152,6 +161,9 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
         // Cleanup temporary arrays initialized in GLPK
         GLPK.delete_intArray(ind)
         GLPK.delete_doubleArray(coefficients)
+
+        // define row in the model
+        constraintMap[lpConstraint.identifier] = index
       } catch (e: Exception) {
         log.error { "Error while initializing GLPK Constraint ($lpConstraint) : $e" }
         return false
@@ -200,12 +212,13 @@ open class GlpkLpSolver(model: LPModel) : LPSolver<glp_prob>(model) {
     }
   }
 
-  private fun getSolutionStatus(solutionStatus: Int): LPSolutionStatus {
+  internal fun getSolutionStatus(solutionStatus: Int): LPSolutionStatus {
     return when (solutionStatus) {
       GLPKConstants.GLP_UNDEF -> LPSolutionStatus.UNKNOWN
       GLPKConstants.GLP_OPT -> LPSolutionStatus.OPTIMAL
       GLPKConstants.GLP_FEAS -> LPSolutionStatus.TIME_LIMIT
       GLPKConstants.GLP_INFEAS -> LPSolutionStatus.INFEASIBLE
+      GLPKConstants.GLP_UNBND -> LPSolutionStatus.UNBOUNDED
       else -> { LPSolutionStatus.UNKNOWN }
     }
   }
