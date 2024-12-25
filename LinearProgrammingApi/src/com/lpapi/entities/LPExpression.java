@@ -87,4 +87,19 @@ public class LPExpression {
     log.debug("LP Expression reduction complete");
   }
 
+  public Map<String, Double> getVarContribution() {
+    Map<String, Double> varContributionMap = new HashMap<>();
+    for (LPExpressionTerm term: expressionList) {
+      if (!term.isConstant()) {
+        String key = term.getVar().getIdentifier();
+        if (varContributionMap.containsKey(key)) {
+          double val = varContributionMap.get(key) + term.getCoefficient();
+          varContributionMap.put(key, val);
+        } else {
+          varContributionMap.put(key, term.getCoefficient());
+        }
+      }
+    }
+    return varContributionMap;
+  }
 }

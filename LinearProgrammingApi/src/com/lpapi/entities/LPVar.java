@@ -21,6 +21,8 @@ public abstract class LPVar<T extends Object> {
 
   private double uBound;
 
+  private double objContribution = 0;
+
   protected LPVar(LPModel model, String identifier, LPVarType type) throws LPVarException {
     log.info(marker, "Validating input parameters and generating new LP Var");
     if (model==null) {
@@ -84,4 +86,12 @@ public abstract class LPVar<T extends Object> {
   public abstract T getModelVar();
 
   protected abstract void initModelVar(T var) throws LPModelException;
+
+  public double getObjContribution() {
+    return objContribution;
+  }
+
+  public void setObjContribution(double objContribution) {
+    this.objContribution = objContribution;
+  }
 }
