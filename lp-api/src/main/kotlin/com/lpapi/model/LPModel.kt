@@ -35,7 +35,7 @@ class LPModel(val identifier: String) {
   private val variableValidator: List<LPParameterValidator<LPVar>> = listOf(LPParamIdValidator(), LPVarValidator())
 
   private val constraintValidator: List<LPParameterValidator<LPConstraint>> =
-    listOf(LPParamIdValidator(), LPConstraintValidator())
+      listOf(LPParamIdValidator(), LPConstraintValidator())
 
   /**Default to empty objective */
   val objective: LPObjective = LPObjective()
@@ -80,10 +80,8 @@ class LPModel(val identifier: String) {
         constant += constMultiplier * constantTerm
       } else {
         // For each term in the LHS, create a map that includes the variable identifier and the computed double value
-        varMap[term.lpVarIdentifier!!] = (
-          varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
+        varMap[term.lpVarIdentifier!!] = varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
             varMultiplier * constantTerm
-          )
       }
     }
 
@@ -114,7 +112,7 @@ class LPModel(val identifier: String) {
       if (!(term.lpConstantIdentifier == null || this.constants.exists(term.lpConstantIdentifier))) {
         log.error {
           "Expression has term with constant identifier ${term.lpConstantIdentifier} which is not defined " +
-            "in the model"
+              "in the model"
         }
         return null
       } else if (term.lpConstantIdentifier == null && term.coefficient == null) {
@@ -128,9 +126,9 @@ class LPModel(val identifier: String) {
       } else {
         // For each expression term, create a map that includes the variable identifier and the computed double value
         varMap[term.lpVarIdentifier!!] = (
-          varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
-            (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!)
-          )
+            varMap.getOrPut(term.lpVarIdentifier, { 0.0 }) +
+                (term.coefficient ?: constants.get(term.lpConstantIdentifier!!)?.value!!)
+            )
       }
     }
 
@@ -153,16 +151,16 @@ class LPModel(val identifier: String) {
   fun validate(): Boolean {
 
     fun <T : LPParameter> parameterValidation(
-      validatorList: List<LPParameterValidator<T>>,
-      paramGroup: LPParameterGroup<T>,
-      displayType: String
+        validatorList: List<LPParameterValidator<T>>,
+        paramGroup: LPParameterGroup<T>,
+        displayType: String
     ): Boolean {
       log.debug { "Validating all ${displayType.lowercase(Locale.getDefault())} in the model" }
       val validationResult = validatorList.map { validator ->
         paramGroup.allValues().stream()
-          .map { v -> validator.validate(v, this) }
-          .reduce { u, v -> u && v }
-          .orElse(true)
+            .map { v -> validator.validate(v, this) }
+            .reduce { u, v -> u && v }
+            .orElse(true)
       }.reduce { u, v -> u && v }
       log.debug { "$displayType validation result : $validationResult" }
       // idValidation being present means
@@ -173,8 +171,8 @@ class LPModel(val identifier: String) {
     }
 
     return parameterValidation(constantValidator, constants, "Constants") && // Constant validation
-      parameterValidation(variableValidator, variables, "Variable") && // Variable validation
-      parameterValidation(constraintValidator, constraints, "Constraint") // Constraint validation
+        parameterValidation(variableValidator, variables, "Variable") && // Variable validation
+        parameterValidation(constraintValidator, constraints, "Constraint") // Constraint validation
   }
 
   override fun equals(other: Any?): Boolean {
@@ -209,12 +207,13 @@ class LPModel(val identifier: String) {
  * belongs to the group that is specified explicitly. The grouping is useful only for accessing the model parameters
  * easily after the creation of the model
  */
-class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: String) {
+class LPParameterGroup<T : LPParameter>(private val defaultGroupIdentifier: String) {
   private val log = KotlinLogging.logger("LPParameterGroup")
 
   /**Grouping is the map which uses the group identifier as the  group keys, and provides the set of LPParameter
    * identifiers that are mapped against each grouping */
   var grouping: MutableMap<String, MutableSet<String>> = mutableMapOf()
+
   /**Parameters is the map which maps the  LPParameter identifiers against the LPParameter objects. */
   var parameters: MutableMap<String, T> = mutableMapOf()
 
@@ -271,10 +270,10 @@ class LPParameterGroup<T : LPParameter> (private val defaultGroupIdentifier: Str
 
 /** Class to store the results from an LP computation */
 class LPModelResult(
-  val status: LPSolutionStatus,
-  val objective: Double?,
-  val computationTime: Long?,
-  val mipGap: Double?
+    val status: LPSolutionStatus,
+    val objective: Double?,
+    val computationTime: Long?,
+    val mipGap: Double?
 ) {
 
   constructor(status: LPSolutionStatus) : this(status, null, null, null)

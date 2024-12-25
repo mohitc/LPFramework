@@ -205,7 +205,7 @@ class LPModelParser(format: LPModelFormat = LPModelFormat.YAML) {
       log.info { "Model Result Dto parsed successfully.Populating results into provided LPModel" }
       return populateModelResult(model, modelResultDto)
     } catch (e: Exception) {
-      log.error("Error while generating model from file $fileName : $e")
+      log.error("Error while populating model result from file $fileName : $e")
     }
     return false
   }

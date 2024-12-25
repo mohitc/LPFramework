@@ -17,7 +17,7 @@ class LPConstantTest : LPParameterTest<LPConstant>() {
   fun testEquality() {
     val c = LPConstant("c")
     log.info { "Testing with constant $c" }
-    Assertions.assertTrue(c == c, "Same object instance should return true")
+    Assertions.assertEquals(c , c, "Same object instance should return true")
     Assertions.assertFalse(
       c.equals(null),
       "Equal comparison with a null value fails"
