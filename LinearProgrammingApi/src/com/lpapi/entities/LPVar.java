@@ -1,10 +1,11 @@
 package com.lpapi.entities;
 
+import com.lpapi.entities.exception.LPModelException;
 import com.lpapi.entities.exception.LPVarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LPVar {
+public abstract class LPVar<T extends Object> {
 
   private static final Logger log = LoggerFactory.getLogger(LPVar.class);
 
@@ -79,4 +80,8 @@ public class LPVar {
   public int hashCode() {
     return identifier.hashCode();
   }
+
+  public abstract T getModelVar();
+
+  protected abstract void initModelVar(T var) throws LPModelException;
 }

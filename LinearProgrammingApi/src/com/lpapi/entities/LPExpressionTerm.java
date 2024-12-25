@@ -23,4 +23,16 @@ public class LPExpressionTerm {
   public boolean isConstant() {
     return (var==null);
   }
+
+  public LPVar getVar() {
+    return var;
+  }
+
+  public double getCoefficient() {
+    return coefficient;
+  }
+
+  protected void setCoefficient(double coefficient) {
+    this.coefficient = coefficient;
+  }
 }

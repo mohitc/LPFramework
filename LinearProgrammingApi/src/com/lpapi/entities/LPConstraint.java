@@ -2,7 +2,7 @@ package com.lpapi.entities;
 
 import com.lpapi.entities.exception.LPConstraintException;
 
-public class LPConstraint {
+public abstract class LPConstraint<Z> {
   private LPExpression lhs, rhs;
 
   private LPOperator operator;

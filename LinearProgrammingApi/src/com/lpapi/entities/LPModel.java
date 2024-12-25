@@ -9,7 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class LPModel {
+/**
+ *
+ * @param <X> Model Type
+ * @param <Y> Model Variable Type
+ * @param <Z> Model Constraint Type
+ */
+public abstract class LPModel <X, Y, Z> {
 
   private static final Logger log = LoggerFactory.getLogger(LPModel.class);
 
@@ -25,6 +31,7 @@ public class LPModel {
 
   private List<LPConstraint> lpConstraintList = new ArrayList<>();
 
+  private LPExpression objFn;
 
   public LPModel(String identifier) throws LPModelException {
     createLPVarGroup(DEF_VAR_GROUP, "Default variable group used in the model");
@@ -83,8 +90,7 @@ public class LPModel {
       if (lpVarIdentifiers.containsKey(identifier))
         throw new LPVarException("Variable with identifier (" + identifier + ") already exists");
 
-      var = new LPVar(this, identifier, type);
-      var.setBounds(lBound, uBound);
+      var = getLPVarFactory().generateLPVar(this, identifier, type, lBound, uBound);
       //If no exception was throws, variable is valid, add to model
       lpVarIdentifiers.put(identifier, var);
       //add variable to set of corresponding var group
@@ -106,7 +112,7 @@ public class LPModel {
   }
 
   public void addConstraint(LPExpression lhs, LPOperator operator, LPExpression rhs) throws LPConstraintException {
-    LPConstraint constraint = new LPConstraint(lhs, operator, rhs);
+    LPConstraint constraint = getLPConstraintFactory().generateConstraint(lhs, operator, rhs);
     log.info("Constraint created successfully. Adding to model");
      lpConstraintList.add(constraint);
   }
@@ -119,4 +125,35 @@ public class LPModel {
     return identifier;
   }
 
+  //method to get the model for the ILP
+  public abstract X getModel();
+
+  //Factory to generate the variables
+  protected abstract LPVarFactory<Y> getLPVarFactory();
+
+  //Factory to generate the constraints
+  protected abstract LPConstraintFactory<Z> getLPConstraintFactory();
+
+
+  //Method to initialize the model
+  public abstract void initModel();
+
+  //Method to initialize the variables
+  public abstract void initVars();
+
+  //method to initialize the constraints
+  public abstract void initConstraints();
+
+  //method to initialize the computation
+  public abstract void computeModel();
+
+  public LPExpression getObjFn() {
+    return objFn;
+  }
+
+  public void setObjFn(LPExpression objFn) throws LPModelException {
+    if (objFn==null)
+      throw new LPModelException("Objective function cannot be null");
+    this.objFn = objFn;
+  }
 }
