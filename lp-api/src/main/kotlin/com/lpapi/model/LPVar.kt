@@ -9,6 +9,9 @@ class LPVar(override val identifier: String, val type: LPVarType, var lbound: Do
 
   var resultSet: Boolean = false
 
+  constructor(identifier: String, type: LPVarType, lbound: Number, ubound: Number) :
+      this(identifier, type, lbound.toDouble(), ubound.toDouble())
+
   constructor(identifier: String, type: LPVarType) : this(
     identifier, type,
     // If variable is defined as boolean then upper bound is automatically set to 1 otherwise is defaulted to 0
