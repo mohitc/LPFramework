@@ -19,7 +19,7 @@
     <module>glpk-ffm</module>
     <module>lp-solver-sample</module>
     <!--    <module>cplex-solver</module>-->
-    <module>scip-solver</module>
+     <module>scip-solver</module>
     <module>lp-rw</module>
     <module>scip-ffm</module>
   </modules>
@@ -35,6 +35,7 @@
     <revision>1.0-SNAPSHOT</revision>
     <glpk.skiptests>false</glpk.skiptests>
     <scip.skiptests>false</scip.skiptests>
+    <scip-ffm.skiptests>false</scip-ffm.skiptests>
     <cplex.skiptests>true</cplex.skiptests>
     <gurobi.skiptests>true</gurobi.skiptests>
     <ktlint.version>3.1.1</ktlint.version>

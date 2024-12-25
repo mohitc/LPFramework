@@ -1,17 +1,14 @@
 package com.lpapi.solver.scip
 
+import com.lpapi.ffm.scip.*
 import com.lpapi.model.LPConstant
 import com.lpapi.model.LPConstraint
 import com.lpapi.model.LPModel
 import com.lpapi.model.LPVar
 import com.lpapi.model.enums.LPObjectiveType
 import com.lpapi.model.enums.LPOperator
+import com.lpapi.model.enums.LPSolutionStatus
 import com.lpapi.model.enums.LPVarType
-import jscip.Constraint
-import jscip.SCIP_Vartype
-import jscip.Scip
-import jscip.Solution
-import jscip.Variable
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -31,15 +28,17 @@ class ScipLpSolverTest {
   private val log = KotlinLogging.logger { this.javaClass.name }
 
   companion object {
-    val mockedModel = mock<Scip> {}
+    val mockedModel: SCIPProblem = mock<SCIPProblem> {}.let{ p ->
+      `when`(p.createProblem("test-model")).thenReturn(SCIPRetCode.SCIP_OKAY)
+      `when`(p.includeDefaultPlugins()).thenReturn(SCIPRetCode.SCIP_OKAY)
+      p
+    }
     val mockedVarX = mock<Variable> {}
     val mockedVarY = mock<Variable> {}
     val mockedVarZ = mock<Variable> {}
     val mockedConstraint1 = mock<Constraint> {}
     val mockedConstraint2 = mock<Constraint> {}
-    val createdConstraints = mutableSetOf<Constraint>()
     val createdObjectiveCoefficients = mutableMapOf<Variable, Number>()
-    val mockedSolution = mock<Solution> {}
     const val SCIP_INF = 1E20
   }
 
@@ -70,17 +69,54 @@ class ScipLpSolverTest {
     setParameter(solver, "constraintMap", constraintMap)
   }
 
-  private fun setScipModel(solver: ScipLpSolver, model: Scip) {
+  private fun setScipModel(solver: ScipLpSolver, model: SCIPProblem) {
     setParameter(solver, "scipModel", model)
   }
 
 
   private fun argsForInitModel() = Stream.of(
       Arguments.of(
-          "Exception in Scip.create() results in a failure",
-          fun(): Scip {
-            val mockedModel = mock<Scip> {}
-            `when`(mockedModel.create("test-model")).thenThrow(RuntimeException())
+          "Exception in createProblem() results in a failure",
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem> {}
+            `when`(mockedModel.createProblem("test-model")).thenThrow(RuntimeException())
+            `when`(mockedModel.includeDefaultPlugins()).thenReturn(SCIPRetCode.SCIP_OKAY)
+            return mockedModel
+          },
+          LPModel("test-model"),
+          false,
+          null,
+      ),
+      Arguments.of(
+          "Invalid error code in Scip.create() results in a failure",
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem> {}
+            `when`(mockedModel.createProblem("test-model")).thenReturn(SCIPRetCode.SCIP_UNKNOWN)
+            `when`(mockedModel.includeDefaultPlugins()).thenReturn(SCIPRetCode.SCIP_OKAY)
+            return mockedModel
+          },
+          LPModel("test-model"),
+          false,
+          null,
+      ),
+      Arguments.of(
+          "Exception in includeDefaultPlugins() results in a failure",
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem> {}
+            `when`(mockedModel.createProblem("test-model")).thenReturn(SCIPRetCode.SCIP_OKAY)
+            `when`(mockedModel.includeDefaultPlugins()).thenThrow(RuntimeException())
+            return mockedModel
+          },
+          LPModel("test-model"),
+          false,
+          null,
+      ),
+      Arguments.of(
+          "Invalid error code in includeDefaultPlugins() results in a failure",
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem> {}
+            `when`(mockedModel.createProblem("test-model")).thenReturn(SCIPRetCode.SCIP_OKAY)
+            `when`(mockedModel.includeDefaultPlugins()).thenReturn(SCIPRetCode.SCIP_BRANCHERROR)
             return mockedModel
           },
           LPModel("test-model"),
@@ -89,7 +125,7 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Model is initialized correctly",
-          fun(): Scip {
+          fun(): SCIPProblem {
             return mockedModel
           },
           LPModel("test-model"),
@@ -103,10 +139,10 @@ class ScipLpSolverTest {
   @MethodSource("argsForInitModel")
   fun testInitModel(
       desc: String,
-      initMock: () -> Scip,
+      initMock: () -> SCIPProblem,
       model: LPModel,
       wantSuccess: Boolean,
-      wantModel: Scip?
+      wantModel: SCIPProblem?
   ) {
     log.info { "Test Case: $desc" }
     val mockedModel = initMock()
@@ -122,9 +158,9 @@ class ScipLpSolverTest {
   private fun argsForInitVars() = Stream.of(
       Arguments.of(
           "Exception while creating a boolean variable",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenThrow(RuntimeException())
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenThrow(RuntimeException())
             return mockedModel
           },
           listOf( LPVar("X", LPVarType.BOOLEAN)),
@@ -133,9 +169,9 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful creation of a boolean variable",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
             return mockedModel
           },
           listOf( LPVar("X", LPVarType.BOOLEAN)),
@@ -144,9 +180,9 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful creation of a linear variable",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("Y", -1.0, 10.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarY)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("Y", -1.0, 10.0, 0.0, SCIPVarType.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarY)
             return mockedModel
           },
           listOf( LPVar("Y", LPVarType.DOUBLE, -1.0, 10.0)),
@@ -155,9 +191,9 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful creation of an integer variable",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("Z", -1.3, 20.2, 0.0, SCIP_Vartype.SCIP_VARTYPE_INTEGER)).thenReturn(mockedVarZ)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("Z", -1.3, 20.2, 0.0, SCIPVarType.SCIP_VARTYPE_INTEGER)).thenReturn(mockedVarZ)
             return mockedModel
           },
           listOf( LPVar("Z", LPVarType.INTEGER, -1.3, 20.2)),
@@ -166,11 +202,11 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful creation of multiple variables",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", -1.0, 10.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarY)
-            `when`(mockedModel.createVar("Z", -1.3, 20.2, 0.0, SCIP_Vartype.SCIP_VARTYPE_INTEGER)).thenReturn(mockedVarZ)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", -1.0, 10.0, 0.0, SCIPVarType.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarY)
+            `when`(mockedModel.createVar("Z", -1.3, 20.2, 0.0, SCIPVarType.SCIP_VARTYPE_INTEGER)).thenReturn(mockedVarZ)
             return mockedModel
           },
           listOf(
@@ -189,7 +225,7 @@ class ScipLpSolverTest {
   @MethodSource("argsForInitVars")
   fun testInitVars(
       desc: String,
-      initMock: () -> Scip,
+      initMock: () -> SCIPProblem,
       lpVars: List<LPVar>,
       wantSuccess: Boolean,
       wantVarMap: Map<String, Variable>
@@ -213,11 +249,10 @@ class ScipLpSolverTest {
   private fun argsForInitConstraints() = Stream.of(
       Arguments.of(
           "Exception while initializing a constraint",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createConsLinear("constraint1", arrayOf(mockedVarX), doubleArrayOf(1.0), 1.0, 1.0)).thenThrow(RuntimeException())
-            `when`(mockedModel.addCons(mockedConstraint1)).then { createdConstraints.add(mockedConstraint1)}
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createConstraint("constraint1", listOf(mockedVarX), listOf(1.0), 1.0, 1.0)).thenThrow(RuntimeException())
             return mockedModel
           },
           fun(): LPModel {
@@ -236,12 +271,11 @@ class ScipLpSolverTest {
           mutableMapOf<String, Constraint>(),
       ),
       Arguments.of(
-          "Exception while adding Constraint",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createConsLinear("constraint1", arrayOf(mockedVarX), doubleArrayOf(1.0), 1.0, 1.0)).thenReturn(mockedConstraint1)
-            `when`(mockedModel.addCons(mockedConstraint1)).thenThrow(RuntimeException())
+          "Null value while adding Constraint",
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createConstraint("constraint1", listOf(mockedVarX), listOf(1.0), 1.0, 1.0)).thenReturn(null)
             return mockedModel
           },
           fun(): LPModel {
@@ -261,12 +295,11 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful initialization of a single equality constraint",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_INTEGER)).thenReturn(mockedVarY)
-            `when`(mockedModel.createConsLinear("constraint1", arrayOf(mockedVarX, mockedVarY), doubleArrayOf(1.0, -2.0), 1.0, 1.0)).thenReturn(mockedConstraint1)
-            `when`(mockedModel.addCons(mockedConstraint1)).then { createdConstraints.add(mockedConstraint1)}
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_INTEGER)).thenReturn(mockedVarY)
+            `when`(mockedModel.createConstraint("constraint1", listOf(mockedVarX, mockedVarY), listOf(1.0, -2.0), 1.0, 1.0)).thenReturn(mockedConstraint1)
             return mockedModel
           },
           fun(): LPModel {
@@ -289,14 +322,13 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful initialization of a <= constraint (2x + 3y <= 5)",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
-            `when`(mockedModel.createVar("Z", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarZ)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.createVar("Z", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarZ)
             `when`(mockedModel.infinity()).thenReturn(SCIP_INF)
-            `when`(mockedModel.createConsLinear("constraint1", arrayOf(mockedVarX, mockedVarY), doubleArrayOf(2.0, 3.0), -1.0 * SCIP_INF, 5.0)).thenReturn(mockedConstraint1)
-            `when`(mockedModel.addCons(mockedConstraint1)).then { createdConstraints.add(mockedConstraint1)}
+            `when`(mockedModel.createConstraint("constraint1", listOf(mockedVarX, mockedVarY), listOf(2.0, 3.0), -1.0 * SCIP_INF, 5.0)).thenReturn(mockedConstraint1)
             return mockedModel
           },
           fun(): LPModel {
@@ -321,14 +353,13 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful initialization of a >= constraint (3y + 4x >= 3)",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
-            `when`(mockedModel.createVar("Z", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarZ)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.createVar("Z", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_CONTINUOUS)).thenReturn(mockedVarZ)
             `when`(mockedModel.infinity()).thenReturn(SCIP_INF)
-            `when`(mockedModel.createConsLinear("constraint1", arrayOf(mockedVarY, mockedVarX), doubleArrayOf(3.0, 4.0), 3.0,  SCIP_INF)).thenReturn(mockedConstraint1)
-            `when`(mockedModel.addCons(mockedConstraint1)).then { createdConstraints.add(mockedConstraint1)}
+            `when`(mockedModel.createConstraint("constraint1", listOf(mockedVarY, mockedVarX), listOf(3.0, 4.0), 3.0,  SCIP_INF)).thenReturn(mockedConstraint1)
             return mockedModel
           },
           fun(): LPModel {
@@ -353,16 +384,14 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Successful initialization of multiple constraints (1) aX + by + cZ <= 4 (2) X + Y >= 2",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
-            `when`(mockedModel.createVar("Z", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarZ)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.createVar("Z", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarZ)
             `when`(mockedModel.infinity()).thenReturn(SCIP_INF)
-            `when`(mockedModel.createConsLinear("constraint1", arrayOf(mockedVarX, mockedVarY, mockedVarZ), doubleArrayOf(2.0, 3.0, 4.0), -1.0 * SCIP_INF, 4.0)).thenReturn(mockedConstraint1)
-            `when`(mockedModel.createConsLinear("constraint2", arrayOf(mockedVarX, mockedVarY), doubleArrayOf(1.0, 1.0), 2.0, SCIP_INF)).thenReturn(mockedConstraint2)
-            `when`(mockedModel.addCons(mockedConstraint1)).then { createdConstraints.add(mockedConstraint1)}
-            `when`(mockedModel.addCons(mockedConstraint1)).then { createdConstraints.add(mockedConstraint2)}
+            `when`(mockedModel.createConstraint("constraint1", listOf(mockedVarX, mockedVarY, mockedVarZ), listOf(2.0, 3.0, 4.0), -1.0 * SCIP_INF, 4.0)).thenReturn(mockedConstraint1)
+            `when`(mockedModel.createConstraint("constraint2", listOf(mockedVarX, mockedVarY), listOf(1.0, 1.0), 2.0, SCIP_INF)).thenReturn(mockedConstraint2)
             return mockedModel
           },
           fun(): LPModel {
@@ -400,14 +429,13 @@ class ScipLpSolverTest {
   @MethodSource("argsForInitConstraints")
   fun testInitConstraints(
       desc: String,
-      initMock: () -> Scip,
+      initMock: () -> SCIPProblem,
       initModel: () -> LPModel,
       wantSuccess: Boolean,
       wantVarMap: Map<String, Variable>,
       wantConstraintMap: Map<String, Constraint>
   ) {
     log.info { "Test Case $desc" }
-    createdConstraints.clear()
     val mockedScipModel = initMock()
     val model = initModel()
     val solver = ScipLpSolver(model)
@@ -425,16 +453,15 @@ class ScipLpSolverTest {
     assertEquals(wantSuccess, gotSuccess, "solver.initConstraints()")
     assertEquals(gotVarMap, wantVarMap, "solver.variableMap")
     assertEquals(gotConstraintMap, wantConstraintMap, "solver.constraintMap")
-    assertEquals(createdConstraints, wantConstraintMap.values.toSet(), "solver.create calls")
   }
 
   private fun argsForInitObjective() = Stream.of(
       Arguments.of(
           "Exception while initializing the objective function",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.changeVarObj(mockedVarX, 1.0)).thenThrow(RuntimeException())
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.setVariableObjective(mockedVarX, 1.0)).thenThrow(RuntimeException())
             return mockedModel
           },
           fun(): LPModel {
@@ -451,11 +478,11 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Exception while initializing the objective direction",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.changeVarObj(mockedVarX, 1.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 1.0) }
-            `when`(mockedModel.setMaximize()).thenThrow(RuntimeException())
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.setVariableObjective(mockedVarX, 1.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 1.0) }
+            `when`(mockedModel.maximize()).thenThrow(RuntimeException())
             return mockedModel
           },
           fun(): LPModel {
@@ -473,14 +500,14 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Reduced expression with maximization objective  5x + 2y -2x + 2y",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
-            `when`(mockedModel.changeVarObj(mockedVarX, 3.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 3.0) }
-            `when`(mockedModel.changeVarObj(mockedVarY, 4.0)).then{ createdObjectiveCoefficients.put(mockedVarY, 4.0) }
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.setVariableObjective(mockedVarX, 3.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 3.0) }
+            `when`(mockedModel.setVariableObjective(mockedVarY, 4.0)).then{ createdObjectiveCoefficients.put(mockedVarY, 4.0) }
             // Throw exception on invalid call
-            `when`(mockedModel.setMinimize()).thenThrow(RuntimeException())
+            `when`(mockedModel.minimize()).thenThrow(RuntimeException())
             return mockedModel
           },
           fun(): LPModel {
@@ -503,13 +530,13 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Reduced expression with minimization objective  5x + 2y -2x - 2y",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
-            `when`(mockedModel.changeVarObj(mockedVarX, 3.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 3.0) }
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+            `when`(mockedModel.setVariableObjective(mockedVarX, 3.0)).then{ createdObjectiveCoefficients.put(mockedVarX, 3.0) }
             // Throw exception on invalid call
-            `when`(mockedModel.setMaximize()).thenThrow(RuntimeException())
+            `when`(mockedModel.maximize()).thenThrow(RuntimeException())
             return mockedModel
           },
           fun(): LPModel {
@@ -531,10 +558,10 @@ class ScipLpSolverTest {
       ),
       Arguments.of(
           "Empty Objective function (feasibility problem)",
-          fun(): Scip {
-            val mockedModel = mock<Scip>{}
-            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
-            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIP_Vartype.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
+          fun(): SCIPProblem {
+            val mockedModel = mock<SCIPProblem>{}
+            `when`(mockedModel.createVar("X", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarX)
+            `when`(mockedModel.createVar("Y", 0.0, 1.0, 0.0, SCIPVarType.SCIP_VARTYPE_BINARY)).thenReturn(mockedVarY)
             return mockedModel
           },
           fun(): LPModel {
@@ -556,7 +583,7 @@ class ScipLpSolverTest {
   @MethodSource("argsForInitObjective")
   fun testInitObjective(
       desc: String,
-      initMock: () -> Scip,
+      initMock: () -> SCIPProblem,
       initModel: () -> LPModel,
       wantSuccess: Boolean,
       wantVarMap: Map<String, Variable>,
@@ -579,8 +606,86 @@ class ScipLpSolverTest {
     assertEquals(gotVarMap, wantVarMap, "solver.variableMap")
     assertEquals(createdObjectiveCoefficients, wantObjectiveCoefficients, "solver.changeObjVal calls")
   }
-}
 
-fun testExtractResults() {
+  private fun argsForGetSolutionStatus() = Stream.of(
+      Arguments.of(
+          "Optimal -> Optimal",
+          SCIPStatus.OPTIMAL, LPSolutionStatus.OPTIMAL,
+      ),
+      Arguments.of(
+          "Infeasible -> Infeasible",
+          SCIPStatus.INFEASIBLE, LPSolutionStatus.INFEASIBLE,
+      ),
+      Arguments.of(
+          "Unbounded -> Unbounded",
+          SCIPStatus.UNBOUNDED, LPSolutionStatus.UNBOUNDED,
+      ),
+      Arguments.of(
+          "Time limit -> Time limit",
+          SCIPStatus.TIME_LIMIT, LPSolutionStatus.TIME_LIMIT,
+      ),
+      Arguments.of(
+          "Infeasible or Unbounded -> Infeasible or Unbounded",
+          SCIPStatus.INFEASIBLE_OR_UNBOUNDED, LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED,
+      ),
+      Arguments.of(
+          "Unknown -> Unknown",
+          SCIPStatus.UNKNOWN, LPSolutionStatus.UNKNOWN,
+      ),
+      Arguments.of(
+          "Terminated -> Error",
+          SCIPStatus.TERMINATED, LPSolutionStatus.ERROR,
+      ),
+      Arguments.of(
+          "User Interrupted -> Error",
+          SCIPStatus.USER_INTERRUPT, LPSolutionStatus.ERROR,
+      ),
+      Arguments.of(
+          "Solution Limit -> CUTOFF",
+          SCIPStatus.SOLUTION_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Gap Limit -> CUTOFF",
+          SCIPStatus.GAP_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Best Solution Limit -> CUTOFF",
+          SCIPStatus.BEST_SOLUTION_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Node Limit -> CUTOFF",
+          SCIPStatus.NODE_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Total Node Limit -> CUTOFF",
+          SCIPStatus.TOTAL_NODE_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Stall node Limit -> CUTOFF",
+          SCIPStatus.STALL_NODE_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Dual Limit -> CUTOFF",
+          SCIPStatus.DUAL_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Memory Limit -> CUTOFF",
+          SCIPStatus.MEMORY_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Primal Limit -> CUTOFF",
+          SCIPStatus.PRIMAL_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+      Arguments.of(
+          "Restart Limit -> CUTOFF",
+          SCIPStatus.RESTART_LIMIT, LPSolutionStatus.CUTOFF,
+      ),
+  )
 
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("argsForGetSolutionStatus")
+  fun testGetSolutionStatus(desc: String, scipStatus: SCIPStatus, wantStatus: LPSolutionStatus) {
+    log.info { "Test Case: $desc" }
+    assertEquals(wantStatus, ScipLpSolver.getSolutionStatus(scipStatus), "solver.getSolutionStatus($scipStatus) want $wantStatus got ${ScipLpSolver.getSolutionStatus(scipStatus)}")
+  }
 }

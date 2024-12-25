@@ -14,8 +14,8 @@
 
   <properties>
     <scip.version>9.0.0</scip.version>
-    <java-library-path-arg>/usr/lib64</java-library-path-arg>
-    <ld-library-path>/usr/lib64</ld-library-path>
+    <java-library-path-arg>/usr/local/lib64</java-library-path-arg>
+    <ld-library-path>/usr/local/lib64</ld-library-path>
   </properties>
 
   <dependencies>
@@ -25,10 +25,16 @@
       <version>${revision}</version>
     </dependency>
     <dependency>
-      <groupId>org.scip</groupId>
-      <artifactId>jscipopt</artifactId>
-      <version>${scip.version}</version>
+      <groupId>com.lpapi</groupId>
+      <artifactId>scip-ffm</artifactId>
+      <version>${revision}</version>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.scip</groupId>-->
+<!--      <artifactId>jscipopt</artifactId>-->
+<!--      <version>${scip.version}</version>-->
+<!--    </dependency>-->
+
     <dependency>
       <groupId>com.lpapi</groupId>
       <artifactId>lp-solver-sample</artifactId>
@@ -43,7 +49,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
+      <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
@@ -90,6 +96,9 @@
               <environmentVariables>
                 <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
               </environmentVariables>
+              <systemPropertyVariables>
+                <jextract.trace.downcalls>false</jextract.trace.downcalls>
+              </systemPropertyVariables>
             </configuration>
           </execution>
         </executions>
