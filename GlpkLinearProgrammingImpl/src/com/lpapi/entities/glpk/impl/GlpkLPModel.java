@@ -82,7 +82,7 @@ public class GlpkLPModel extends LPModel<glp_prob, Integer, Integer> {
     GLPK.glp_init_iocp(iocp);
     iocp.setPresolve(GLPKConstants.GLP_ON);
     GLPK.glp_write_lp(model, null, "model.lp");
-    int ret = GLPK.glp_intopt(model, iocp);
+    GLPK.glp_intopt(model, iocp);
 
     double val  = GLPK.glp_mip_obj_val(model);
     LPSolutionStatus solnStatus = getSolutionStatus(GLPK.glp_mip_status(model));
