@@ -14,6 +14,7 @@
 
   <properties>
     <glpk.version>1.12.0</glpk.version>
+    <maven.test.skip>${glpk.skiptests}</maven.test.skip>
   </properties>
 
   <dependencies>
@@ -34,42 +35,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-<!--  <build>-->
-<!--    <plugins>-->
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-surefire-plugin</artifactId>-->
-<!--        <version>2.22.1</version>-->
-<!--        <configuration>-->
-<!--          <groups>unitTest</groups>-->
-<!--          <skipTests>${skip.unit.tests}</skipTests>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-failsafe-plugin</artifactId>-->
-<!--        <version>2.22.1</version>-->
-<!--        <configuration>-->
-<!--          <groups>integrationTest</groups>-->
-<!--          <includes>-->
-<!--            <include>**/*.kt</include>-->
-<!--          </includes>-->
-<!--        </configuration>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>integration-tests</id>-->
-<!--            <goals>-->
-<!--              <goal>integration-test</goal>-->
-<!--              <goal>verify</goal>-->
-<!--            </goals>-->
-<!--            <configuration>-->
-<!--              <skipTests>${skip.integration.tests}</skipTests>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
-<!--    </plugins>-->
-<!--  </build>-->
 
 </project>
