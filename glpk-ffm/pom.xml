@@ -11,12 +11,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>glpk-ffm</artifactId>
+  <packaging>jar</packaging>
 
   <properties>
     <glpkc-header.path>/usr/local/include/</glpkc-header.path>
     <glpk-library>glpk</glpk-library>
   </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -130,6 +130,4 @@
       </plugin>
     </plugins>
   </build>
-
-
 </project>
