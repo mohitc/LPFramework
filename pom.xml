@@ -19,9 +19,9 @@
     <module>glpk-ffm</module>
     <module>lp-solver-sample</module>
     <!--    <module>cplex-solver</module>-->
-     <module>scip-solver</module>
+<!--     <module>scip-solver</module>-->
+<!--    <module>scip-ffm</module>-->
     <module>lp-rw</module>
-    <module>scip-ffm</module>
   </modules>
 
   <properties>

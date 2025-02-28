@@ -13,8 +13,6 @@
   <packaging>jar</packaging>
 
   <properties>
-    <glpk.version>1.12.0</glpk.version>
-    <java-library-path-arg>/usr/local/lib/jni:/usr/lib/jni</java-library-path-arg>
     <ld-library-path>/usr/local/lib</ld-library-path>
   </properties>
 
@@ -89,7 +87,6 @@
         <version>${surefire.version}</version>
         <configuration>
           <!-- Provide environment variables -->
-          <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
           <environmentVariables>
             <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
           </environmentVariables>
