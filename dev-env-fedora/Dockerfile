@@ -47,7 +47,7 @@ ENV PATH="/opt/jextract/bin:$PATH"
 RUN wget https://www.scipopt.org/download/release/scipoptsuite-9.2.1.tgz -P /tmp && tar -zxvf /tmp/scipoptsuite-9.2.1.tgz -C /opt && ln -s /opt/scipoptsuite-9.2.1 /opt/scipopt
 
 RUN dnf install --setopt=install_weak_deps=False cmake coin-or-Ipopt-devel gmp-devel zlib-ng-devel zlib-ng-compat-devel readline-devel boost-devel tbb-devel -y
-RUN mkdir /opt/scipopt/build && cd /opt/scipopt/build && cmake .. && make
+RUN mkdir /opt/scipopt/build && cd /opt/scipopt/build && cmake .. && make && make install
 
 # Download and install HIGHS 
 
