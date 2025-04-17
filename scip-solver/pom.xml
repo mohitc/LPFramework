@@ -13,9 +13,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <scip.version>9.0.0</scip.version>
-    <java-library-path-arg>/usr/local/lib64</java-library-path-arg>
-    <ld-library-path>/usr/local/lib64</ld-library-path>
+    <scip-library.path>/usr/local/lib64</scip-library.path>
   </properties>
 
   <dependencies>
@@ -74,9 +72,9 @@
             <configuration>
               <skipTests>${scip.skiptests}</skipTests>
               <!-- Provide environment variables -->
-              <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
+              <argLine>-Djava.library.path=${scip-library.path}</argLine>
               <environmentVariables>
-                <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+                <LD_LIBRARY_PATH>${scip-library.path}</LD_LIBRARY_PATH>
               </environmentVariables>
               <systemPropertyVariables>
                 <jextract.trace.downcalls>false</jextract.trace.downcalls>
@@ -92,9 +90,9 @@
         <version>${surefire.version}</version>
         <configuration>
           <!-- Provide environment variables -->
-          <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
+          <argLine>-Djava.library.path=${scip-library.path}</argLine>
           <environmentVariables>
-            <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+            <LD_LIBRARY_PATH>${scip-library.path}</LD_LIBRARY_PATH>
           </environmentVariables>
         </configuration>
       </plugin>

@@ -13,7 +13,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <ld-library-path>/usr/local/lib</ld-library-path>
+    <glpk-library.path>/usr/local/lib</glpk-library.path>
   </properties>
 
   <dependencies>
@@ -72,9 +72,8 @@
             <configuration>
               <skipTests>${glpk.skiptests}</skipTests>
               <!-- Provide environment variables -->
-              <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
               <environmentVariables>
-                <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+                <LD_LIBRARY_PATH>${glpk-library.path}</LD_LIBRARY_PATH>
               </environmentVariables>
             </configuration>
           </execution>
@@ -88,7 +87,7 @@
         <configuration>
           <!-- Provide environment variables -->
           <environmentVariables>
-            <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+            <LD_LIBRARY_PATH>${glpk-library.path}</LD_LIBRARY_PATH>
           </environmentVariables>
         </configuration>
       </plugin>
