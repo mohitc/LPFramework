@@ -3,7 +3,7 @@ name: Build Docker Dev Environment used for development
 
 on:
   push:
-    branches: [ $default-branch ]
+    paths: dev-env-fedora/Dockerfile
 
 jobs:
 
