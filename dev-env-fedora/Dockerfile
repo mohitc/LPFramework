@@ -14,7 +14,7 @@ gpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public
 EOF
 
 # Install java and some common packages and update dependencies from image
-RUN dnf install --setopt=install_weak_deps=False temurin-23-jdk wget git gcc g++ -y && \
+RUN dnf install --setopt=install_weak_deps=False temurin-24-jdk wget git gcc g++ -y && \
     dnf update -y
 
 # Java Home configuration 
