@@ -16,6 +16,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Publish package
-        run: mvn --batch-mode deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: docker run -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}--entrypoint /bin/bash --mount type=bind,src=./,dst=/root/projects/LPFramework -it ghcr.io/mohitc/lpframework/dev-env-fedora:master -c "cd /root/projects/LPFramework && mvn --batch_mode deploy"
