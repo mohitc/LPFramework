@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.lpapi.model.LPConstant
 import com.lpapi.model.LPConstraint
 import com.lpapi.model.LPExpression
@@ -38,7 +38,7 @@ class LPModelParser(
 
   init {
     // Configuration for the ObjectMapper
-    mapper.registerModule(KotlinModule())
+    mapper.registerKotlinModule()
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
   }
 
