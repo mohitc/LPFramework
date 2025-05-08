@@ -21,9 +21,9 @@ open class ScipLpSolver(
   model: LPModel,
 ) : LPSolver<SCIPProblem>(model) {
   companion object {
-    internal fun getSolutionStatus(status: SCIPStatus): LPSolutionStatus {
-      return when (status) {
-        SCIPStatus.OPTIMAL -> return LPSolutionStatus.OPTIMAL
+    internal fun getSolutionStatus(status: SCIPStatus): LPSolutionStatus =
+      when (status) {
+        SCIPStatus.OPTIMAL -> LPSolutionStatus.OPTIMAL
         SCIPStatus.INFEASIBLE -> LPSolutionStatus.INFEASIBLE
         SCIPStatus.UNBOUNDED -> LPSolutionStatus.UNBOUNDED
         SCIPStatus.TIME_LIMIT -> LPSolutionStatus.TIME_LIMIT
@@ -46,7 +46,6 @@ open class ScipLpSolver(
           LPSolutionStatus.UNKNOWN
         }
       }
-    }
 
 //    init {
 //      try {
