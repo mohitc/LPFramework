@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - 'master'
+    paths-ignore:
+      - 'dev-env-fedora/**'
 
 jobs:
   publish:
@@ -16,4 +18,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Publish package
-        run: mvn -DGITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} --batch-mode deploy
+        run: mvn -Dgithub.user=${{ github.actor }} -Dgithub.token=${{ secrets.GITHUB_TOKEN }} --batch-mode deploy
