@@ -16,4 +16,4 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Publish package
-        run: mvn -DGITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} --batch_mode deploy"
+        run: mvn -DGITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} --batch_mode deploy
