@@ -1,17 +1,11 @@
 # Start from Fedora 41
 FROM fedora:41
 
-ENV DISTRIBUTION_NAME=fedora
+# Copy maven settings.xml
+COPY settings.xml /root/.m2/settings.xml
 
-# Install Adoptium Repo 
-RUN cat <<EOF > /etc/yum.repos.d/adoptium.repo
-[Adoptium]
-name=Adoptium
-baseurl=https://packages.adoptium.net/artifactory/rpm/${DISTRIBUTION_NAME:-$(. /etc/os-release; echo $ID)}/\$releasever/\$basearch
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public
-EOF
+# Install Adoptium Repo
+COPY adoptium.repo /etc/yum.repos.d/adoptium.repo
 
 # Install java and some common packages and update dependencies from image
 RUN dnf install --setopt=install_weak_deps=False temurin-24-jdk wget git gcc g++ -y && \
@@ -65,7 +59,7 @@ RUN mkdir /opt/scipopt/build && \
     make && \
     make install
 
-# Download and install HIGHS 
+# Download and install HIGHS
 
 RUN cd /opt/ && \
     git clone --branch v1.10.0 --single-branch https://github.com/ERGO-Code/HiGHS.git && \
@@ -74,8 +68,4 @@ RUN cd /opt/ && \
     cmake --build build
 
 # Cleanup downloads
-RUN rm -rf /tmp/* 
-
-
-
-
+RUN rm -rf /tmp/*

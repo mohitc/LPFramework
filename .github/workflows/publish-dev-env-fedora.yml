@@ -7,7 +7,10 @@ name: Docker
 
 on:
   push:
-    paths: dev-env-fedora/Dockerfile
+    paths:
+      - 'dev-env-fedora/**'
+      - '!dev-env-fedora/README.md'
+
 
 env:
   # Use docker.io for Docker Hub if empty
