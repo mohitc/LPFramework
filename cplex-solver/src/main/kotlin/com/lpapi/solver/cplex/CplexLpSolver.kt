@@ -16,8 +16,9 @@ import ilog.concert.IloNumVarType
 import ilog.cplex.IloCplex
 import kotlin.system.measureTimeMillis
 
-class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
-
+class CplexLpSolver(
+  model: LPModel,
+) : LPSolver<IloCplex>(model) {
   private var cplexModel: IloCplex? = null
 
   private var variableMap: MutableMap<String, IloNumVar> = mutableMapOf()
@@ -37,35 +38,35 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
     return true
   }
 
-  override fun getBaseModel(): IloCplex? {
-    return cplexModel
-  }
+  override fun getBaseModel(): IloCplex? = cplexModel
 
   override fun solve(): LPSolutionStatus {
     try {
       log.info { "Starting computation of model" }
-      val executionTime = measureTimeMillis {
-        cplexModel?.solve()
-      }
+      val executionTime =
+        measureTimeMillis {
+          cplexModel?.solve()
+        }
       val solutionStatus = getSolutionStatus(cplexModel?.status)
       log.info { "Computation terminated. Solution Status : $solutionStatus" }
       if (solutionStatus == LPSolutionStatus.ERROR) {
         log.error { "Could not determine solution status" }
         model.solution = LPModelResult(LPSolutionStatus.ERROR)
       } else if (!(
-        solutionStatus==LPSolutionStatus.INFEASIBLE ||
-          solutionStatus==LPSolutionStatus.UNBOUNDED ||
-          solutionStatus==LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+          solutionStatus == LPSolutionStatus.INFEASIBLE ||
+            solutionStatus == LPSolutionStatus.UNBOUNDED ||
+            solutionStatus == LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
         )
       ) {
         // add model results
         extractResults()
-        model.solution = LPModelResult(
-          solutionStatus,
-          cplexModel?.getValue(cplexObjective),
-          executionTime,
-          cplexModel?.mipRelativeGap
-        )
+        model.solution =
+          LPModelResult(
+            solutionStatus,
+            cplexModel?.getValue(cplexObjective),
+            executionTime,
+            cplexModel?.mipRelativeGap,
+          )
         log.info { "${model.solution}" }
       } else {
         model.solution = LPModelResult(solutionStatus)
@@ -93,8 +94,8 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
     }
   }
 
-  fun getSolutionStatus(cplexStatus: IloCplex.Status?): LPSolutionStatus {
-    return when (cplexStatus) {
+  fun getSolutionStatus(cplexStatus: IloCplex.Status?): LPSolutionStatus =
+    when (cplexStatus) {
       IloCplex.Status.Optimal -> LPSolutionStatus.OPTIMAL
       IloCplex.Status.InfeasibleOrUnbounded -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
       IloCplex.Status.Infeasible -> LPSolutionStatus.INFEASIBLE
@@ -102,9 +103,10 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
       IloCplex.Status.Bounded -> LPSolutionStatus.BOUNDED
       IloCplex.Status.Error -> LPSolutionStatus.ERROR
       null -> LPSolutionStatus.ERROR
-      else -> { LPSolutionStatus.UNKNOWN }
+      else -> {
+        LPSolutionStatus.UNKNOWN
+      }
     }
-  }
 
   /** Function to initialize all variables in the model
    *
@@ -189,7 +191,9 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
             LPOperator.EQUAL -> {
               cplexModel?.addEq(lhs, rhs, lpConstraint.identifier)
             }
-            else -> { null }
+            else -> {
+              null
+            }
           }
         if (modelConstraint == null) {
           log.error { "Error while generating model constraint ${lpConstraint.identifier}" }
@@ -207,7 +211,7 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
   /** Function to generate CPLEX linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
    */
-  private fun generateExpression(expr: LPExpression): IloLinearNumExpr ? {
+  private fun generateExpression(expr: LPExpression): IloLinearNumExpr? {
     try {
       val cplexExpr: IloLinearNumExpr? = cplexModel?.linearNumExpr()
       if (cplexExpr == null) {
@@ -233,12 +237,13 @@ class CplexLpSolver(model: LPModel) : LPSolver<IloCplex>(model) {
     }
   }
 
-  internal fun getCplexVarType(type: LPVarType): IloNumVarType? {
-    return when (type) {
+  internal fun getCplexVarType(type: LPVarType): IloNumVarType? =
+    when (type) {
       LPVarType.BOOLEAN -> IloNumVarType.Bool
       LPVarType.INTEGER -> IloNumVarType.Int
       LPVarType.DOUBLE -> IloNumVarType.Float
-      else -> { null }
+      else -> {
+        null
+      }
     }
-  }
 }

@@ -7,7 +7,5 @@ import com.lpapi.spi.LPSpi
 import ilog.cplex.IloCplex
 
 class CplexLPSpi : LPSpi<IloCplex> {
-  override fun create(model: LPModel): LPSolver<IloCplex> {
-    return CplexLpSolver(model)
-  }
+  override fun create(model: LPModel): LPSolver<IloCplex> = CplexLpSolver(model)
 }

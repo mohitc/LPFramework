@@ -21,7 +21,7 @@
     <dependency>
       <groupId>cplex</groupId>
       <artifactId>cplex</artifactId>
-      <version>1.0</version>
+      <version>20.1.0</version>
     </dependency>
     <!--Abstract model samples used to generate test cases-->
     <dependency>
@@ -80,4 +80,10 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>jena-bio</id>
+      <url>https://bio.informatik.uni-jena.de/repository/libs-release-oss/</url>
+    </repository>
+  </repositories>
 </project>
