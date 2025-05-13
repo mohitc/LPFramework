@@ -1,0 +1,19 @@
+name: Verify that maven builds are running successfully by running maven install on the container
+on:
+  push:
+    paths-ignore:
+      - 'dev-env-fedora/**'
+      - '.github/**'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/mohitc/lpframework/dev-env-fedora:master
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Validate all tests
+        run: mvn --batch-mode install
