@@ -7,15 +7,15 @@ import com.gurobi.gurobi.GRBException
 import com.gurobi.gurobi.GRBLinExpr
 import com.gurobi.gurobi.GRBModel
 import com.gurobi.gurobi.GRBVar
-import com.lpapi.model.LPConstraint
-import com.lpapi.model.LPExpression
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPModelResult
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
+import io.github.mohitc.lpapi.model.LPConstraint
+import io.github.mohitc.lpapi.model.LPExpression
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPModelResult
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import kotlin.system.measureTimeMillis
 
 class GurobiLpSolver(
@@ -233,7 +233,7 @@ class GurobiLpSolver(
   /** Function to generate Gurobi linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
    */
-  private fun generateExpression(expr: LPExpression): GRBLinExpr? {
+  private fun generateExpression(expr: io.github.mohitc.lpapi.model.LPExpression): GRBLinExpr? {
     try {
       val linExpr = GRBLinExpr()
       val reducedExpr = model.reduce(expr)

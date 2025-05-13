@@ -6,14 +6,14 @@ import com.lpapi.ffm.highs.HIGHSObjective
 import com.lpapi.ffm.highs.HIGHSProblem
 import com.lpapi.ffm.highs.HIGHSStatus
 import com.lpapi.ffm.highs.HIGHSVarType
-import com.lpapi.model.LPConstraint
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPModelResult
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
+import io.github.mohitc.lpapi.model.LPConstraint
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPModelResult
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import kotlin.system.measureTimeMillis
 
 class HighsLPSolver(

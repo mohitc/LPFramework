@@ -85,7 +85,7 @@ paradigm by defining named constants, with the option of defining their values a
 ```kotlin
 var c = LPConstant("c", -10) // Initialize a constant with a value
 var d = LPConstant("d")      // Initialize a constant without a value (defaults to 0)
-d.value = -2.3               // set the value of d at a later point in time. 
+d.value = -2.3               // set the value of d at a later point in time.
 ```
 
 ### Expressions: LPExpression <a name="lpexpression"></a>
@@ -103,7 +103,7 @@ The `LPExpression` is used to represent [constraints](#lpconstraint) in the mode
 ```kotlin
 // Expression: aX + bY - 3Z + d - 4
 // Variables: X, Y, Z
-// Named Constants: a, b 
+// Named Constants: a, b
 val expr = LPExpression()
 expr
   .addTerm("a", "X")
@@ -119,7 +119,7 @@ The [`LPConstraint`](./src/main/kotlin/com/lpapi/model/LPConstraint.kt) object i
 a model. Constraints are referenced by a unique identifier, and consist of:
 
 * [`LPExpression`](#lpexpression) terms representing the `lhs`(Left-Hand Side) and `rhs`(Right-Hand Side).
-* [LPOperator](./src/main/kotlin/com/lpapi/model/enums/LPOperator.kt) to define the conditional operations
+* [LPOperator](src/main/kotlin/io/github/mohitc/lpapi/model/enums/LPOperator.kt) to define the conditional operations
   (&leq;, =, &geq; ) between the two expressions.
 
 An example of the same is shown below
@@ -142,7 +142,7 @@ The objective function for a linear optimization problem is defined using a comb
 
 * [`LPExpression`](#lpexpression) linear expression
 * optimization direction (maximize/minimize) defined as
-  [LPObjectiveType](./src/main/kotlin/com/lpapi/model/enums/LPObjectiveType.kt)
+  [LPObjectiveType](src/main/kotlin/io/github/mohitc/lpapi/model/enums/LPObjectiveType.kt)
 
 The [`LPObjective`](./src/main/kotlin/com/lpapi/model/LPObjective.kt) object is used to encapsulate these two values,
 and can be defined as
@@ -162,7 +162,7 @@ the [`LPModel`](./src/main/kotlin/com/lpapi/model/LPModel.kt) is used to define 
 computation, and stores generic parameters such as the
 
 * status of the computation, enumerated
-  via [`LPSolutionStatus`](./src/main/kotlin/com/lpapi/model/enums/LPSolutionStatus.kt)
+  via [`LPSolutionStatus`](src/main/kotlin/io/github/mohitc/lpapi/model/enums/LPSolutionStatus.kt)
 * computation time
 * mip gap, if applicable
 * value of the objective function

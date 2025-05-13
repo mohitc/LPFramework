@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>linear-programming</artifactId>
-    <groupId>com.lpapi</groupId>
+    <groupId>io.github.mohitc</groupId>
     <version>${revision}</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -17,13 +17,13 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.lpapi</groupId>
+      <groupId>io.github.mohitc</groupId>
       <artifactId>lp-api</artifactId>
       <version>${revision}</version>
     </dependency>
     <!--LP Solver samples to test import / export to file -->
     <dependency>
-      <groupId>com.lpapi</groupId>
+      <groupId>io.github.mohitc</groupId>
       <artifactId>lp-solver-sample</artifactId>
       <version>${revision}</version>
       <scope>test</scope>

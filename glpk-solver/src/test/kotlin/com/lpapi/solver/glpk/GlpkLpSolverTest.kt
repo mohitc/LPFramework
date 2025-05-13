@@ -6,14 +6,14 @@ import com.lpapi.ffm.glpk.GLPKObjective
 import com.lpapi.ffm.glpk.GLPKProblem
 import com.lpapi.ffm.glpk.GLPKVarKind
 import com.lpapi.ffm.glpk.GlpIocp
-import com.lpapi.model.LPConstraint
-import com.lpapi.model.LPExpression
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPVar
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
+import io.github.mohitc.lpapi.model.LPConstraint
+import io.github.mohitc.lpapi.model.LPExpression
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPVar
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
@@ -269,7 +269,8 @@ class GlpkLpSolverTest {
         LPModel("test"),
         mutableMapOf<String, Int>(),
         LPObjectiveType.MINIMIZE,
-        LPExpression(),
+        io.github.mohitc.lpapi.model
+          .LPExpression(),
         false,
       ),
       Arguments.of(
@@ -281,7 +282,8 @@ class GlpkLpSolverTest {
         LPModel("test"),
         mutableMapOf<String, Int>(),
         LPObjectiveType.MAXIMIZE,
-        LPExpression(),
+        io.github.mohitc.lpapi.model
+          .LPExpression(),
         false,
       ),
       Arguments.of(
@@ -298,7 +300,9 @@ class GlpkLpSolverTest {
         },
         mutableMapOf(Pair("x", 1), Pair("y", 2)),
         LPObjectiveType.MINIMIZE,
-        LPExpression().apply { this.addTerm("a", "x").addTerm(3, "y") },
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .apply { this.addTerm("a", "x").addTerm(3, "y") },
         false,
       ),
       Arguments.of(
@@ -315,7 +319,9 @@ class GlpkLpSolverTest {
         },
         mutableMapOf(Pair("x", 1)),
         LPObjectiveType.MAXIMIZE,
-        LPExpression().apply { this.add(3).addTerm(2, "x") },
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .apply { this.add(3).addTerm(2, "x") },
         false,
       ),
       Arguments.of(
@@ -332,7 +338,9 @@ class GlpkLpSolverTest {
         },
         mutableMapOf(Pair("x", 1)),
         LPObjectiveType.MAXIMIZE,
-        LPExpression().apply { this.add(3).addTerm(2, "x") },
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .apply { this.add(3).addTerm(2, "x") },
         false,
       ),
       Arguments.of(
@@ -348,7 +356,9 @@ class GlpkLpSolverTest {
         },
         mutableMapOf(Pair("x", 1)),
         LPObjectiveType.MINIMIZE,
-        LPExpression().apply { this.add(3).addTerm(2, "x") },
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .apply { this.add(3).addTerm(2, "x") },
         true,
       ),
     )
@@ -361,7 +371,7 @@ class GlpkLpSolverTest {
     model: LPModel,
     varMap: MutableMap<String, Int>,
     objective: LPObjectiveType,
-    expr: LPExpression,
+    expr: io.github.mohitc.lpapi.model.LPExpression,
     wantSuccess: Boolean,
   ) {
     log.info { "Test Case: $desc" }

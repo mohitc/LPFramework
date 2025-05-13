@@ -1,14 +1,5 @@
 package com.lpapi.solver.cplex
 
-import com.lpapi.model.LPConstraint
-import com.lpapi.model.LPExpression
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPModelResult
-import com.lpapi.model.LPVar
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import ilog.concert.IloConstraint
 import ilog.concert.IloException
 import ilog.concert.IloLinearNumExpr
@@ -16,6 +7,15 @@ import ilog.concert.IloNumVar
 import ilog.concert.IloNumVarType
 import ilog.cplex.CpxNumVar
 import ilog.cplex.IloCplex
+import io.github.mohitc.lpapi.model.LPConstraint
+import io.github.mohitc.lpapi.model.LPExpression
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPModelResult
+import io.github.mohitc.lpapi.model.LPVar
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
@@ -307,9 +307,13 @@ class CplexLpSolverTest {
         mock<IloCplex> {
           on { linearNumExpr() } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.LESS_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -319,9 +323,13 @@ class CplexLpSolverTest {
         mock<IloCplex> {
           on { linearNumExpr() } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.LESS_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -331,9 +339,13 @@ class CplexLpSolverTest {
         mock<IloCplex> {
           on { linearNumExpr() } doReturn null
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.LESS_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -347,9 +359,13 @@ class CplexLpSolverTest {
             }
           on { linearNumExpr() } doReturn numExpr
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.LESS_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -363,9 +379,13 @@ class CplexLpSolverTest {
             }
           on { linearNumExpr() } doReturn numExpr
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.LESS_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -390,9 +410,13 @@ class CplexLpSolverTest {
           on { addEq(lhs, rhs, "test") } doThrow IloException()
           on { addLe(lhs, rhs, "test") } doReturn mockConstraint
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.LESS_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         true,
         mapOf(Pair("test", mockConstraint)),
       ),
@@ -417,9 +441,13 @@ class CplexLpSolverTest {
           on { addEq(lhs, rhs, "test") } doThrow IloException()
           on { addLe(lhs, rhs, "test") } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.GREATER_EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         true,
         mapOf(Pair("test", mockConstraint)),
       ),
@@ -444,9 +472,13 @@ class CplexLpSolverTest {
           on { addEq(lhs, rhs, "test") } doReturn mockConstraint
           on { addLe(lhs, rhs, "test") } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         true,
         mapOf(Pair("test", mockConstraint)),
       ),
@@ -468,9 +500,13 @@ class CplexLpSolverTest {
           on { linearNumExpr() } doAnswer { expr.removeAt(0) }
           on { addEq(lhs, rhs, "test") } doReturn null
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -492,9 +528,13 @@ class CplexLpSolverTest {
           on { linearNumExpr() } doAnswer { expr.removeAt(0) }
           on { addEq(lhs, rhs, "test") } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPOperator.EQUAL,
-        LPExpression().add(3),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .add(3),
         false,
         mapOf<String, IloConstraint>(),
       ),
@@ -506,9 +546,9 @@ class CplexLpSolverTest {
     desc: String,
     variableMap: MutableMap<LPVar, IloNumVar>,
     cplexMock: IloCplex?,
-    lhs: LPExpression,
+    lhs: io.github.mohitc.lpapi.model.LPExpression,
     operator: LPOperator,
-    rhs: LPExpression,
+    rhs: io.github.mohitc.lpapi.model.LPExpression,
     wantSuccess: Boolean,
     wantConstraintMap: Map<String, IloConstraint>,
   ) {
@@ -545,7 +585,9 @@ class CplexLpSolverTest {
         mock<IloCplex> {
           on { linearNumExpr() } doReturn mockExpression
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPObjectiveType.MINIMIZE,
         false,
         null,
@@ -556,7 +598,9 @@ class CplexLpSolverTest {
         mock<IloCplex> {
           on { linearNumExpr() } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPObjectiveType.MINIMIZE,
         false,
         null,
@@ -568,7 +612,9 @@ class CplexLpSolverTest {
           on { linearNumExpr() } doReturn mockExpression
           on { addMinimize(mockExpression) } doThrow IloException()
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPObjectiveType.MINIMIZE,
         false,
         null,
@@ -581,7 +627,9 @@ class CplexLpSolverTest {
           on { addMaximize(mockExpression) } doThrow IloException()
           on { addMinimize(mockExpression) } doReturn mock {}
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPObjectiveType.MINIMIZE,
         true,
         mockExpression,
@@ -594,7 +642,9 @@ class CplexLpSolverTest {
           on { addMinimize(mockExpression) } doThrow IloException()
           on { addMaximize(mockExpression) } doReturn mock {}
         },
-        LPExpression().addTerm(2, "x"),
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .addTerm(2, "x"),
         LPObjectiveType.MAXIMIZE,
         true,
         mockExpression,
@@ -607,7 +657,7 @@ class CplexLpSolverTest {
     desc: String,
     variableMap: MutableMap<LPVar, IloNumVar>,
     cplexMock: IloCplex?,
-    objectiveExpr: LPExpression,
+    objectiveExpr: io.github.mohitc.lpapi.model.LPExpression,
     objectiveType: LPObjectiveType,
     wantSuccess: Boolean,
     wantCplexExpr: IloLinearNumExpr?,

@@ -7,14 +7,14 @@ import com.lpapi.ffm.scip.SCIPStatus
 import com.lpapi.ffm.scip.SCIPVarType
 import com.lpapi.ffm.scip.Solution
 import com.lpapi.ffm.scip.Variable
-import com.lpapi.model.LPExpressionTerm
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPModelResult
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
+import io.github.mohitc.lpapi.model.LPExpressionTerm
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPModelResult
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import kotlin.system.measureTimeMillis
 
 open class ScipLpSolver(

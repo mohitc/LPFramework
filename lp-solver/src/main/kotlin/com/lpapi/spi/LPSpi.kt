@@ -1,7 +1,7 @@
 package com.lpapi.spi
 
-import com.lpapi.model.LPModel
 import com.lpapi.solver.LPSolver
+import io.github.mohitc.lpapi.model.LPModel
 import java.util.ServiceLoader
 
 /** LpSpi is the Service provider interface that implementations of the LPSolver can implement to automatically pick up

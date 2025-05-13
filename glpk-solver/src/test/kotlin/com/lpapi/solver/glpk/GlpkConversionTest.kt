@@ -1,7 +1,7 @@
 package com.lpapi.solver.glpk
 
-import com.lpapi.model.LPModel
-import com.lpapi.model.enums.LPVarType
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 

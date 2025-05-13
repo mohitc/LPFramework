@@ -1,19 +1,19 @@
 package com.lpapi.solver.cplex
 
-import com.lpapi.model.LPConstraint
-import com.lpapi.model.LPExpression
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPModelResult
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import com.lpapi.solver.LPSolver
 import ilog.concert.IloConstraint
 import ilog.concert.IloLinearNumExpr
 import ilog.concert.IloNumVar
 import ilog.concert.IloNumVarType
 import ilog.cplex.IloCplex
+import io.github.mohitc.lpapi.model.LPConstraint
+import io.github.mohitc.lpapi.model.LPExpression
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPModelResult
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import kotlin.system.measureTimeMillis
 
 class CplexLpSolver(
@@ -211,7 +211,7 @@ class CplexLpSolver(
   /** Function to generate CPLEX linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
    */
-  private fun generateExpression(expr: LPExpression): IloLinearNumExpr? {
+  private fun generateExpression(expr: io.github.mohitc.lpapi.model.LPExpression): IloLinearNumExpr? {
     try {
       val cplexExpr: IloLinearNumExpr? = cplexModel?.linearNumExpr()
       if (cplexExpr == null) {

@@ -1,14 +1,14 @@
 package com.lpapi.solver.sample
 
-import com.lpapi.model.LPConstant
-import com.lpapi.model.LPConstraint
-import com.lpapi.model.LPModel
-import com.lpapi.model.LPVar
-import com.lpapi.model.enums.LPObjectiveType
-import com.lpapi.model.enums.LPOperator
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import com.lpapi.spi.Solver
+import io.github.mohitc.lpapi.model.LPConstant
+import io.github.mohitc.lpapi.model.LPConstraint
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.LPVar
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

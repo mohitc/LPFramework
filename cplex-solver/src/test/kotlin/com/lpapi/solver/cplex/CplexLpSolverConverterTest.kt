@@ -1,9 +1,9 @@
 package com.lpapi.solver.cplex
 
-import com.lpapi.model.LPModel
-import com.lpapi.model.enums.LPSolutionStatus
-import com.lpapi.model.enums.LPVarType
 import ilog.cplex.IloCplex
+import io.github.mohitc.lpapi.model.LPModel
+import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
