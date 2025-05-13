@@ -1,11 +1,11 @@
 package io.github.mohitc.lpapi.model.parser
 
-import com.lpapi.solver.sample.PrimitiveSolverSample
 import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpapi.model.LPModelResult
 import io.github.mohitc.lpapi.model.dto.LPModelResultDto
 import io.github.mohitc.lpapi.model.dto.LPVarResultDto
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
+import io.github.mohitc.lpsolver.sample.PrimitiveSolverSample
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.TestInstance
