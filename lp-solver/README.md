@@ -16,9 +16,9 @@ which are discussed next.
 ### Solver-Agnostic Initialization
 
 When attempting to solve a model without any customization to the underlying solver,
-an [`LPSolver`](src/main/kotlin/com/lpapi/solver/LPSolver.kt) instance can be solved by including the solver as a
-runtime dependency, and then using the provided Java Service Provider interface  
-(see [`LPSpi`](src/main/kotlin/com/lpapi/spi/LPSpi.kt)) to instantiate the solver found in the runtime.
+an [`LPSolver`](src/main/kotlin/io/github/mohitc/lpsolver/LPSolver.kt) instance can be solved by including the solver as a
+runtime dependency, and then using the provided Java Service Provider interface
+(see [`LPSpi`](src/main/kotlin/io/github/mohitc/lpsolver/spi/LPSpi.kt)) to instantiate the solver found in the runtime.
 
 For example, a runtime Maven Dependency for the [glpk-solver](../glpk-solver/README.md) :
 
@@ -53,7 +53,7 @@ by swapping out the runtime dependency.
 
 A common use case when using specific solver implementations involves providing advanced configurations to the solvers.
 In order to do so, solver instances can also be initialized directly, and the `getBaseModel()` method in the associated
-[`LPSolver`](src/main/kotlin/com/lpapi/solver/LPSolver.kt) implementation can be used to access the underlying solver
+[`LPSolver`](src/main/kotlin/io/github/mohitc/lpsolver/LPSolver.kt) implementation can be used to access the underlying solver
 model.
 
 For example, in order to solver the model using the `glpk-solver`, include the compile-time dependency:
@@ -80,9 +80,9 @@ solver.solve()
 ## Implementing Support for a new Solver
 
 In order to support a new solver, a module should implement the abstract
-class [`LPSolver`](src/main/kotlin/com/lpapi/solver/LPSolver.kt)
+class [`LPSolver`](src/main/kotlin/io/github/mohitc/lpsolver/LPSolver.kt)
 implementing the appropriate functions to convert variables and constraints as defined in the LPModel to associated
 entities in the solver. In order to support solver-agnostic initialization, the module should also implement an instance
-of the [`LPSpi`](src/main/kotlin/com/lpapi/spi/LPSpi.kt) interface, and include a file named `com.lpapi.spi.LPSpi` in
-the `META-INF/services` folder with a fully qualified class name to the implemented `LPSpi` interface. Sample instances 
-of the same can be found in one of the existing solver implementations. 
+of the [`LPSpi`](src/main/kotlin/io/github/mohitc/lpsolver/spi/LPSpi.kt) interface, and include a file named `com.lpapi.spi.LPSpi` in
+the `META-INF/services` folder with a fully qualified class name to the implemented `LPSpi` interface. Sample instances
+of the same can be found in one of the existing solver implementations.

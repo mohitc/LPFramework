@@ -1,6 +1,5 @@
 package io.github.mohitc.lpsolver.sample
 
-import com.lpapi.spi.Solver
 import io.github.mohitc.lpapi.model.LPConstant
 import io.github.mohitc.lpapi.model.LPConstraint
 import io.github.mohitc.lpapi.model.LPModel
@@ -9,6 +8,7 @@ import io.github.mohitc.lpapi.model.enums.LPObjectiveType
 import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
+import io.github.mohitc.lpsolver.spi.Solver
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
