@@ -43,7 +43,7 @@
     <highs-ffm.skiptests>false</highs-ffm.skiptests>
     <cplex.skiptests>true</cplex.skiptests>
     <gurobi.skiptests>true</gurobi.skiptests>
-    <ktlint.version>3.4.0</ktlint.version>
+    <ktlint.version>3.5.0</ktlint.version>
     <jacoco.version>0.8.13</jacoco.version>
     <junit.version>5.12.2</junit.version>
     <surefire.version>3.5.2</surefire.version>
