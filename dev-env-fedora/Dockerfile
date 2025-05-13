@@ -1,5 +1,5 @@
 # Start from Fedora 41
-FROM fedora:41
+FROM fedora:42
 
 # Copy maven settings.xml
 COPY settings.xml /root/.m2/settings.xml
