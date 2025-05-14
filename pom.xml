@@ -33,7 +33,7 @@
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <java.version>23</java.version>
     <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
-    <kotlin.version>2.1.20</kotlin.version>
+    <kotlin.version>2.1.21</kotlin.version>
     <logger.version>3.0.5</logger.version>
     <slf4j.version>2.0.17</slf4j.version>
     <revision>0.0.1-SNAPSHOT</revision>
