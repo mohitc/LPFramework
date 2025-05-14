@@ -1,6 +1,6 @@
 package io.github.mohitc.lpsolver.spi.glpk
 
-import com.lpapi.ffm.glpk.GLPKProblem
+import io.github.mohitc.glpk.ffm.GLPKProblem
 import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpsolver.LPSolver
 import io.github.mohitc.lpsolver.glpk.GlpkLpSolver

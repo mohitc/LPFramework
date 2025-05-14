@@ -1,8 +1,8 @@
 package io.github.mohitc.lpsolver.highs
 
-import com.lpapi.ffm.highs.HIGHSObjective
-import com.lpapi.ffm.highs.HIGHSProblem
-import com.lpapi.ffm.highs.HIGHSVarType
+import io.github.mohitc.highs.ffm.HIGHSObjective
+import io.github.mohitc.highs.ffm.HIGHSProblem
+import io.github.mohitc.highs.ffm.HIGHSVarType
 import io.github.mohitc.lpapi.model.LPConstant
 import io.github.mohitc.lpapi.model.LPConstraint
 import io.github.mohitc.lpapi.model.LPModel

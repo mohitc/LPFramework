@@ -1,6 +1,6 @@
 package io.github.mohitc.lpsolver.spi.highs
 
-import com.lpapi.ffm.highs.HIGHSProblem
+import io.github.mohitc.highs.ffm.HIGHSProblem
 import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpsolver.LPSolver
 import io.github.mohitc.lpsolver.highs.HighsLPSolver

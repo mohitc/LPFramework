@@ -1,11 +1,11 @@
 package io.github.mohitc.lpsolver.glpk
 
-import com.lpapi.ffm.glpk.GLPKBoundType
-import com.lpapi.ffm.glpk.GLPKMipStatus
-import com.lpapi.ffm.glpk.GLPKObjective
-import com.lpapi.ffm.glpk.GLPKProblem
-import com.lpapi.ffm.glpk.GLPKVarKind
-import com.lpapi.ffm.glpk.GlpIocp
+import io.github.mohitc.glpk.ffm.GLPKBoundType
+import io.github.mohitc.glpk.ffm.GLPKMipStatus
+import io.github.mohitc.glpk.ffm.GLPKObjective
+import io.github.mohitc.glpk.ffm.GLPKProblem
+import io.github.mohitc.glpk.ffm.GLPKVarKind
+import io.github.mohitc.glpk.ffm.GlpIocp
 import io.github.mohitc.lpapi.model.LPConstraint
 import io.github.mohitc.lpapi.model.LPExpression
 import io.github.mohitc.lpapi.model.LPModel

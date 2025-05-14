@@ -1,11 +1,5 @@
 package io.github.mohitc.lpsolver.scip
 
-import com.lpapi.ffm.scip.Constraint
-import com.lpapi.ffm.scip.SCIPProblem
-import com.lpapi.ffm.scip.SCIPRetCode
-import com.lpapi.ffm.scip.SCIPStatus
-import com.lpapi.ffm.scip.SCIPVarType
-import com.lpapi.ffm.scip.Variable
 import io.github.mohitc.lpapi.model.LPConstant
 import io.github.mohitc.lpapi.model.LPConstraint
 import io.github.mohitc.lpapi.model.LPModel
@@ -14,6 +8,12 @@ import io.github.mohitc.lpapi.model.enums.LPObjectiveType
 import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
+import io.github.mohitc.scip.ffm.Constraint
+import io.github.mohitc.scip.ffm.SCIPProblem
+import io.github.mohitc.scip.ffm.SCIPRetCode
+import io.github.mohitc.scip.ffm.SCIPStatus
+import io.github.mohitc.scip.ffm.SCIPVarType
+import io.github.mohitc.scip.ffm.Variable
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
