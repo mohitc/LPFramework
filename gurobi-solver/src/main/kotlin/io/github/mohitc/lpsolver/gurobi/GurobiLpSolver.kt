@@ -124,10 +124,6 @@ class GurobiLpSolver(
       try {
         log.debug { "Initializing variable ($lpVar)" }
         val grbVarType = getGurobiVarType(lpVar.type)
-        if (grbVarType == null) {
-          log.error { "Could not determine variable type for ${lpVar.type}" }
-          return false
-        }
         val grbVar = grbModel?.addVar(lpVar.lbound, lpVar.ubound, 0.0, grbVarType, lpVar.identifier)
         if (grbVar != null) {
           variableMap[lpVar.identifier] = grbVar
@@ -145,27 +141,20 @@ class GurobiLpSolver(
 
   /** Function to get the Gurobi variable type from the LP Variable type
    */
-  internal fun getGurobiVarType(type: LPVarType): Char? {
-    return when (type) {
-      LPVarType.INTEGER -> return GRB.INTEGER
-      LPVarType.BOOLEAN -> return GRB.BINARY
-      LPVarType.DOUBLE -> return GRB.CONTINUOUS
-      else -> {
-        null
-      }
+  internal fun getGurobiVarType(type: LPVarType): Char =
+    when (type) {
+      LPVarType.INTEGER -> GRB.INTEGER
+      LPVarType.BOOLEAN -> GRB.BINARY
+      LPVarType.DOUBLE -> GRB.CONTINUOUS
     }
-  }
 
   /** Function to get the Gurobi operator from the LP Operator type
    */
-  internal fun getGurobiOperator(operator: LPOperator): Char? =
+  internal fun getGurobiOperator(operator: LPOperator): Char =
     when (operator) {
       LPOperator.GREATER_EQUAL -> GRB.GREATER_EQUAL
       LPOperator.EQUAL -> GRB.EQUAL
       LPOperator.LESS_EQUAL -> GRB.LESS_EQUAL
-      else -> {
-        null
-      }
     }
 
   override fun initConstraints(): Boolean {
@@ -180,10 +169,6 @@ class GurobiLpSolver(
         }
 
         val gurobiOperator = getGurobiOperator(lpConstraint.operator)
-        if (gurobiOperator == null) {
-          log.error { "Could not determine operator for LP Model Operator ${lpConstraint.operator}" }
-          return false
-        }
         val modelConstraint: GRBConstr? =
           grbModel?.addConstr(
             generateExpression(lpConstraint.lhs),

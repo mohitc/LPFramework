@@ -42,9 +42,6 @@ open class ScipLpSolver(
         SCIPStatus.UNKNOWN -> LPSolutionStatus.UNKNOWN
         SCIPStatus.TERMINATED -> LPSolutionStatus.ERROR
         SCIPStatus.USER_INTERRUPT -> LPSolutionStatus.ERROR
-        else -> {
-          LPSolutionStatus.UNKNOWN
-        }
       }
 
 //    init {
@@ -106,7 +103,7 @@ open class ScipLpSolver(
   private fun releaseModelVars() {
     log.info { "Releasing variables from SCIP" }
     variableMap.entries.forEach { p ->
-      log.info { "Releasing variable ${p.key}" }
+      log.debug { "Releasing variable ${p.key}" }
       val retCode = scipModel.releaseVar(p.value)
       if (retCode != SCIPRetCode.SCIP_OKAY) {
         log.error { "releaseVar(${p.value}) want OKAY got $retCode" }
@@ -117,7 +114,7 @@ open class ScipLpSolver(
   private fun releaseModelConstraints() {
     log.info { "Releasing constraints from SCIP" }
     constraintMap.entries.forEach { p ->
-      log.info { "Releasing constraint ${p.key}" }
+      log.debug { "Releasing constraint ${p.key}" }
       val retCode = scipModel.releaseConstraint(p.value)
       if (retCode != SCIPRetCode.SCIP_OKAY) {
         log.error { "releaseVar(${p.value}) want OKAY got $retCode" }
@@ -221,10 +218,6 @@ open class ScipLpSolver(
       try {
         log.debug { "Initializing variable ($lpVar)" }
         val scipVarType = getScipVarType(lpVar.type)
-        if (scipVarType == null) {
-          log.error { "Could not determine var type for ${lpVar.type}" }
-          return false
-        }
         val scipVar = scipModel.createVar(lpVar.identifier, lpVar.lbound, lpVar.ubound, 0.0, scipVarType)
         if (scipVar != null) {
           variableMap[lpVar.identifier] = scipVar
@@ -246,13 +239,12 @@ open class ScipLpSolver(
     log.error { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.info { "Initializing constraint ($lpConstraint)" }
+        log.info { "Initializing constraint (${lpConstraint.identifier})" }
         val reducedConstraint = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
           return false
         }
-        log.error { "Reduced Constraint: $reducedConstraint" }
         val variables: MutableList<Variable> = mutableListOf()
         val coefficient: MutableList<Double> = mutableListOf()
         reducedConstraint.lhs.expression
@@ -270,7 +262,7 @@ open class ScipLpSolver(
             "Inconsistent constraint initialization for LHS in reduced expression for constraints $lpConstraint"
           }
         }
-        log.info { "Constraint variables $variables coefficients $coefficient" }
+        log.debug { "Constraint variables $variables coefficients $coefficient" }
         val constant =
           reducedConstraint.rhs.expression
             .stream()
@@ -285,7 +277,7 @@ open class ScipLpSolver(
             LPOperator.EQUAL -> Pair(constant, constant)
             LPOperator.GREATER_EQUAL -> Pair(constant, scipModel.infinity())
           }
-        log.error { "Bound for Constraints $bound" }
+        log.debug { "Bound for Constraints $bound" }
         val scipConstraint =
           scipModel.createConstraint(
             lpConstraint.identifier,
@@ -311,13 +303,13 @@ open class ScipLpSolver(
     log.info { "Initializing Objective Function" }
     try {
       val reducedObjectiveFn = model.reduce(model.objective.expression)
-      log.info { "Reduced Objective Function: $reducedObjectiveFn" }
+      log.debug { "Reduced Objective Function: $reducedObjectiveFn" }
       if (reducedObjectiveFn?.expression == null) {
         return false
       }
       reducedObjectiveFn.expression.forEach { term ->
         if (!term.isConstant()) {
-          log.info { "Adding capability for term $term" }
+          log.debug { "Adding capability for term $term" }
           val scipVar = variableMap[term.lpVarIdentifier]
           if (scipVar == null) {
             log.error { "Found variable in objective ${term.lpVarIdentifier} that was not initialized" }
@@ -341,14 +333,10 @@ open class ScipLpSolver(
     }
   }
 
-  internal fun getScipVarType(type: LPVarType): SCIPVarType? {
-    return when (type) {
-      LPVarType.INTEGER -> return SCIPVarType.SCIP_VARTYPE_INTEGER
-      LPVarType.BOOLEAN -> return SCIPVarType.SCIP_VARTYPE_BINARY
-      LPVarType.DOUBLE -> return SCIPVarType.SCIP_VARTYPE_CONTINUOUS
-      else -> {
-        null
-      }
+  internal fun getScipVarType(type: LPVarType): SCIPVarType =
+    when (type) {
+      LPVarType.INTEGER -> SCIPVarType.SCIP_VARTYPE_INTEGER
+      LPVarType.BOOLEAN -> SCIPVarType.SCIP_VARTYPE_BINARY
+      LPVarType.DOUBLE -> SCIPVarType.SCIP_VARTYPE_CONTINUOUS
     }
-  }
 }

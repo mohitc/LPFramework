@@ -152,13 +152,6 @@ open class GlpkLpSolver(
           LPOperator.LESS_EQUAL -> glpkModel.setRowBounds(index, GLPKBoundType.UPPER_BOUNDED, 0.0, constant)
           LPOperator.GREATER_EQUAL -> glpkModel.setRowBounds(index, GLPKBoundType.LOWER_BOUNDED, constant, 0.0)
           LPOperator.EQUAL -> glpkModel.setRowBounds(index, GLPKBoundType.FIXED, constant, constant)
-          else -> {
-            log.error {
-              "Bound handling not supported in GLPK for operator ${reducedConstraint.operator} in " +
-                "constraint ${lpConstraint.identifier}"
-            }
-            return false
-          }
         }
         // initialize variables and coefficients
         val ind = mutableListOf<Int>()
@@ -188,10 +181,6 @@ open class GlpkLpSolver(
       when (model.objective.objective) {
         LPObjectiveType.MINIMIZE -> glpkModel.setObjective(GLPKObjective.MINIMIZE)
         LPObjectiveType.MAXIMIZE -> glpkModel.setObjective(GLPKObjective.MAXIMIZE)
-        else -> {
-          log.error { "Support not included to handle objective type ${model.objective.objective} in GLPK" }
-          return false
-        }
       }
 
       val reducedObjective = model.reduce(model.objective)
@@ -219,17 +208,14 @@ open class GlpkLpSolver(
       LPVarType.BOOLEAN -> GLPKVarKind.BOOLEAN
       LPVarType.INTEGER -> GLPKVarKind.INTEGER
       LPVarType.DOUBLE -> GLPKVarKind.CONTINUOUS
-      else -> GLPKVarKind.CONTINUOUS
     }
 
   internal fun getSolutionStatus(solutionStatus: GLPKMipStatus?): LPSolutionStatus =
     when (solutionStatus) {
+      null -> LPSolutionStatus.UNKNOWN
       GLPKMipStatus.UNDEFINED -> LPSolutionStatus.UNKNOWN
       GLPKMipStatus.OPTIMAL -> LPSolutionStatus.OPTIMAL
       GLPKMipStatus.FEASIBLE -> LPSolutionStatus.TIME_LIMIT
       GLPKMipStatus.NOFEASIBLE -> LPSolutionStatus.INFEASIBLE
-      else -> {
-        LPSolutionStatus.UNKNOWN
-      }
     }
 }

@@ -140,9 +140,6 @@ class HighsLPSolver(
       LPVarType.DOUBLE -> HIGHSVarType.CONTINUOUS
       LPVarType.BOOLEAN -> HIGHSVarType.INTEGER
       LPVarType.INTEGER -> HIGHSVarType.INTEGER
-      else -> {
-        null
-      }
     }
 
   override fun initVars(): Boolean {
@@ -223,10 +220,6 @@ class HighsLPSolver(
       LPOperator.LESS_EQUAL -> Pair(highsModel.negInfinity(), rhsConstant)
       LPOperator.EQUAL -> Pair(rhsConstant, rhsConstant)
       LPOperator.GREATER_EQUAL -> Pair(rhsConstant, highsModel.infinity())
-      else -> {
-        log.error { "Cannot generate bounds for operator ${reducedConstraint.operator}" }
-        return null
-      }
     }
   }
 

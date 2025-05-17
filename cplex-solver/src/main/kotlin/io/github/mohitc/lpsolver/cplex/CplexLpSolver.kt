@@ -151,10 +151,6 @@ class CplexLpSolver(
       when (model.objective.objective) {
         LPObjectiveType.MAXIMIZE -> cplexModel?.addMaximize(cplexObjective)
         LPObjectiveType.MINIMIZE -> cplexModel?.addMinimize(cplexObjective)
-        else -> {
-          log.error { "Mechanism not implemented to support objective type ${model.objective.objective}" }
-          null
-        }
         // If objective if not created, return false otherwise return true
       } ?: return false
       return true
@@ -190,9 +186,6 @@ class CplexLpSolver(
             }
             LPOperator.EQUAL -> {
               cplexModel?.addEq(lhs, rhs, lpConstraint.identifier)
-            }
-            else -> {
-              null
             }
           }
         if (modelConstraint == null) {
@@ -237,13 +230,10 @@ class CplexLpSolver(
     }
   }
 
-  internal fun getCplexVarType(type: LPVarType): IloNumVarType? =
+  internal fun getCplexVarType(type: LPVarType): IloNumVarType =
     when (type) {
       LPVarType.BOOLEAN -> IloNumVarType.Bool
       LPVarType.INTEGER -> IloNumVarType.Int
       LPVarType.DOUBLE -> IloNumVarType.Float
-      else -> {
-        null
-      }
     }
 }
