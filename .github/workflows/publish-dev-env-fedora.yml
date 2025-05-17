@@ -93,3 +93,7 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+  # Once the docker image is published, verify that the underlying build is working.
+  call-verify-maven-build-in-local-repo:
+    uses: ./.github/workflows/verify-maven-build.yml
