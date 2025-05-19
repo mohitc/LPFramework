@@ -47,7 +47,7 @@
     <ktlint.version>3.5.0</ktlint.version>
     <jacoco.version>0.8.13</jacoco.version>
     <junit.version>5.12.2</junit.version>
-    <surefire.version>3.5.2</surefire.version>
+    <surefire.version>3.5.3</surefire.version>
     <build-helper.version>3.6.0</build-helper.version>
     <failsafe.version>3.5.3</failsafe.version>
     <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
