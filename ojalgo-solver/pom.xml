@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>linear-programming</artifactId>
+    <groupId>io.github.mohitc</groupId>
+    <version>${revision}</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>ojalgo-solver</artifactId>
+  <packaging>jar</packaging>
+
+  <properties>
+    <ojalgo.version>55.2.0</ojalgo.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>io.github.mohitc</groupId>
+      <artifactId>lp-solver</artifactId>
+      <version>${revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.ojalgo</groupId>
+      <artifactId>ojalgo</artifactId>
+      <version>${ojalgo.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.mohitc</groupId>
+      <artifactId>lp-solver-sample</artifactId>
+      <version>${revision}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build-helper.version}</version>
+        <executions>
+          <!-- Add the integration test directory to the build -->
+          <execution>
+            <id>add-integration-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/integration-test/kotlin</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Failsafe plugin to run integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe.version}</version>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <skipTests>${ojalgo.skiptests}</skipTests>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Surefire plugin to run Junit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
