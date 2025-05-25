@@ -24,6 +24,7 @@
     <module>scip-solver</module>
     <module>scip-ffm</module>
     <module>lp-rw</module>
+    <module>ojalgo-solver</module>
   </modules>
 
   <properties>
@@ -44,6 +45,7 @@
     <highs-ffm.skiptests>false</highs-ffm.skiptests>
     <cplex.skiptests>true</cplex.skiptests>
     <gurobi.skiptests>true</gurobi.skiptests>
+    <ojalgo.skiptests>false</ojalgo.skiptests>
     <ktlint.version>3.5.0</ktlint.version>
     <jacoco.version>0.8.13</jacoco.version>
     <junit.version>5.12.2</junit.version>

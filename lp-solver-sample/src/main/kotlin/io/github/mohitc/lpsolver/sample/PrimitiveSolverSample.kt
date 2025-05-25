@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
 
 open class PrimitiveSolverSample {
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
@@ -93,5 +94,7 @@ open class PrimitiveSolverSample {
     assertEquals(model?.variables?.get("X")?.result, 1, "X should be = 1")
     assertEquals(model?.variables?.get("Y")?.result, 1, "Y should be = 1")
     assertEquals(model?.variables?.get("Z")?.result, 0, "Z should be = 0")
+    assertEquals(model?.solution?.status, LPSolutionStatus.OPTIMAL, "Expect optimal result")
+    assertTrue(abs(model?.solution?.objective!! - 2) < 0.001, "Objective value for optimal result should be 2.0")
   }
 }
