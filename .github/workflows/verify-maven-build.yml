@@ -1,5 +1,6 @@
 name: Verify that maven builds are running successfully by running maven install on the container
 on:
+  workflow_call:
   push:
     paths-ignore:
       - 'dev-env-fedora/**'
