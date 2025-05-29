@@ -9,7 +9,11 @@ updates:
     directory: "/" 
     schedule:
       interval: "weekly"
-  - package-ecosystem: "docker" 
+    groups:
+      github-actions:
+        patterns:
+          - "*"  # Group all Actions updates into a single larger pull request
+  - package-ecosystem: "docker"
     directory: "/dev-env-fedora/"
     schedule:
       interval: "weekly"

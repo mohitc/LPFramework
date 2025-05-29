@@ -6,6 +6,10 @@ name: Docker
 # documentation.
 
 on:
+  # Scheduled to run once a week on monday
+  schedule:
+    - cron: "30 12 * * 1"
+  # On a push to the docker folders
   push:
     paths:
       - 'dev-env-fedora/**'
@@ -96,4 +100,5 @@ jobs:
 
   # Once the docker image is published, verify that the underlying build is working.
   call-verify-maven-build-in-local-repo:
+    needs: build
     uses: ./.github/workflows/verify-maven-build.yml
