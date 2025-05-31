@@ -106,10 +106,43 @@ class LPModel(
     return newLPConstraint
   }
 
+  fun evaluate(expression: LPExpression): Double? {
+    val reducedExpression = reduce(expression)
+    if (reducedExpression == null) {
+      log.error { "Error reducing expression $expression" }
+      return null
+    }
+    var result = 0.0
+    reducedExpression.expression.forEach { t ->
+      if (t.isConstant()) {
+        if (t.coefficient == null) {
+          log.error { "Null coefficient in constant term $t" }
+          return null
+        }
+        result += t.coefficient
+      } else {
+        val tVar = variables.get(t.lpVarIdentifier!!)
+        if (t.coefficient == null) {
+          log.error { "Null coefficient in term $t" }
+          return null
+        } else if (tVar == null) {
+          log.error { "variable ${t.lpVarIdentifier} not found while evaluating expression" }
+          return null
+        } else if (!tVar.resultSet) {
+          log.error { "variable ${t.lpVarIdentifier} want resultSet true got false" }
+          return null
+        } else {
+          result += t.coefficient * tVar.result.toDouble()
+        }
+      }
+    }
+    return result
+  }
+
   /** Function to reduce an expression to the format where all variables have a single double coefficient, and a single
    * constant term. In case the value for any constant identifier is not found in the model, a null value is returned
    */
-  fun reduce(expression: io.github.mohitc.lpapi.model.LPExpression): io.github.mohitc.lpapi.model.LPExpression? {
+  fun reduce(expression: LPExpression): LPExpression? {
     val varMap: MutableMap<String, Double> = mutableMapOf()
     var constant = 0.0
     var hasConstantTerm = false
@@ -145,9 +178,7 @@ class LPModel(
     }
 
     // Initialize new expression
-    val reducedExpression =
-      io.github.mohitc.lpapi.model
-        .LPExpression()
+    val reducedExpression = LPExpression()
     if (hasConstantTerm) {
       reducedExpression.add(constant)
     }
