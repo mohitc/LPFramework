@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPModelTest {
@@ -58,9 +59,7 @@ class LPModelTest {
   fun testReduceExpression() {
     val model = LPModel()
 
-    var invalidExpr =
-      io.github.mohitc.lpapi.model
-        .LPExpression()
+    var invalidExpr = LPExpression()
     invalidExpr.expression.add(
       0,
       LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = null),
@@ -71,21 +70,15 @@ class LPModelTest {
     )
     // Assume variable is present
     model.variables.add(LPVar("invalid-var", LPVarType.BOOLEAN))
-    invalidExpr =
-      io.github.mohitc.lpapi.model
-        .LPExpression()
+    invalidExpr = LPExpression()
     invalidExpr.expression.add(
       0,
       LPExpressionTerm(coefficient = null, lpConstantIdentifier = null, lpVarIdentifier = "invalid-var"),
     )
     Assertions.assertNull(model.reduce(invalidExpr), "Expressions with invalid coefficients are not reduced")
 
-    val expr =
-      io.github.mohitc.lpapi.model
-        .LPExpression()
-    val expectedExpression =
-      io.github.mohitc.lpapi.model
-        .LPExpression()
+    val expr = LPExpression()
+    val expectedExpression = LPExpression()
 
     Assertions.assertNotNull(model.reduce(expr), "Empty expression can be reduced")
 
@@ -214,6 +207,57 @@ class LPModelTest {
   }
 
   @Test
+  @DisplayName("Test Evaluate")
+  fun testEvaluate() {
+    val model = LPModel("test")
+    val expr = LPExpression()
+    var eval = model.evaluate(expr)
+    Assertions.assertEquals(eval, 0.0, "evaluate($expr) want 0 got $eval")
+
+    val constantTerm = LPConstant("c")
+    model.constants.add(constantTerm)
+    expr.add("c")
+    eval = model.evaluate(expr)
+    Assertions.assertEquals(eval, 0.0, "Undefined Constant defaults to 0: model.evaluate($expr) want 0 got $eval")
+
+    constantTerm.value = 3.5
+    eval = model.evaluate(expr)
+    Assertions.assertEquals(eval, 3.5, "Defined Constant: model.evaluate($expr) want 3.5 got $eval")
+
+    val varY = LPVar("y", LPVarType.INTEGER)
+    varY.populateResult(3)
+    expr.addTerm(2, varY)
+    eval = model.evaluate(expr)
+    assertNull(eval, "Undefined variable: model.evaluate($expr) want null got $eval")
+
+    model.variables.add(varY)
+    eval = model.evaluate(expr)
+    Assertions.assertEquals(eval, 9.5, "Defined variable (3y+c) : model.evaluate($expr) want 9.5 got $eval")
+
+    val coefX = LPConstant("a")
+    val varX = LPVar("x", LPVarType.DOUBLE)
+    varX.populateResult(0.0)
+    expr.addTerm("a", "x")
+    model.variables.add(varX)
+    eval = model.evaluate(expr)
+    assertNull(eval, "Undefined constant in expression term: model.evaluate($expr) want null got $eval")
+
+    model.constants.add(coefX)
+    eval = model.evaluate(expr)
+    Assertions.assertEquals(eval, 9.5, "Defined variable (ax+3y+c) : model.evaluate($expr) want 9.5 got $eval")
+
+    val varZ = LPVar("z", LPVarType.BOOLEAN)
+    expr.addTerm("z")
+    model.variables.add(varZ)
+    eval = model.evaluate(expr)
+    assertNull(eval, "Result not set for z: model.evaluate($expr) want null got $eval")
+
+    varZ.populateResult(1)
+    eval = model.evaluate(expr)
+    Assertions.assertEquals(eval, 10.5, "Defined variable (ax+3y+z+c) : model.evaluate($expr) want 10.5 got $eval")
+  }
+
+  @Test
   @DisplayName("Test Model Equality")
   fun testEquality() {
     val modelId = "test-model"
@@ -224,7 +268,7 @@ class LPModelTest {
     constraint.lhs.addTerm("a", "x").add("b")
     constraint.rhs.add(3)
 
-    val assertEquals = fun (
+    val assertEquals = fun(
       a: LPModel,
       b: LPModel,
       message: String,
@@ -232,7 +276,7 @@ class LPModelTest {
       Assertions.assertEquals(a, b, "equals(): $message")
       Assertions.assertEquals(a.hashCode(), b.hashCode(), "hashCode(): $message")
     }
-    val assertNotEquals = fun (
+    val assertNotEquals = fun(
       a: LPModel,
       b: LPModel,
       message: String,

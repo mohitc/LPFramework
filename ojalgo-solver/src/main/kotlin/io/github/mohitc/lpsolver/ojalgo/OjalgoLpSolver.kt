@@ -1,6 +1,5 @@
 package io.github.mohitc.lpsolver.ojalgo
 
-import io.github.mohitc.lpapi.model.LPExpressionTerm
 import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpapi.model.LPModelResult
 import io.github.mohitc.lpapi.model.enums.LPObjectiveType
@@ -57,28 +56,6 @@ class OjalgoLpSolver(
     return true
   }
 
-  private fun extractObjectiveVal(): Double {
-    if (model.objective.expression.expression
-        .isEmpty()
-    ) {
-      return 0.0
-    }
-    return model.objective.expression.expression
-      .map(
-        fun(t: LPExpressionTerm): Double =
-          if (t.isConstant()) {
-            t.coefficient!!
-          } else {
-            t.coefficient!!.times(
-              model.variables
-                .get(t.lpVarIdentifier!!)!!
-                .result
-                .toDouble(),
-            )
-          },
-      ).reduce { sum, element -> sum + element }
-  }
-
   override fun solve(): LPSolutionStatus {
     try {
       log.info { "Starting computation of model" }
@@ -100,11 +77,22 @@ class OjalgoLpSolver(
         model.solution = LPModelResult(solutionStatus)
         return solutionStatus
       }
-      extractResults()
+      val resultsOkay = extractResults()
+      if (!resultsOkay) {
+        log.error { "extractResults() want true got false" }
+        model.solution = LPModelResult(LPSolutionStatus.ERROR)
+        return solutionStatus
+      }
+      val objectiveVal = model.evaluate(model.objective.expression)
+      if (objectiveVal == null) {
+        log.error { "evaluate(${model.objective.expression}) want non-null got null" }
+        model.solution = LPModelResult(LPSolutionStatus.ERROR)
+        return solutionStatus
+      }
       model.solution =
         LPModelResult(
           solutionStatus,
-          extractObjectiveVal(),
+          objectiveVal,
           executionTime,
           if (solutionStatus == LPSolutionStatus.OPTIMAL) {
             0.0
