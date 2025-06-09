@@ -10,7 +10,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ojalgo-solver</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The implementation of the LPSolver API which uses the ojAlgo
+    Solver (https://www.ojalgo.org) to solve MILP problems.
+  </description>
 
   <properties>
     <ojalgo.version>55.2.0</ojalgo.version>

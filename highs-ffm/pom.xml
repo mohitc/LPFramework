@@ -11,7 +11,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>highs-ffm</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    A Java/FFM interface to the HiGHS C API for calling the
+    HiGHS Solver (https://www.highs.dev) from Java/Kotlin.
+  </description>
 
   <properties>
     <highs-root.path>/opt/HiGHS</highs-root.path>

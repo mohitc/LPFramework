@@ -10,7 +10,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>glpk-solver</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The implementation of the LPSolver API which uses the GLPK
+    Solver (https://www.gnu.org/software/glpk/) to solve MILP
+    problems.
+  </description>
 
   <properties>
     <glpk-library.path>/usr/local/lib</glpk-library.path>

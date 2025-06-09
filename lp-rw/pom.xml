@@ -11,6 +11,12 @@
 
   <artifactId>lp-rw</artifactId>
 
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    Functionality to read/write LP Models to file in various formats.
+  </description>
+
   <properties>
     <jackson.version>2.19.0</jackson.version>
   </properties>

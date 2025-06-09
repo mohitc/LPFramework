@@ -10,7 +10,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>scip-solver</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The implementation of the LPSolver API which uses the SCIP
+    Solver (https://www.scipopt.org) to solve MILP problems.
+  </description>
 
   <properties>
     <scip-library.path>/usr/local/lib64</scip-library.path>

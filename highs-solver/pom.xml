@@ -10,7 +10,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>highs-solver</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The implementation of the LPSolver API which uses the HiGHS
+    Solver (https://www.highs.dev) to solve MILP problems.
+  </description>
 
   <properties>
     <highs-root.path>/opt/HiGHS</highs-root.path>

@@ -10,6 +10,16 @@
   </parent>
   <artifactId>lp-solver</artifactId>
 
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The API abstraction of a MILP solver that takes in a problem
+    instance as specified using the lp-api model and solves the
+    instance. Implementations of this API convert the model instance
+    to ones for a specific solver, and abstract away as many specifics
+    of the actual solver as feasible.
+  </description>
+
   <dependencies>
     <dependency>
       <groupId>io.github.mohitc</groupId>
