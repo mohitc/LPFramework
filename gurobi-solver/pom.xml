@@ -11,6 +11,13 @@
 
   <artifactId>gurobi-solver</artifactId>
 
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The implementation of the LPSolver API which uses the Gurobi
+    Solver (https://www.gurobi.com) to solve MILP problems.
+  </description>
+
   <properties>
     <gurobi.version>12.0.2</gurobi.version>
   </properties>

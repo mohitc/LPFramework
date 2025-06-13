@@ -12,6 +12,13 @@
 
   <artifactId>scip-ffm</artifactId>
 
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    A Java/FFM interface to the SCIP C API for calling the
+    SCIP Solver (https://www.scipopt.org) from Java/Kotlin.
+  </description>
+
   <properties>
     <scip-header.path>/usr/local/include/</scip-header.path>
     <scip-library>scip</scip-library>

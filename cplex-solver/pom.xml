@@ -11,6 +11,14 @@
 
   <artifactId>cplex-solver</artifactId>
 
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    The implementation of the LPSolver API which uses the CPLEX
+    Solver (https://www.ibm.com/products/ilog-cplex-optimization-studio)
+    to solve MILP problems.
+  </description>
+
   <dependencies>
     <dependency>
       <groupId>io.github.mohitc</groupId>

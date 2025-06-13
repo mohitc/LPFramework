@@ -11,7 +11,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>glpk-ffm</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    A Java/FFM interface to the GLPK C API for calling the
+    GLPK Solver (https://www.gnu.org/software/glpk/) from
+    Java/Kotlin.
+  </description>
 
   <properties>
     <glpkc-header.path>/usr/local/include/</glpkc-header.path>

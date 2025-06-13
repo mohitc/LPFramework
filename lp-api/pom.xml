@@ -9,6 +9,14 @@
     <version>${revision}</version>
   </parent>
   <artifactId>lp-api</artifactId>
-  <packaging>jar</packaging>
+
+  <!-- Module Metadata -->
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>
+    A generic MILP model representation in Kotlin/Java, which is used
+    as the basis for defining problems in a solver-agnostic fashion.
+    Combined with a solver implementation this model is converted into
+    the equivalent model for a MILP solver.
+  </description>
 
 </project>

@@ -6,5 +6,10 @@
       <username>${github.user}</username>
       <password>${github.token}</password>
     </server>
+    <server>
+      <id>central</id>
+      <username>${{ secrets.MAVEN_CENTRAL_USER }}</username>
+      <password>${{ secrets.MAVEN_CENTRAL_PASSWORD }}</password>
+    </server>
   </servers>
 </settings>
