@@ -20,9 +20,9 @@ RUN source /etc/bashrc
 
 # Download and install Maven 
 
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz -P /tmp && \
-    tar -zxvf /tmp/apache-maven-3.9.9-bin.tar.gz -C /opt && \
-    ln -s /opt/apache-maven-3.9.9 /opt/maven
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.tar.gz -P /tmp && \
+    tar -zxvf /tmp/apache-maven-3.9.10-bin.tar.gz -C /opt && \
+    ln -s /opt/apache-maven-3.9.10 /opt/maven
 
 ENV M2_HOME="/opt/maven"
 ENV MAVEN_HOME="/opt/maven"
