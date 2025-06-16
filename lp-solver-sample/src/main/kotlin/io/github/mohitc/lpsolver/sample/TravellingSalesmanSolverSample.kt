@@ -9,16 +9,21 @@ import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
 import io.github.mohitc.lpsolver.spi.Solver
+import io.github.mohitc.lpsolver.test.SolverTestInstance
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import kotlin.math.roundToInt
 
-open class TravellingSalesmanSolverSample {
+class TravellingSalesmanSolverSample : SolverTestInstance {
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
 
+  private var model: LPModel? = null
+
+  private var vertexMap = generateVertices(10)
+
+  override fun name(): String = "Travelling Salesman"
   // This test implements the classical travelling salesman problem.
   // Ref: (https://en.wikipedia.org/wiki/Travelling_salesman_problem)
   // We use the MTZ formulation which defines an order on the vertices
@@ -75,66 +80,67 @@ open class TravellingSalesmanSolverSample {
     return vertices.toList().mapIndexed { index, vertex -> Pair(index, vertex) }.toMap()
   }
 
-  fun generateModel(vertices: Map<Int, Vertex>): LPModel =
-    LPModel("Travelling Salesman").apply {
-      this.objective.objective = LPObjectiveType.MINIMIZE
-
-      val n = vertices.size
-      for (i in 0 until n) {
-        for (j in 0 until n) {
-          if (i == j) continue
-          this.variables.add(LPVar("x-$i-$j", LPVarType.BOOLEAN))
-          this.constants.add(LPConstant("c-$i-$j", vertices[i]!!.distance(vertices[j]!!)))
-          this.objective.expression.addTerm("c-$i-$j", "x-$i-$j")
-        }
-        this.variables.add(LPVar("u-$i", LPVarType.INTEGER, 1, n - 1))
-      }
-
-      // constrain u-0 to 0
-      this.variables.get("u-0")!!.bounds(0.0, 0.0)
-
-      // initialize ingress / egress constraints
-      for (i in 0 until n) {
-        val egressConstraint =
-          LPConstraint("Egress-$i").apply {
-            this.operator = LPOperator.EQUAL
-            this.rhs.add(1)
-          }
-        val ingressConstraint =
-          LPConstraint("Ingress-$i").apply {
-            this.operator = LPOperator.EQUAL
-            this.rhs.add(1)
-          }
-        for (j in 0 until n) {
-          if (i == j) continue
-          egressConstraint.lhs.addTerm("x-$i-$j")
-          ingressConstraint.lhs.addTerm("x-$j-$i")
-        }
-        this.constraints.add(egressConstraint)
-        this.constraints.add(ingressConstraint)
-      }
-      // u_i - u_j + 1 <= (n-1)(1-X_ij) (i in 1..n , j in 2..n, i != j)
-      for (i in 0 until n) {
-        for (j in 1 until n) {
-          if (i == j) continue
-          val constraint =
-            LPConstraint("Sequence-$i-$j").apply {
-              this.lhs
-                .addTerm("u-$i")
-                .addTerm(-1, "u-$j")
-                .add(1)
-              this.operator = LPOperator.LESS_EQUAL
-              this.rhs.add(n - 1).addTerm(1 - n, "x-$i-$j")
-            }
-          this.constraints.add(constraint)
-        }
-      }
-    }
-
-  @Test
-  fun generateProblem() {
-    val vertexMap = generateVertices(10)
+  override fun initModel(): Boolean {
     log.info { "Vertex map: $vertexMap" }
+    model =
+      LPModel("Travelling Salesman").apply {
+        this.objective.objective = LPObjectiveType.MINIMIZE
+
+        val n = vertexMap.size
+        for (i in 0 until n) {
+          for (j in 0 until n) {
+            if (i == j) continue
+            this.variables.add(LPVar("x-$i-$j", LPVarType.BOOLEAN))
+            this.constants.add(LPConstant("c-$i-$j", vertexMap[i]!!.distance(vertexMap[j]!!)))
+            this.objective.expression.addTerm("c-$i-$j", "x-$i-$j")
+          }
+          this.variables.add(LPVar("u-$i", LPVarType.INTEGER, 1, n - 1))
+        }
+
+        // constrain u-0 to 0
+        this.variables.get("u-0")!!.bounds(0.0, 0.0)
+
+        // initialize ingress / egress constraints
+        for (i in 0 until n) {
+          val egressConstraint =
+            LPConstraint("Egress-$i").apply {
+              this.operator = LPOperator.EQUAL
+              this.rhs.add(1)
+            }
+          val ingressConstraint =
+            LPConstraint("Ingress-$i").apply {
+              this.operator = LPOperator.EQUAL
+              this.rhs.add(1)
+            }
+          for (j in 0 until n) {
+            if (i == j) continue
+            egressConstraint.lhs.addTerm("x-$i-$j")
+            ingressConstraint.lhs.addTerm("x-$j-$i")
+          }
+          this.constraints.add(egressConstraint)
+          this.constraints.add(ingressConstraint)
+        }
+        // u_i - u_j + 1 <= (n-1)(1-X_ij) (i in 1..n , j in 2..n, i != j)
+        for (i in 0 until n) {
+          for (j in 1 until n) {
+            if (i == j) continue
+            val constraint =
+              LPConstraint("Sequence-$i-$j").apply {
+                this.lhs
+                  .addTerm("u-$i")
+                  .addTerm(-1, "u-$j")
+                  .add(1)
+                this.operator = LPOperator.LESS_EQUAL
+                this.rhs.add(n - 1).addTerm(1 - n, "x-$i-$j")
+              }
+            this.constraints.add(constraint)
+          }
+        }
+      }
+    return model!!.validate()
+  }
+
+  override fun solveAndValidate() {
     val startVertex = vertexMap[0]!!
     val dynProbSol =
       evaluateMinCost(
@@ -146,15 +152,14 @@ open class TravellingSalesmanSolverSample {
         },
       )
     log.info { "Solution with dynamic programming: = $dynProbSol" }
-    val model = generateModel(vertexMap)
-    val solver = Solver.create(model)
+    val solver = Solver.create(model!!)
     val ok = solver.initialize()
     assertTrue(ok, "solver.initialize() want true got false")
     val status = solver.solve()
     assertEquals(LPSolutionStatus.OPTIMAL, status, "solver.solve() want OPTIMAL got $status")
-    log.info { model.solution }
-    assertNotNull(model.solution, "Model should be computed successfully.")
-    val objeciveFromILP = model.solution!!.objective!!
+    log.info { model!!.solution }
+    assertNotNull(model!!.solution, "Model should be computed successfully.")
+    val objeciveFromILP = model!!.solution!!.objective!!
     assertEquals(dynProbSol, objeciveFromILP.roundToInt(), "ilp.objective want $dynProbSol got $objeciveFromILP")
   }
 

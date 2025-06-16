@@ -91,6 +91,21 @@ class LPModelValidationTest {
       "Integer bounding should pass if variables have at least one " +
         "integer value between their bounds",
     )
+
+    lpModel = LPModel("testModel")
+    lpModel.variables.add(LPVar("a", LPVarType.INTEGER, 1.9, 1.95))
+    Assertions.assertFalse(
+      lpModel.validate(),
+      "Integer bounding should not pass if variables do not have at least one " +
+        "integer value between their bounds",
+    )
+
+    lpModel = LPModel("testModel")
+    lpModel.variables.add(LPVar("a", LPVarType.INTEGER, 1.0, 1.0))
+    Assertions.assertTrue(
+      lpModel.validate(),
+      "Integer bounding should pass if bounds are equal and the same as an int",
+    )
   }
 
   @Test

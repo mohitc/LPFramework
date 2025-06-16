@@ -27,13 +27,6 @@
       <artifactId>lp-api</artifactId>
       <version>${revision}</version>
     </dependency>
-    <!--LP Solver samples to test import / export to file -->
-    <dependency>
-      <groupId>io.github.mohitc</groupId>
-      <artifactId>lp-solver-sample</artifactId>
-      <version>${revision}</version>
-      <scope>test</scope>
-    </dependency>
     <!--Jackson dependencies for parsing to YAML/JSON-->
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
