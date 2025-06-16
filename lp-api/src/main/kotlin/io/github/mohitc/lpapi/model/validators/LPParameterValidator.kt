@@ -86,16 +86,35 @@ class LPVarValidator : LPParameterValidator<LPVar> {
         }
         validationFails
       }
+
       (instance.type == LPVarType.BOOLEAN && instance.lbound > 1) -> {
         log.error { "Boolean Variable ${instance.identifier} has a lower bound ${instance.lbound} greater than 1" }
         validationFails
       }
+
       (instance.type == LPVarType.BOOLEAN && instance.ubound < 0) -> {
         log.error { "Boolean Variable ${instance.identifier} has an upper bound ${instance.ubound} less than 0" }
         validationFails
       }
+
+      (
+        (instance.type != LPVarType.DOUBLE) &&
+          (instance.lbound == instance.ubound) &&
+          (instance.lbound.roundToInt().toDouble() != instance.lbound)
+      )
+
+      -> {
+        log.error {
+          "${if (instance.type == LPVarType.INTEGER) "Integer" else "Boolean"} " +
+            "Variable ${instance.identifier} has no integer value in the covered bounds " +
+            "(${instance.lbound}, ${instance.ubound}"
+        }
+        validationFails
+      }
+
       (
         instance.type != LPVarType.DOUBLE &&
+          (instance.lbound < instance.ubound) &&
           ((instance.ubound + 0.5).roundToInt() - (instance.lbound + 0.5).roundToInt() == 0)
       ) -> {
         log.error {
@@ -103,8 +122,9 @@ class LPVarValidator : LPParameterValidator<LPVar> {
             "Variable ${instance.identifier} has no integer value in the covered bounds " +
             "(${instance.lbound}, ${instance.ubound}"
         }
-        return validationFails
+        validationFails
       }
+
       else -> {
         true
       }
@@ -139,6 +159,7 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
               log.error { "Constraint ${instance.identifier} has term with no constant reference or value defined" }
               false
             }
+
             it.coefficient != null && it.lpConstantIdentifier != null -> {
               log.error {
                 "Constraint ${instance.identifier} has term that has both constant reference " +
@@ -146,6 +167,7 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
               }
               false
             }
+
             it.lpConstantIdentifier != null && !model.constants.exists(it.lpConstantIdentifier) -> {
               log.error {
                 "Constraint ${instance.identifier} has term with constant reference " +
@@ -153,6 +175,7 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
               }
               false
             }
+
             it.lpVarIdentifier != null && !model.variables.exists(it.lpVarIdentifier) -> {
               log.error {
                 "Constraint ${instance.identifier} has term with variable reference " +
@@ -160,6 +183,7 @@ class LPConstraintValidator : LPParameterValidator<LPConstraint> {
               }
               false
             }
+
             else -> {
               true
             }

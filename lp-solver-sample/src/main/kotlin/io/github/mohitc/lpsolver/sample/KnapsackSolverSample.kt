@@ -9,15 +9,17 @@ import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
 import io.github.mohitc.lpsolver.spi.Solver
+import io.github.mohitc.lpsolver.test.SolverTestInstance
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import kotlin.math.abs
 
-open class KnapsackSolverSample {
+class KnapsackSolverSample : SolverTestInstance {
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
+
+  override fun name(): String = "Knapsack Problem"
 
   // Classical knapsack problem formulated as
   // Maximize Sum ( Profit (i) * X(i) )
@@ -39,52 +41,51 @@ open class KnapsackSolverSample {
 
   private val expectedObjective = 16
 
-  val model: LPModel =
-    LPModel("knapsack").apply {
-      this.objective.objective = LPObjectiveType.MAXIMIZE
-      for (i in 1..profitWeightPair.size) {
-        this.variables.add(LPVar("x-$i", LPVarType.BOOLEAN))
-        this.constants.add(LPConstant("Profit-$i").value(profitWeightPair.get(i - 1).first.toDouble()))
-        this.constants.add(LPConstant("Weight-$i").value(profitWeightPair.get(i - 1).second.toDouble()))
-        this.objective.expression.addTerm("Profit-$i", "x-$i")
-      }
-      this.constants.add(LPConstant("Capacity").value(capacity.toDouble()))
-      this.constraints.add(
-        LPConstraint("Weight Limit").apply {
-          for (i in 1..profitWeightPair.size) {
-            this.lhs.addTerm("Weight-$i", "x-$i")
-          }
-          this.rhs.add("Capacity")
-          this.operator = LPOperator.LESS_EQUAL
-        },
-      )
-    }
+  var model: LPModel? = null
 
-  @Test
-  fun validateModel() {
+  override fun initModel(): Boolean {
+    model =
+      LPModel("knapsack").apply {
+        this.objective.objective = LPObjectiveType.MAXIMIZE
+        for (i in 1..profitWeightPair.size) {
+          this.variables.add(LPVar("x-$i", LPVarType.BOOLEAN))
+          this.constants.add(LPConstant("Profit-$i").value(profitWeightPair.get(i - 1).first.toDouble()))
+          this.constants.add(LPConstant("Weight-$i").value(profitWeightPair.get(i - 1).second.toDouble()))
+          this.objective.expression.addTerm("Profit-$i", "x-$i")
+        }
+        this.constants.add(LPConstant("Capacity").value(capacity.toDouble()))
+        this.constraints.add(
+          LPConstraint("Weight Limit").apply {
+            for (i in 1..profitWeightPair.size) {
+              this.lhs.addTerm("Weight-$i", "x-$i")
+            }
+            this.rhs.add("Capacity")
+            this.operator = LPOperator.LESS_EQUAL
+          },
+        )
+      }
     log.info { "Validating knapsack model" }
-    assertTrue(model.validate(), "Model Validation failed in the knapsack solver")
+    return model?.validate() ?: false
   }
 
-  @Test
-  fun testSolver() {
-    val solver = Solver.create(model)
+  override fun solveAndValidate() {
+    val solver = Solver.create(model!!)
     val ok = solver.initialize()
     assertTrue(ok, "solver.initialize() want true got false")
     val status = solver.solve()
     assertEquals(LPSolutionStatus.OPTIMAL, status, "solver.solve() want OPTIMAL got $status")
-    log.info { model.solution }
-    assertNotNull(model.solution, "Model should be computed successfully.")
+    log.info { model!!.solution }
+    assertNotNull(model!!.solution, "Model should be computed successfully.")
     for (i in 1..expectedResult.size) {
       assertEquals(
         expectedResult[i - 1],
-        model.variables.get("x-$i")?.result,
-        "x-$i want ${expectedResult[i - 1]} got ${model.variables.get("x-$i")?.result}",
+        model!!.variables.get("x-$i")?.result,
+        "x-$i want ${expectedResult[i - 1]} got ${model!!.variables.get("x-$i")?.result}",
       )
     }
     assertTrue(
-      abs(model.solution?.objective!! - expectedObjective) <= 0.001,
-      "Objective want $expectedObjective got ${model.solution?.objective!!}",
+      abs(model!!.solution?.objective!! - expectedObjective) <= 0.001,
+      "Objective want $expectedObjective got ${model!!.solution?.objective!!}",
     )
   }
 }

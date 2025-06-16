@@ -7,12 +7,16 @@ import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
 import io.github.mohitc.lpsolver.spi.Solver
+import io.github.mohitc.lpsolver.test.SolverTestInstance
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 
-open class SudokuSolverSample {
+class SudokuSolverSample : SolverTestInstance {
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
+
+  private var model: LPModel? = null
+
+  override fun name(): String = "Sudoku Solver"
 
   private fun varName(
     fieldVal: Int,
@@ -90,9 +94,8 @@ open class SudokuSolverSample {
     return model
   }
 
-  @Test
-  fun testSolveFeasibleProblem() {
-    val model = baseModelGenerator()
+  override fun initModel(): Boolean {
+    val m = baseModelGenerator()
     // Initialize feasible sudoku problem instance
     // __|_1_2_3_4_5_6_7_8_9
     // 1 | - 5 - 8 - - - - 6
@@ -129,14 +132,20 @@ open class SudokuSolverSample {
       varName(4, 9, 8),
       varName(3, 2, 9),
       varName(8, 5, 9),
-    ).mapNotNull { v -> model.variables.get(v) }.forEach { v ->
+    ).mapNotNull { v -> m.variables.get(v) }.forEach { v ->
       v.bounds(1.0, 1.0)
     }
+
+    model = m
+    return m.validate()
+  }
+
+  override fun solveAndValidate() {
     log.info { "Initializing the solver " }
-    val solver = Solver.create(model)
+    val solver = Solver.create(model!!)
     solver.initialize()
     val status = solver.solve()
-    log.info { model.solution }
+    log.info { model!!.solution }
     assertEquals(status, LPSolutionStatus.OPTIMAL, "model should be solved successfully")
   }
 }

@@ -1,11 +1,16 @@
 package io.github.mohitc.lpapi.model.parser
 
+import io.github.mohitc.lpapi.model.LPConstant
+import io.github.mohitc.lpapi.model.LPConstraint
 import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpapi.model.LPModelResult
+import io.github.mohitc.lpapi.model.LPVar
 import io.github.mohitc.lpapi.model.dto.LPModelResultDto
 import io.github.mohitc.lpapi.model.dto.LPVarResultDto
+import io.github.mohitc.lpapi.model.enums.LPObjectiveType
+import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
-import io.github.mohitc.lpsolver.sample.PrimitiveSolverSample
+import io.github.mohitc.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.TestInstance
@@ -19,11 +24,48 @@ import java.util.stream.Stream
 class LPModelParserTest {
   private val log = KotlinLogging.logger("LPModelParserTest")
 
-  private val sampleModel = fun (withResult: Boolean): LPModel {
+  private val sampleModel = fun(withResult: Boolean): LPModel {
     val model =
-      object : PrimitiveSolverSample() {
-        override fun initAndSolveModel(model: LPModel): LPModel? = null
-      }.model
+      LPModel("Test Instance").apply {
+        // Initializing variables
+        variables.add(LPVar("X", LPVarType.BOOLEAN))
+        variables.add(LPVar("Y", LPVarType.BOOLEAN))
+        variables.add(LPVar("Z", LPVarType.BOOLEAN))
+
+        // Objective function => Maximize : X + Y + 2Z
+        objective.expression
+          .addTerm("X")
+          .addTerm("Y")
+          .addTerm(2, "Z")
+        objective.objective = LPObjectiveType.MAXIMIZE
+
+        // Add constants
+        // a = 1, b = 2, c = 3
+        constants.add(LPConstant("a", 1))
+        constants.add(LPConstant("b", 2))
+        constants.add(LPConstant("c", 3))
+
+        // Add Constraints
+        // Constraint 1 : aX + bY + cZ <= 4
+        val constraint1 = constraints.add(LPConstraint("Constraint 1"))
+        constraint1
+          ?.lhs
+          ?.addTerm("a", "X")
+          ?.addTerm("b", "Y")
+          ?.addTerm("c", "Z")
+        constraint1?.rhs?.add(4)
+        constraint1?.operator = LPOperator.LESS_EQUAL
+
+        // Constraint 2 : X + Y >= 2
+        val constraint2 = constraints.add(LPConstraint("Constraint 2"))
+        constraint2
+          ?.lhs
+          ?.addTerm("X")
+          ?.addTerm("Y")
+        constraint2?.rhs?.add(2)
+        constraint2?.operator = LPOperator.GREATER_EQUAL
+      }
+
     if (withResult) {
       model.solution =
         LPModelResult(
@@ -45,15 +87,13 @@ class LPModelParserTest {
         "Sample model to JSON",
         sampleModel(false),
         "testModel.json",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
       ),
       Arguments.of(
         "Sample model to YAML",
         sampleModel(false),
         "testModel.yaml",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.YAML),
+        LPModelParser(LPModelFormat.YAML),
       ),
     )
 
@@ -63,7 +103,7 @@ class LPModelParserTest {
     testCase: String,
     model: LPModel,
     fileName: String,
-    lpModelParser: io.github.mohitc.lpapi.model.parser.LPModelParser,
+    lpModelParser: LPModelParser,
   ) {
     log.info { "Test Case $testCase" }
     log.info { "Generating solver sample to write to file in JSON format: $fileName" }
@@ -111,16 +151,14 @@ class LPModelParserTest {
         sampleModel(true),
         "testModel.json",
         "testModel-result.json",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
       ),
       Arguments.of(
         "Sample model to YAML",
         sampleModel(true),
         "testModel.yaml",
         "testModel-result.yaml",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.YAML),
+        LPModelParser(LPModelFormat.YAML),
       ),
     )
 
@@ -131,7 +169,7 @@ class LPModelParserTest {
     model: LPModel,
     fileName: String,
     resultFileName: String,
-    lpModelParser: io.github.mohitc.lpapi.model.parser.LPModelParser,
+    lpModelParser: LPModelParser,
   ) {
     log.info { "Test Case $testCase" }
     log.info { "Generating solver sample to write to file in JSON format: $fileName" }
@@ -158,32 +196,28 @@ class LPModelParserTest {
     Stream.of(
       Arguments.of(
         "DTO with computed false is parsed without errors",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
         sampleModel(false),
         LPModelResultDto(computed = false),
         true,
       ),
       Arguments.of(
         "DTO with null status results in false",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
         sampleModel(false),
         LPModelResultDto(computed = true, status = null),
         false,
       ),
       Arguments.of(
         "DTO with objective but no variables results in false",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
         sampleModel(false),
         LPModelResultDto(computed = true, status = LPSolutionStatus.OPTIMAL, objective = 1.0),
         false,
       ),
       Arguments.of(
         "DTO with bad variable identifier results in false",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
         sampleModel(false),
         LPModelResultDto(
           computed = true,
@@ -198,8 +232,7 @@ class LPModelParserTest {
       ),
       Arguments.of(
         "DTO with correct variables results in true",
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
         sampleModel(false),
         LPModelResultDto(
           computed = true,
@@ -220,7 +253,7 @@ class LPModelParserTest {
   @MethodSource("resultDtosForTest")
   fun testPopulateModelResult(
     testCase: String,
-    parser: io.github.mohitc.lpapi.model.parser.LPModelParser,
+    parser: LPModelParser,
     model: LPModel,
     resultDto: LPModelResultDto,
     expected: Boolean,
@@ -239,14 +272,12 @@ class LPModelParserTest {
       Arguments.of(
         "JSON Parser",
         sampleModel(true),
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
       ),
       Arguments.of(
         "YAML Parser",
         sampleModel(true),
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.YAML),
+        LPModelParser(LPModelFormat.YAML),
       ),
     )
 
@@ -255,7 +286,7 @@ class LPModelParserTest {
   fun testWriteToInvalidLocation(
     testCase: String,
     model: LPModel,
-    parser: io.github.mohitc.lpapi.model.parser.LPModelParser,
+    parser: LPModelParser,
   ) {
     log.info { "Test Case: $testCase" }
     val got = parser.writeToFile(model, "")
@@ -269,14 +300,12 @@ class LPModelParserTest {
       Arguments.of(
         "JSON Parser",
         sampleModel(false),
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.JSON),
+        LPModelParser(LPModelFormat.JSON),
       ),
       Arguments.of(
         "YAML Parser",
         sampleModel(false),
-        io.github.mohitc.lpapi.model.parser
-          .LPModelParser(io.github.mohitc.lpapi.model.parser.LPModelFormat.YAML),
+        LPModelParser(LPModelFormat.YAML),
       ),
     )
 
@@ -285,7 +314,7 @@ class LPModelParserTest {
   fun testReadFromInvalidLocation(
     testCase: String,
     model: LPModel,
-    parser: io.github.mohitc.lpapi.model.parser.LPModelParser,
+    parser: LPModelParser,
   ) {
     log.info { "Test Case: $testCase" }
     val newModel = parser.readFromFile("")
