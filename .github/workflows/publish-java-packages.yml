@@ -19,8 +19,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Publish package
-        run: mvn -Dgithub.user=${{ github.actor }} \
-          -Dgithub.token=${{ secrets.GITHUB_TOKEN }} \
-          -Dcentral.user=${{ secrets.MAVEN_CENTRAL_USER }} \
-          -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }} \
+        run: mvn -Dgithub.user=${{ github.actor }}
+          -Dgithub.token=${{ secrets.GITHUB_TOKEN }}
+          -Dcentral.user=${{ secrets.MAVEN_CENTRAL_USER }}
+          -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           --batch-mode deploy
