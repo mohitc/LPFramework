@@ -78,7 +78,6 @@
             <configuration>
               <skipTests>${scip.skiptests}</skipTests>
               <!-- Provide environment variables -->
-              <argLine>-Djava.library.path=${scip-library.path}</argLine>
               <environmentVariables>
                 <LD_LIBRARY_PATH>${scip-library.path}</LD_LIBRARY_PATH>
               </environmentVariables>
@@ -96,7 +95,6 @@
         <version>${surefire.version}</version>
         <configuration>
           <!-- Provide environment variables -->
-          <argLine>-Djava.library.path=${scip-library.path}</argLine>
           <environmentVariables>
             <LD_LIBRARY_PATH>${scip-library.path}</LD_LIBRARY_PATH>
           </environmentVariables>

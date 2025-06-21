@@ -8,8 +8,11 @@ Java FFM bindings generated in the [glpk-ffm](../glpk-ffm/README.md) module.
 
 ## Installation Instructions
 
-Follow the instructions in the [glpk-ffm](../glpk-ffm/README.md) to install glpk
-and the module which is a pre-requisite to building this module.
+If you just want to use a default instance of the GPLK solver, we
+recommend [using the docker image](../dev-env-fedora/README.md) packaged with
+the binary as it comes with all paths configured appropriately for compilation.
+If you wish to continue with a local installation, follow the instructions in
+the [glpk-ffm](../glpk-ffm/README.md) to install GLPK.
 
 The standard GLPK installation in Linux installs the glpk libraries under
 `/usr/local/lib`. In case these files are located in a different location,
@@ -35,11 +38,15 @@ export LD_LIBRARY_PATH=/usr/local/lib
 
 when running the binary.
 
-Sample problem instances can be found as integration tests in the glpk-solver
-project, and are disabled by default. In order to enable the tests, go to the
-parent pom and set the property:
+## Running Integration Tests
 
-```xml
+Sample problem instances can be found
+as [integration tests](./src/integration-test/kotlin) folder and use the
+instances in the [`lp-solver-sample`](../lp-solver-sample/README.md) module. In
+order to run these instances, just use the command
 
-<glpk.skiptests>false</glpk.skiptests>
+```shell
+mvn clean verify
 ```
+
+to run the problem instances.

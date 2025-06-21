@@ -8,13 +8,13 @@ solver-agnostic model definition API, which is then used by implementations of
 the [lp-solver](../lp-solver/README.md) package to generate the solver-specific
 model instance.
 
-## Overview
+## Overview: LPModel
 
-Each linear optimization model is defined as a [`LPModel`](#lpmodel) object,
-which encapsulates the definitions of
-[variables](#lpvar), [constraints](#lpconstraint),
-and [objective functions](#lpobjective). A linear optimization model can be
-defined as:
+Each linear optimization model is defined as a [`LPModel`](#overview-lpmodel)
+object, which encapsulates the definitions of
+[variables](#variables-lpvar), [constraints](#constraints-lpconstraint),
+and [objective functions](#objective-function-lpobjective). A linear
+optimization model can be defined as:
 
 ```kotlin
 model = LPModel("an-example")
@@ -56,11 +56,11 @@ package. After an overview of the individual components, we also discuss the
 functionalities in the model to group the various components of the model in a
 meaningful fashion.
 
-### Variables: LPVar <a name="lpvar"></a>
+### Variables: LPVar
 
 A variable is defined as an instance of the [
-`LPVar`](src/main/kotlin/com/lpapi/model/LPVar.kt) class, and essentially
-contains
+`LPVar`](src/main/kotlin/io/github/mohitc/lpapi/model/LPVar.kt) class, and
+essentially contains
 
 * A unique immutable String identifier
 * An immutable enum declaring a variable as one of (Boolean/Integer/Double)
@@ -86,9 +86,10 @@ if (x.resultSet) { // resultSet is a boolean to indicate if the result was set
 
 ### Named Constants: LPConstant
 
-When defining constraints in a linear program, it is often useful to have
-constants defined as parameters that can be defined independent of the
-constraints. [`LPConstant`](./src/main/kotlin/com/lpapi/model/LPConstant.kt)
+When defining expressions for objective/constraints in a linear program, it is
+often useful to use constants for specifying the model, and then provide the
+values of the constants for a specific instance of the problem.  [
+`LPConstant`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPConstant.kt)
 supports this paradigm by defining named constants, with the option of defining
 their values at a later point in time.
 
@@ -99,21 +100,21 @@ var d =
 d.value = -2.3               // set the value of d at a later point in time.
 ```
 
-### Expressions: LPExpression <a name="lpexpression"></a>
+### Expressions: LPExpression
 
-The [`LPExpression`](./src/main/kotlin/com/lpapi/model/LPExpression.kt) object
+The [`LPExpression`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPExpression.kt) object
 is a representation of a generic linear expression, which is a combination of
 terms. A term, represented by an [
-`LPExpressionTerm`](./src/main/kotlin/com/lpapi/model/LPExpressionTerm.kt)object
+`LPExpressionTerm`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPExpressionTerm.kt)object
 can be a
 
 * constant, represented by a named constant, or a fixed number
 * a scaled variable, with the scaling factor defined as a named constant, or a
   fixed value
 
-The `LPExpression` is used to represent [constraints](#lpconstraint) in the
+The `LPExpression` is used to represent [constraints](#constraints-lpconstraint) in the
 model, as well as in the definition of the
-[objective](#lpobjective) functions. A reference example of populating terms in
+[objective](#objective-function-lpobjective) functions. A reference example of populating terms in
 a constraint is shown below:
 
 ```kotlin
@@ -129,13 +130,14 @@ expr
   .add(-4)
 ```
 
-### Constraints: LPConstraint <a name="lpconstraint"></a>
+### Constraints: LPConstraint
 
-The [`LPConstraint`](./src/main/kotlin/com/lpapi/model/LPConstraint.kt) object
-is used to define a constraint imposed on a model. Constraints are referenced by
-a unique identifier, and consist of:
+The [
+`LPConstraint`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPConstraint.kt)
+object is used to define a constraint imposed on a model. Constraints are
+referenced by a unique identifier, and consist of:
 
-* [`LPExpression`](#lpexpression) terms representing the `lhs`(Left-Hand Side)
+* [`LPExpression`](#expressions-lpexpression) terms representing the `lhs`(Left-Hand Side)
   and `rhs`(Right-Hand Side).
 * [LPOperator](src/main/kotlin/io/github/mohitc/lpapi/model/enums/LPOperator.kt)
   to define the conditional operations
@@ -155,17 +157,18 @@ c.rhs.add(5)
 c.operator = LPOperator.GREATER_EQUAL
 ```
 
-### Objective function: LPObjective <a name="lpobjective"></a>
+### Objective function: LPObjective
 
 The objective function for a linear optimization problem is defined using a
 combination of a
 
-* [`LPExpression`](#lpexpression) linear expression
+* [`LPExpression`](#expressions-lpexpression) linear expression
 * optimization direction (maximize/minimize) defined as
   [LPObjectiveType](src/main/kotlin/io/github/mohitc/lpapi/model/enums/LPObjectiveType.kt)
 
-The [`LPObjective`](./src/main/kotlin/com/lpapi/model/LPObjective.kt) object is
-used to encapsulate these two values, and can be defined as
+The [
+`LPObjective`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPObjective.kt)
+object is used to encapsulate these two values, and can be defined as
 
 ```kotlin
 objective.expression
@@ -178,8 +181,9 @@ objective.objective = LPObjectiveType.MAXIMIZE
 ### Computation Results: LPModelResult
 
 There are two distinct components of a solution for a model. The `LPModelResult`
-object in the [`LPModel`](./src/main/kotlin/com/lpapi/model/LPModel.kt) is used
-to define the overall status of the result of a computation, and stores generic
+object in the [
+`LPModel`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPModel.kt) is used to
+define the overall status of the result of a computation, and stores generic
 parameters such as the
 
 * status of the computation, enumerated via [
@@ -209,8 +213,8 @@ that is evident to the designers of the models. There is a requirement that all
 identifiers associated with the entities are unique, but the model supports a
 mechanism to associate these components with a logical group when initializing
 the individual entities. The three aforementioned entities all implement the [
-`LPParameter`](./src/main/kotlin/com/lpapi/model/LPParameter.kt) interface, and
-are stored in the
+`LPParameter`](./src/main/kotlin/io/github/mohitc/lpapi/model/LPParameter.kt)
+interface, and are stored in the
 `LPModel` as an `LPParameterGroup`, which supports the association of parameters
 with logical groups.
 

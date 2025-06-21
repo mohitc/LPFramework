@@ -2,38 +2,63 @@
 
 The CPLEX solver converts the programmed model to be solved using
 the [IBM ILOG CPLEX](https://www.ibm.com/products/ilog-cplex-optimization-studio)
-solver. The installation of the tool comes with a packaged jar file `cplex.jar`
-which is usually located under the `CPLEX_INSTALL_FOLDER/cplex/lib/cplex.jar`.
+solver.
 
 ## Installation Instructions
 
 CPLEX does not maintain a repository for the jar files, and as a result, the
-module is not included in the default compilation. In order to compile the
-`cplex-solver` module, please follow the following steps.
+module is not included in the default compilation. This module can therefore be
+built in two separate ways:
 
-- Navigate to the folder with the file `cplex.jar` and run the following command
-  to install the jar as a maven artifact in the local repository
+### Option 1: Referencing CPLEX jar from a private Maven Repository
+
+If your institution maintains a version of the CPLEX jar in a private maven
+repository, you can include a small repository bloc like
+
+```xml
+
+<repositories>
+  <repository>
+    <id>cplex-repo</id>
+    <url>{URL-TO-Maven-Repo}</url>
+  </repository>
+</repositories>
+```
+
+in the [module POM](./pom.xml).
+
+### Option 2: Using the cplex.jar from your local installation
+
+If you do not have access to a maven repository that has CPLEX available, you
+can install a local `cplex.jar` file available with your CPLEX installation into
+the local maven repository. To do so, navigate to the folder with the file
+`cplex.jar` and run the following command to install the jar as a maven artifact
+in the local repository
 
 ```
 mvn install:install-file -Dfile=cplex.jar -DgroupId=cplex -DartifactId=cplex -Dversion=1.0 -Dpackaging=jar
 ```
 
-- Navigate to the `pom.xml` file in the base project and uncomment the module
-  dependency
+After that, you can use the CPLEX profile in project to compile the module. For
+example, in order to compile and install the module, you can navigate to the
+root project director and run the command
 
-```
-<module>cplex-solver</module>
+```shell
+$ mvn -P cplex clean install
 ```
 
-- Run the command `mvn clean install` after which the `cplex-solver` can be
-  instantiated as a dependency in other projects:
+## Using the CPLEX solver module
+
+In order to solve problem instances using the CPLEX solver, just include the
+following dependency in the project, and the framework will automatically use
+the CPLEX libraries to solve the model.
 
 ```xml
 
 <dependency>
   <groupId>io.github.mohitc</groupId>
   <artifactId>cplex-solver</artifactId>
-  <version>${lpapi.version}</version>
+  <version>${version}</version>
 </dependency>
 ```
 
@@ -45,7 +70,8 @@ argument. The CPLEX jni libraries are usually included at the same location as
 the CPLEX binaries, and can be found, for example in linux in
 `CPLEX_INSTALL_FOLDER/cplex/bin/[system architecture]`. In order to run the
 solver, please include the VM argument
-`-Djava.library.path=[path_to_cplex_jni_libraries]`. For example:
+`-Djava.library.path=[path_to_cplex_jni_libraries]`. For example, include the
+following parameter in your command line:
 
 ```
 -Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux
@@ -53,32 +79,24 @@ solver, please include the VM argument
 
 ## Running Test Problem instances
 
-Sample problem instances can be found as integration tests in the cplex-solver
-project, and are disabled by default. In order to enable the tests, go to the
-parent pom and set the property:
+Sample problem instances are taken from the `lp-solver-sample` package and
+included as integration tests in the `cplex-solver` module. In order to run
+these test instances, you need to:
+
+1. Enable the CPLEX integration tests in the parent pom by setting the parameter
+   `cplex.skiptests` to false (defaults to true).
 
 ```xml
 
 <cplex.skiptests>false</cplex.skiptests>
 ```
 
-In order to include the JVM arguments when running the tests, either include
-them as an environment variable, e.g.
-
-```
-MAVEN_OPTS=" -Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux"
-export MAVEN_OPTS
-```
+1. Navigate to the properties in the POM and update the `cplex-root.path` and
+   1ld-library-path` parameters based on the CPLEX installation location and the
+   architecture/OS that you are running the instance on.
 
 After the environment variables are set, run the target:
 
 ```
 mvn clean verify
-```
-
-Another option is to include the path to the library directly in the command
-line:
-
-```
-mvn clean verify -DargLine="-Djava.library.path=/opt/ibm/ILOG/CPLEX_Studio_Community129/cplex/bin/x86-64_linux"
 ```
