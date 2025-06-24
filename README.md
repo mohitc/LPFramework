@@ -6,9 +6,11 @@ open-source or commercial solvers. The project currently supports the following
 solvers:
 
 * [Gurobi](https://www.gurobi.com/)
-* [IBM ILOG Cplex](https://www.ibm.com/products/ilog-cplex-optimization-studio)
+* [IBM ILOG CPLEX](https://www.ibm.com/products/ilog-cplex-optimization-studio)
 * [GLPK](https://www.gnu.org/software/glpk/)
 * [SCIP](https://www.scipopt.org/)
+* [HIGHS](https://highs.dev)
+* [ojAlgo](https://www.ojalgo.org/)
 
 ## How it works
 
@@ -123,11 +125,19 @@ The core of the Linear Programming framework is divided into three modules:
   - [cplex-solver](cplex-solver/README.md)
   - [glpk-solver](glpk-solver/README.md)
   - [scip-solver](scip-solver/README.md)
+  - [highs-solver](highs-solver/README.md)
+  - [ojalgo-solver](ojalgo-solver/README.md)
 * [lp-rw](lp-rw/README.md) implements mechanisms to import/export models and
   computed results to different file formats.
+* For projects that do not have Java bindings available, the project includes
+  code to generate Java bindings to the native C interfaces using the Java
+  Foreign Function and Memory (FFM) Interface at
+  - [glpk-ffm](glpk-ffm/README.md)
+  - [scip-ffm](scip-ffm/README.md)
+  - [highs-ffm](highs-ffm/README.md)
 
-Additionally, some sample problem instances can be found in
-the [lp-solver-sample](lp-solver-sample/README.md) module.
+  - Additionally, some sample problem instances can be found in
+    the [lp-solver-sample](lp-solver-sample/README.md) module.
 
 ## Building the Project
 
@@ -148,15 +158,24 @@ Docker dev environment.
 
 If you wish to setup and configure the maven environment for your personal
 workspace, follow the instructions below. Note that these instructions were
-tested with Fedora 41, and some steps will differ with different operating
+tested with Fedora 42, and some steps will differ with different operating
 systems.
 
 ### Step 1: Install and configure JExtract
 
 In order to generate this code, you will need to
 install [JExtract](https://jdk.java.net/jextract/) which comes as a pre-built
-binary for most environments. Once it is extracted, update the environment
-variable
+binary for most environments.
+
+The following commands install JExtract in the location expected by the project
+
+```shell
+$ wget https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz -P /tmp && \
+  tar -zxvf /tmp/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz -C /opt && \
+  ln -s /opt/jextract-22 /opt/jextract
+```
+
+If you choose to use a different location, update the environment variable
 
 ```xml
 
@@ -177,24 +196,8 @@ project. Use the commands below to
 * Download and unpack GLPK 5.0
 * Build and install GLPK 5.0
 
-```shell
-sudo dnf install gcc g++ make wget -y
-wget https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz -P /tmp && \
-    tar -zxvf /tmp/glpk-5.0.tar.gz -C /tmp && \
-    cd /tmp/glpk-5.0 && ./configure && \
-    make && \
-    sudo make install
-```
-
-With these instructions:
-
-* GLPK C headers are available under `/usr/local/include`
-* GLPK Linker library is available under `/usr/local/lib`
-
-If you choose to change the installation locations, or find the libraries under
-different locations in different OSs, search and update the references to the
-properties in the [glpk-ffm](./glpk-ffm/pom.xml)
-and [glpk-solver](./glpk-solver/pom.xml) build files.
+Installation instructions are available in
+the [glpk-ffm](glpk-ffm/README.md#installing-glpk) module.
 
 ### Step 3: Install SCIP
 
@@ -203,29 +206,27 @@ BUILD system to compile the project. In addition to the SCIP Optimization suite,
 the system requires a number of other open-source libraries which might differ
 for different operating systems.
 
-The commands below are tested on Fedora 41 to:
+Installation instructions are available in
+the [scip-ffm](scip-ffm/README.md#installing-scip) module.
 
-* Install the dependencies to build the project
-* Download SCIP Optimization suite v9.2.1
-* Build and install SCIP Optimization suite v9.2.1
+### Step 4: Install HiGHS
+
+The HiGHS solver code is available at Github
+at https://github.com/ERGO-Code/HiGHS and uses the `cmake` BUILD system to
+compile the project.
+
+Installation instructions for the HiGHS solver are available in
+the [highs-ffm](highs-ffm/README.md#installing-highs) module.
+
+Once all of these dependencies are installed, you should be able to compile the
+complete project using the maven build system.
 
 ```shell
-$ sudo dnf install --setopt=install_weak_deps=False cmake gcc g++ coin-or-Ipopt-devel gmp-devel zlib-ng-devel zlib-ng-compat-devel readline-devel boost-devel tbb-devel -y
-$ wget https://www.scipopt.org/download/release/scipoptsuite-9.2.1.tgz -P /tmp && \
-    tar -zxvf /tmp/scipoptsuite-9.2.1.tgz -C /opt && \
-    ln -s /opt/scipoptsuite-9.2.1 /opt/scipopt
-$ mkdir /opt/scipopt/build && \
-    cd /opt/scipopt/build && \
-    cmake .. && \
-    make
-$ sudo make install
+$ mvn clean install
 ```
 
-With these installation instructions, you should find
+### Custom Instructions for CPLEX
 
-* SCIP header files at `/usr/local/include`
-* SCIP libraries at `/usr/local/lib64`
-
-These paths are used as environment variabled in
-the [scip-ffm](./scip-ffm/pom.xml) and [scip-solver](./scip-solver/pom.xml)
-build files.
+CPLEX does not publish its Java bindings on maven central, and is not built by
+default. Instructions in [cplex-solver](cplex-solver/README.md) documentation
+point to the steps required to build the `cplex-solver` instance locally.

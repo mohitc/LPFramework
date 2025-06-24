@@ -2,29 +2,35 @@
 
 The lp-solver module is a generic interface for a solver, and instances of the
 supported solvers implement this interface to convert and solve for an [
-`LPModel`](../lp-api/src/main/kotlin/com/lpapi/model/LPModel.kt) instance. The
-following solvers are currently supported:
+`LPModel`](../lp-api/src/main/kotlin/io/github/mohitc/lpapi/model/LPModel.kt) instance. The
+solver is an abstraction allowing users to write the model in the [
+`lp-api`](../lp-api/README.md) format, and then solving the model using one of
+solver implementations in this project.
 
-* [Gurobi](https://www.gurobi.com/) : [gurobi-solver](../gurobi-solver/README.md)
-* [GLPK](https://www.gnu.org/software/glpk/) : [glpk-solver](../glpk-solver/README.md)
-* [ILOG CPLEX](https://www.ibm.com/products/ilog-cplex-optimization-studio) : [cplex-solver](../cplex-solver/README.md)
-
-## Using an Existing Solver
+## Initializing a Solver
 
 When writing an application to solve an LPModel instance, there are two distinct
 mechanisms to initialize the solvers, which are discussed next.
 
 ### Solver-Agnostic Initialization
 
-When attempting to solve a model without any customization to the underlying
-solver, an [`LPSolver`](src/main/kotlin/io/github/mohitc/lpsolver/LPSolver.kt)
-instance can be solved by including the solver as a runtime dependency, and then
-using the provided Java Service Provider interface
-(see [`LPSpi`](src/main/kotlin/io/github/mohitc/lpsolver/spi/LPSpi.kt)) to
-instantiate the solver found in the runtime.
+Each solver implementation includes a Java Service Provider interface
+implementation (see [
+`LPSpi`](src/main/kotlin/io/github/mohitc/lpsolver/spi/LPSpi.kt)) to instantiate
+the solver based on a definition of this SPI interface found in the runtime
+libraries. What this means is that if you want to solve a model without any
+customization to the underlying solver, you can specify your code as
 
-For example, a runtime Maven Dependency for
-the [glpk-solver](../glpk-solver/README.md) :
+```kotlin
+val solver = Solver.create(model)
+solver.initialize()
+val status = solver.solve()
+```
+
+which is completely solver-agnostic. You can then specify runtime dependencies
+in the project using the build system. For example, if you are using Maven and
+want to use the `glpk-solver` to solve your problem instance, you can include
+the following dependencies in your project:
 
 ```xml
 <!-- LP Solver dependency which is independent of the backing model -->
@@ -42,17 +48,9 @@ the [glpk-solver](../glpk-solver/README.md) :
 </dependency>
 ```
 
-With these dependencies, an instance of the `LPModel` can be solved as:
-
-```kotlin
-val solver = Solver.create(model)
-solver.initialize()
-val status = solver.solve()
-```
-
 Note that the code does not reference any specific instance of the
 `glpk-solver`, and the chosen solver can be replaced by swapping out the runtime
-dependency.
+dependency at any point in time.
 
 ### Solver-Specific Initialization
 

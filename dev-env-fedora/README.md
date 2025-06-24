@@ -7,6 +7,27 @@ docker development environment that can be used to provide a consistent
 environment for building the LPFramework project. Once built, the libraries can
 be used across various development environments.
 
+## Using the Docker instances from Github
+
+The projects automation build and publish the docker image to the Github
+container registry periodically. In order to use the pre-built image, navigate
+to the root folder of the project and run the following command
+
+```shell
+$ docker run \
+  --mount type=bind,src=.,dst=/root/projects/LPFramework \
+  -it ghcr.io/mohitc/lpframework/dev-env-fedora:master \
+  /bin/bash
+```
+
+This command basically binds the local installation folder for the project to
+`/root/projects/LPFramework` in the docker container, and provides you a bash
+instance in the container. In order to compile project, just use the command
+
+```shell
+$ cd /root/projects/LPFramework && mvn clean install
+```
+
 ## Building the Docker container and project locally
 
 The following section outlines the steps to build the docker container and
@@ -24,11 +45,11 @@ $ docker build --tag lp-framework/dev-env-fedora .
 This image builds on a Fedora instance, and sets up a development environment
 that includes:
 
-* Adoptium Temurin JDK 23
-* Apache Maven (v 3.9.9)
+* Adoptium Temurin JDK 24
+* Apache Maven (v 3.9.10)
 * JExtract Early Access (v22)
 * GLPK v5.0
-* SCIP Optimization Suite (v9.2.1)
+* SCIP Optimization Suite (v9.2.2)
 * HiGHS Solver (v1.10.0)
 
 In order to build and explore the project, you can navigate to the root folder
@@ -36,15 +57,17 @@ in this project and use the command line below run the docker image, mount the
 project directory under `/root/projects/LPFramework` and access a console in the
 container.
 
-```
-$ docker run --mount type=bind,src=./,dst=/root/projects/LPFramework -it lp-framework/dev-env-fedora  /bin/bash
+```shell
+$ docker run \
+  --mount type=bind,src=./,dst=/root/projects/LPFramework \
+  -it lp-framework/dev-env-fedora \
+  /bin/bash
 ```
 
-Once you have access, you can navigate to the correct folder in the docker image
-and build the project as shown below:
+Once you have access, navigate to the correct folder in the docker image and
+build the project as shown below:
 
-```
-$ cd /root/projects/LPFramework
-$ mvn clean install
+```shell
+$ cd /root/projects/LPFramework && mvn clean install
 ```
 

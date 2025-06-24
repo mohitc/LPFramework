@@ -21,7 +21,6 @@
   <properties>
     <highs-root.path>/opt/HiGHS</highs-root.path>
     <highs-library>highs</highs-library>
-    <java-library-path-arg>${highs-root.path}/build/lib64</java-library-path-arg>
     <ld-library-path>${highs-root.path}/build/lib64</ld-library-path>
   </properties>
 

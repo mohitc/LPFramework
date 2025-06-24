@@ -19,6 +19,19 @@
     to solve MILP problems.
   </description>
 
+  <!--
+    Update these properties to run the integration tests with CPLEX.
+    The cplex-root is meant to point to the base installation folder
+    while the ld-library-path is the parameter used to reference the
+    CPLEX platform-specific libraries used for the computation.
+    Update these to your installation and platform to run the integration
+    tests.
+  -->
+  <properties>
+    <cplex-root.path>/opt/ibm/ILOG/CPLEX_Studio_Community129/</cplex-root.path>
+    <ld-library-path>${cplex-root.path}/cplex/bin/x86-64_linux</ld-library-path>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.github.mohitc</groupId>
@@ -29,7 +42,7 @@
     <dependency>
       <groupId>cplex</groupId>
       <artifactId>cplex</artifactId>
-      <version>20.1.0</version>
+      <version>1.0</version>
     </dependency>
     <!--Abstract model samples used to generate test cases-->
     <dependency>
@@ -76,16 +89,14 @@
             </goals>
             <configuration>
               <skipTests>${cplex.skiptests}</skipTests>
+              <!-- Provide environment variables -->
+              <environmentVariables>
+                <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+              </environmentVariables>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
-  <repositories>
-    <repository>
-      <id>jena-bio</id>
-      <url>https://bio.informatik.uni-jena.de/repository/libs-release-oss/</url>
-    </repository>
-  </repositories>
 </project>
