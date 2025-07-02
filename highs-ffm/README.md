@@ -37,7 +37,7 @@ below:
 ```shell
 $ dnf install gcc g++ cmake
 $ cd /opt/ && \
-    git clone --branch v1.10.0 --single-branch https://github.com/ERGO-Code/HiGHS.git && \
+    git clone --branch v1.11.0 --single-branch https://github.com/ERGO-Code/HiGHS.git && \
     cd /opt/HiGHS && \
     cmake -S . -B build && \
     cmake --build build

@@ -50,7 +50,7 @@ that includes:
 * JExtract Early Access (v22)
 * GLPK v5.0
 * SCIP Optimization Suite (v9.2.2)
-* HiGHS Solver (v1.10.0)
+* HiGHS Solver (v1.11.0)
 
 In order to build and explore the project, you can navigate to the root folder
 in this project and use the command line below run the docker image, mount the
