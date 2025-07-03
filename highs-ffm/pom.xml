@@ -93,10 +93,10 @@
         <configuration>
           <executable>${jextract.executable}</executable>
           <headerSearchPaths>
-            <headerSearchPath>${highs-root.path}/src</headerSearchPath>
+            <headerSearchPath>${highs-root.path}/highs</headerSearchPath>
             <headerSearchPath>${highs-root.path}/build</headerSearchPath>
           </headerSearchPaths>
-          <headerFile>${highs-root.path}/src/interfaces/highs_c_api.h</headerFile>
+          <headerFile>${highs-root.path}/highs/interfaces/highs_c_api.h</headerFile>
           <targetPackage>org.highs.java</targetPackage>
           <headerClassName>HIGHS</headerClassName>
           <libraries>
