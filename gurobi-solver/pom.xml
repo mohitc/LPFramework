@@ -19,7 +19,7 @@
   </description>
 
   <properties>
-    <gurobi.version>12.0.2</gurobi.version>
+    <gurobi.version>12.0.3</gurobi.version>
     <!--
       Update these properties to run the integration tests with Gurobi.
       The gurobi-home property points to the base installation folder
