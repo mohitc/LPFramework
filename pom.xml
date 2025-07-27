@@ -60,6 +60,7 @@
         <module>highs-ffm</module>
         <module>highs-solver</module>
         <module>lp-solver-sample</module>
+        <module>mosek-solver</module>
         <module>scip-solver</module>
         <module>scip-ffm</module>
         <module>lp-rw</module>
@@ -89,6 +90,7 @@
     <scip-ffm.skiptests>false</scip-ffm.skiptests>
     <highs.skiptests>false</highs.skiptests>
     <highs-ffm.skiptests>false</highs-ffm.skiptests>
+    <mosek.skiptests>true</mosek.skiptests>
     <cplex.skiptests>true</cplex.skiptests>
     <gurobi.skiptests>true</gurobi.skiptests>
     <ojalgo.skiptests>false</ojalgo.skiptests>

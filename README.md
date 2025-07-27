@@ -11,6 +11,7 @@ solvers:
 * [SCIP](https://www.scipopt.org/)
 * [HIGHS](https://highs.dev)
 * [ojAlgo](https://www.ojalgo.org/)
+* [Mosek](https://www.mosek.com)
 
 ## How it works
 
@@ -127,6 +128,7 @@ The core of the Linear Programming framework is divided into three modules:
   - [scip-solver](scip-solver/README.md)
   - [highs-solver](highs-solver/README.md)
   - [ojalgo-solver](ojalgo-solver/README.md)
+  - [mosek-solver](mosek-solver/README.md)
 * [lp-rw](lp-rw/README.md) implements mechanisms to import/export models and
   computed results to different file formats.
 * For projects that do not have Java bindings available, the project includes

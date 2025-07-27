@@ -51,6 +51,7 @@ that includes:
 * GLPK v5.0
 * SCIP Optimization Suite (v9.2.2)
 * HiGHS Solver (v1.11.0)
+* Mosek Solver (v.11.0.25)
 
 In order to build and explore the project, you can navigate to the root folder
 in this project and use the command line below run the docker image, mount the
