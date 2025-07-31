@@ -108,6 +108,7 @@
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     <maven-central-publishing-plugin.version>0.8.0</maven-central-publishing-plugin.version>
+    <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
     <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
   </properties>
@@ -322,6 +323,26 @@
         <configuration>
           <publishingServerId>central</publishingServerId>
           <excludeArtifacts>lp-solver-sample</excludeArtifacts>
+        </configuration>
+      </plugin>
+      <!-- GPG Plugin to sign artifacts -->
+      <plugin>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>${maven-gpg-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <gpgArguments>
+            <argument>--pinentry-mode</argument>
+            <argument>loopback</argument>
+          </gpgArguments>
         </configuration>
       </plugin>
     </plugins>

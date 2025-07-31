@@ -18,9 +18,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup GPG
+        uses: ./.github/actions/setup-gpg
       - name: Publish package
         run: mvn -Dgithub.user=${{ github.actor }}
           -Dgithub.token=${{ secrets.GITHUB_TOKEN }}
           -Dcentral.user=${{ secrets.MAVEN_CENTRAL_USER }}
           -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
           --batch-mode deploy

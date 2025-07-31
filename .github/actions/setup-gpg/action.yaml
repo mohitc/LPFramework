@@ -1,0 +1,11 @@
+name: 'Setup GPG Key'
+description: 'Sets up the GPG key in the system as a pre-requisite for deployment'
+
+runs:
+  using: "composite"
+  steps:
+    # Install gpg secret key in the environment as a pre-requisite for deployment
+    - name: 'Setup GPG Key'
+      run: |
+        cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
+      shell: bash

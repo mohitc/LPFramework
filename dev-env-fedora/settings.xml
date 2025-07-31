@@ -2,6 +2,10 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
   <servers>
     <server>
+      <id>gpg.passphrase</id>
+      <password>${gpg.passphrase}</password>
+    </server>
+    <server>
       <id>github</id>
       <username>${github.user}</username>
       <password>${github.token}</password>
