@@ -26,4 +26,5 @@ jobs:
           -Dcentral.user=${{ secrets.MAVEN_CENTRAL_USER }}
           -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+          -P default,publish
           --batch-mode deploy

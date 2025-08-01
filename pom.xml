@@ -38,7 +38,7 @@
   <!-- SCM -->
   <scm>
     <connection>scm:git:git://github.com/mohitc/LPFramework.git</connection>
-    <developerConnection>scm:git:ssh://github.com:mohitc/LPFramework.git</developerConnection>
+    <developerConnection>scm:git:https://github.com:mohitc/LPFramework.git</developerConnection>
     <url>https://github.com/mohitc/LPFramework/tree/master</url>
   </scm>
 
@@ -72,6 +72,44 @@
       <modules>
         <module>cplex-solver</module>  <!-- Only compile the Cplex solver-->
       </modules>
+    </profile>
+    <profile>
+      <id>publish</id>
+      <build>
+        <plugins>
+          <!-- GPG Plugin to sign artifacts -->
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <gpgArguments>
+                <argument>--pinentry-mode</argument>
+                <argument>loopback</argument>
+              </gpgArguments>
+            </configuration>
+          </plugin>
+          <!-- Plugin to publish packages to maven central -->
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>${maven-central-publishing-plugin.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <excludeArtifacts>lp-solver-sample</excludeArtifacts>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
@@ -108,6 +146,7 @@
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     <maven-central-publishing-plugin.version>0.8.0</maven-central-publishing-plugin.version>
+    <maven-version-plugin.version>2.18.0</maven-version-plugin.version>
     <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
     <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
@@ -314,36 +353,11 @@
           </execution>
         </executions>
       </plugin>
-      <!-- Plugin to publish packages to maven central -->
+      <!-- Used to update the revision property for bumping releases -->
       <plugin>
-        <groupId>org.sonatype.central</groupId>
-        <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>${maven-central-publishing-plugin.version}</version>
-        <extensions>true</extensions>
-        <configuration>
-          <publishingServerId>central</publishingServerId>
-          <excludeArtifacts>lp-solver-sample</excludeArtifacts>
-        </configuration>
-      </plugin>
-      <!-- GPG Plugin to sign artifacts -->
-      <plugin>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>${maven-gpg-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <gpgArguments>
-            <argument>--pinentry-mode</argument>
-            <argument>loopback</argument>
-          </gpgArguments>
-        </configuration>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${maven-version-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
