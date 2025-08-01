@@ -140,7 +140,7 @@
     <failsafe.version>3.5.3</failsafe.version>
     <mockito-kotlin.version>6.0.0</mockito-kotlin.version>
     <mockito.version>5.18.0</mockito.version>
-    <maven-flatten-plugin.version>1.7.1</maven-flatten-plugin.version>
+    <maven-flatten-plugin.version>1.7.2</maven-flatten-plugin.version>
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
