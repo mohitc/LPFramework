@@ -1,5 +1,10 @@
 name: 'Setup GPG Key'
 description: 'Sets up the GPG key in the system as a pre-requisite for deployment'
+inputs:
+  gpgKey:
+    required: true
+    description: 'New version number for the project post release'
+    default: ''
 
 runs:
   using: "composite"
@@ -9,5 +14,5 @@ runs:
       run: |
         echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --batch --import_options import-show --import
       env:
-        $GPG_SIGNING_KEY: ${{ secrets.GPG_KEY }}
+        $GPG_SIGNING_KEY: ${{ inputs.gpgKey }}
       shell: bash
