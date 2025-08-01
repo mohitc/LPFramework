@@ -7,5 +7,7 @@ runs:
     # Install gpg secret key in the environment as a pre-requisite for deployment
     - name: 'Setup GPG Key'
       run: |
-        cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
+        echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --batch --import_options import-show --import
+      env:
+        $GPG_SIGNING_KEY: ${{ secrets.GPG_KEY }}
       shell: bash
