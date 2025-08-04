@@ -147,7 +147,7 @@
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     <maven-central-publishing-plugin.version>0.8.0</maven-central-publishing-plugin.version>
     <maven-version-plugin.version>2.18.0</maven-version-plugin.version>
-    <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
     <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
   </properties>
