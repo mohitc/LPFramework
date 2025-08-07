@@ -31,3 +31,5 @@ jobs:
           -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
           -P default,publish
           --batch-mode deploy
+      - name: Cleanup GPG
+        uses: ./.github/actions/cleanup-gpg
