@@ -32,4 +32,4 @@ runs:
         --batch-mode deploy
       shell: bash
       env:
-        MAVEN_GPG_PASSPHRASE:${{ inputs.gpgPassphrase }}
+        MAVEN_GPG_PASSPHRASE: ${{ inputs.gpgPassphrase }}
