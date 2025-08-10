@@ -23,13 +23,13 @@ runs:
   steps:
     # Use Maven deploy command to deploy packages
     - name: 'Publish Java package'
-      run:
+      run: |
         mvn -Dgithub.user=${{ inputs.githubActor }} \
-        -Dgithub.token=${{ inputs.githubToken }} \
-        -Dcentral.user=${{ inputs.mavenCentralUser }} \
-        -Dcentral.token=${{ inputs.mavenCentralPassword }} \
-        -P default,publish \
-        --batch-mode deploy
+          -Dgithub.token=${{ inputs.githubToken }} \
+          -Dcentral.user=${{ inputs.mavenCentralUser }} \
+          -Dcentral.token=${{ inputs.mavenCentralPassword }} \
+          -P default,publish \
+          --batch-mode deploy
       shell: bash
       env:
         MAVEN_GPG_PASSPHRASE: ${{ inputs.gpgPassphrase }}
