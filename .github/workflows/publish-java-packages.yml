@@ -28,8 +28,9 @@ jobs:
           -Dgithub.token=${{ secrets.GITHUB_TOKEN }}
           -Dcentral.user=${{ secrets.MAVEN_CENTRAL_USER }}
           -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
           -P default,publish
           --batch-mode deploy
+        env:
+          MAVEN_GPG_PASSPHRASE:${{ secrets.GPG_PASSPHRASE }}
       - name: Cleanup GPG
         uses: ./.github/actions/cleanup-gpg
