@@ -8,6 +8,9 @@ on:
       - '.github/**'
   workflow_dispatch:
 
+env:
+  MAVEN_GPG_PASSPHRASE:${{ secrets.GPG_PASSPHRASE }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -30,7 +33,5 @@ jobs:
           -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           -P default,publish
           --batch-mode deploy
-        env:
-          MAVEN_GPG_PASSPHRASE:${{ secrets.GPG_PASSPHRASE }}
       - name: Cleanup GPG
         uses: ./.github/actions/cleanup-gpg
