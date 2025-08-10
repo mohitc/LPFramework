@@ -14,6 +14,6 @@ runs:
       run: |
         echo "${{ inputs.gpgKey }}" | base64 --decode > key.txt
         wc -l key.txt
-        gpg --batch --import-options import-show --import key.txt
+        gpg --batch --import key.txt
         rm -rf key.txt
       shell: bash
