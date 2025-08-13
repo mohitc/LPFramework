@@ -10,22 +10,28 @@ jobs:
       image: ghcr.io/mohitc/lpframework/dev-env-fedora:master
     permissions:
       contents: read
+
+    outputs:
+      packages: ${{ steps.module-extraction.outputs.packages }}
+      version: ${{ steps.version-extraction.outputs.version }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install packages locally
         run: mvn --batch-mode -Dmaven.test.skip=true install
       - name: Extract module names
+        id: module-extraction
         run: |
           echo \
             "packages=[`mvn -Dexec.executable='echo' -Dexec.args='${project.groupId}.${project.artifactId}' exec:exec -q \
             2> /dev/null | sed 's/^\|$/"/g'|paste -sd, -`]" >> "$GITHUB_OUTPUT"
       - name: Extract module version
+        id: version-extraction
         run: |
           echo \
             "version=`mvn -Dexec.executable='echo' help:evaluate -Dexpression=revision -q -DforceStdout \
             2> /dev/null`" >> "$GITHUB_OUTPUT"
-  
 
   delete-packages:
     runs-on: ubuntu-latest
