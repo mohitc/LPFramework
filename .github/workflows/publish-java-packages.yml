@@ -33,3 +33,8 @@ jobs:
           gpgPassphrase: ${{ secrets.GPG_PASSPHRASE }}
       - name: Cleanup GPG
         uses: ./.github/actions/cleanup-gpg
+
+  # Once the docker image is published, verify that the underlying build is working.
+  call-cleanup-packages:
+    needs: publish
+    uses: ./.github/workflows/delete-old-packages.yml
