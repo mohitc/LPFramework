@@ -48,5 +48,6 @@ jobs:
         with:
           version-pattern: ${{ matrix.version }}.*
           type: 'maven'
+          user: ${{ github.actor }}
           keep: 2
           names: ${{ matrix.package }}
