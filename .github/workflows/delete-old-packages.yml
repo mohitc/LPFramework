@@ -44,8 +44,9 @@ jobs:
 
     steps:
       - name: Delete package
-        uses: actions/delete-package-versions@v5
+        uses: SmartsquareGmbH/delete-old-packages@v0.8.1
         with:
-          package-name: ${{ inputs.package }}
+          version-pattern: ${{ inputs.version }}.*
           package-type: 'maven'
-          min-versions-to-keep: 2
+          keep: 2
+          names: ${{ inputs.package }}
