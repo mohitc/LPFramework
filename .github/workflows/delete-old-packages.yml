@@ -10,6 +10,7 @@ jobs:
       image: ghcr.io/mohitc/lpframework/dev-env-fedora:master
     permissions:
       contents: read
+      packages: write
 
     outputs:
       packages: ${{ steps.module-extraction.outputs.packages }}
@@ -43,5 +44,8 @@ jobs:
 
     steps:
       - name: Delete package
-        run: |
-          echo "Delete package ${{ matrix.package }} - ${{ matrix.version }}
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ inputs.package }}
+          package-type: 'maven'
+          min-versions-to-keep: 2
