@@ -30,8 +30,8 @@ jobs:
         id: version-extraction
         run: |
           echo \
-            "version=`mvn -Dexec.executable='echo' help:evaluate -Dexpression=revision -q -DforceStdout \
-            2> /dev/null`" >> "$GITHUB_OUTPUT"
+            "version=[\"`mvn -Dexec.executable='echo' help:evaluate -Dexpression=revision -q -DforceStdout \
+            2> /dev/null`\"]" >> "$GITHUB_OUTPUT"
 
   delete-packages:
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         package: ${{ fromJSON(needs.define-matrix.outputs.packages) }}
-        version: ${{ needs.define-matrix.outputs.version }}
+        version: ${{ fromJSON(needs.define-matrix.outputs.version) }}
 
     steps:
       - name: Delete package
