@@ -47,6 +47,6 @@ jobs:
         uses: SmartsquareGmbH/delete-old-packages@v0.8.1
         with:
           version-pattern: ${{ inputs.version }}.*
-          package-type: 'maven'
+          type: 'maven'
           keep: 2
           names: ${{ inputs.package }}
