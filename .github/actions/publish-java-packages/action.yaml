@@ -22,13 +22,18 @@ runs:
   using: "composite"
   steps:
     # Use Maven deploy command to deploy packages
-    - name: 'Publish Java package'
+    - name: 'Publish Java package to github'
       run: |
         mvn -Dgithub.user=${{ inputs.githubActor }} \
           -Dgithub.token=${{ inputs.githubToken }} \
-          -Dcentral.user=${{ inputs.mavenCentralUser }} \
+          -P default,publish-github \
+          --batch-mode deploy
+      shell: bash
+    - name: 'Publish Java package to Maven Central'
+      run: |
+        mvn -Dcentral.user=${{ inputs.mavenCentralUser }} \
           -Dcentral.token=${{ inputs.mavenCentralPassword }} \
-          -P default,publish \
+          -P default,publish-central \
           --batch-mode deploy
       shell: bash
       env:
