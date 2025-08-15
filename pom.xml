@@ -362,11 +362,18 @@
     </plugins>
   </build>
   <distributionManagement>
+    <!-- Githib Repositories for snapshot and releases -->
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
       <url>https://maven.pkg.github.com/mohitc/LPFramework</url>
     </repository>
+    <snapshotRepository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/mohitc/LPFramework</url>
+    </snapshotRepository>
+    <!-- central repos for snapshots and releases -->
     <snapshotRepository>
       <id>central</id>
       <name>Maven Central - Snapshots</name>
