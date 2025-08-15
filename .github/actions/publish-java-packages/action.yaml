@@ -30,9 +30,11 @@ runs:
           --batch-mode deploy
       shell: bash
     - name: 'Publish Java package to Maven Central'
+      # Skip tests in this instance because they are the same as the previous build
       run: |
         mvn -Dcentral.user=${{ inputs.mavenCentralUser }} \
           -Dcentral.token=${{ inputs.mavenCentralPassword }} \
+          -Dmaven.test.skip=true \ 
           -P default,publish-central \
           --batch-mode deploy
       shell: bash
