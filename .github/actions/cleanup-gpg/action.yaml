@@ -1,0 +1,12 @@
+name: 'Cleanup GPG Key'
+description: 'Removes GPG key installed in the system'
+
+runs:
+  using: "composite"
+  steps:
+    # Remove gpg secret key in the environment as cleanup
+    - name: 'Remove GPG Key'
+      run: |
+        gpg --batch --yes --delete-secret-and-public-key `gpg --list-secret-keys | grep -o -E [A-Z0-9]{40} | head -n 1`
+      shell: bash
+

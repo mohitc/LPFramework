@@ -1,0 +1,42 @@
+name: 'Publish Maven Packages'
+description: 'Run maven deploy actions'
+
+inputs:
+  githubActor:
+    required: true
+    description: 'New version number for the project post release'
+  githubToken:
+    required: true
+    description: 'Github token for publishing packages to Github Packages'
+  mavenCentralUser:
+    required: true
+    description: 'Username for publishing to Maven Central'
+  mavenCentralPassword:
+    required: true
+    description: 'Password for publishing to Maven Central'
+  gpgPassphrase:
+    required: true
+    description: 'Passphrase for GPG key to sign artifacts'
+
+runs:
+  using: "composite"
+  steps:
+    # Use Maven deploy command to deploy packages
+    - name: 'Publish Java package to github'
+      run: |
+        mvn -Dgithub.user=${{ inputs.githubActor }} \
+          -Dgithub.token=${{ inputs.githubToken }} \
+          -P default,publish-github \
+          --batch-mode deploy
+      shell: bash
+    # Skip tests in this instance because they are the same as the previous build
+    - name: 'Publish Java package to Maven Central'
+      run: |
+        mvn -Dcentral.user=${{ inputs.mavenCentralUser }} \
+          -Dcentral.token=${{ inputs.mavenCentralPassword }} \
+          -Dmaven.test.skip=true \
+          -P default,publish-central \
+          --batch-mode deploy
+      shell: bash
+      env:
+        MAVEN_GPG_PASSPHRASE: ${{ inputs.gpgPassphrase }}

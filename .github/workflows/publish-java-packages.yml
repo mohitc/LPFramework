@@ -24,10 +24,17 @@ jobs:
         with:
           gpgKey: ${{ secrets.GPG_KEY }}
       - name: Publish package
-        run: mvn -Dgithub.user=${{ github.actor }}
-          -Dgithub.token=${{ secrets.GITHUB_TOKEN }}
-          -Dcentral.user=${{ secrets.MAVEN_CENTRAL_USER }}
-          -Dcentral.token=${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
-          -P default,publish
-          --batch-mode deploy
+        uses: ./.github/actions/publish-java-packages
+        with:
+          githubActor: ${{ github.actor }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          mavenCentralUser: ${{ secrets.MAVEN_CENTRAL_USER }}
+          mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          gpgPassphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Cleanup GPG
+        uses: ./.github/actions/cleanup-gpg
+
+  # Once the docker image is published, verify that the underlying build is working.
+  call-cleanup-packages:
+    needs: publish
+    uses: ./.github/workflows/delete-old-packages.yml

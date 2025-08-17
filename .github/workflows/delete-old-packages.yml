@@ -1,0 +1,53 @@
+name: Keep all but one version of the packages based on the current maven setup
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/mohitc/lpframework/dev-env-fedora:master
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      packages: ${{ steps.module-extraction.outputs.packages }}
+      version: ${{ steps.version-extraction.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install packages locally
+        run: mvn --batch-mode -Dmaven.test.skip=true install
+      - name: Extract module names
+        id: module-extraction
+        run: |
+          echo \
+            "packages=[`mvn -Dexec.executable='echo' -Dexec.args='${project.groupId}.${project.artifactId}' exec:exec -q \
+            2> /dev/null | sed 's/^\|$/"/g'|paste -sd, -`]" >> "$GITHUB_OUTPUT"
+      - name: Extract module version
+        id: version-extraction
+        run: |
+          echo \
+            "version=[\"`mvn -Dexec.executable='echo' help:evaluate -Dexpression=revision -q -DforceStdout \
+            2> /dev/null`\"]" >> "$GITHUB_OUTPUT"
+
+  delete-packages:
+    runs-on: ubuntu-latest
+    needs: define-matrix
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.define-matrix.outputs.packages) }}
+        version: ${{ fromJSON(needs.define-matrix.outputs.version) }}
+
+    steps:
+      - name: Delete package
+        uses: SmartsquareGmbH/delete-old-packages@v0.8.1
+        with:
+          version-pattern: ${{ matrix.version }}.*
+          type: 'maven'
+          user: ${{ github.actor }}
+          keep: 2
+          names: ${{ matrix.package }}
