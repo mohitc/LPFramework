@@ -94,7 +94,7 @@ open class GlpkLpSolver(
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
-        log.error { "Initializing variable ($lpVar)" }
+        log.debug { "Initializing variable ($lpVar)" }
         val index: Int = glpkModel.addCols(1)
         glpkModel.setColName(index, lpVar.identifier)
         glpkModel.setColKind(index, getGlpVarType(lpVar.type))
@@ -121,7 +121,7 @@ open class GlpkLpSolver(
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.error { "Initializing Constraint ($lpConstraint)" }
+        log.debug { "Initializing Constraint ($lpConstraint)" }
         val reducedConstraint: LPConstraint? = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }
@@ -129,9 +129,9 @@ open class GlpkLpSolver(
         }
         // Initialize constraint row in the model
         val index = glpkModel.addRows(1)
-        log.error { "Initialized row (Index: $index)" }
+        log.debug { "Initialized row (Index: $index)" }
         glpkModel.setRowName(index, lpConstraint.identifier)
-        log.error { "Set row name (Index: $index, ${lpConstraint.identifier})" }
+        log.debug { "Set row name (Index: $index, ${lpConstraint.identifier})" }
 
         // Get the constant contribution from the RHS
         val constant: Double? =
@@ -175,7 +175,7 @@ open class GlpkLpSolver(
 
   override fun initObjectiveFunction(): Boolean {
     return try {
-      log.error { "Initializing objective function" }
+      log.info { "Initializing objective function" }
 
       glpkModel.setObjectiveName("Objective Function")
       when (model.objective.objective) {
@@ -195,7 +195,7 @@ open class GlpkLpSolver(
           glpkModel.setObjectiveCoefficient(variableMap[it.lpVarIdentifier]!!, it.coefficient!!)
         }
       }
-      log.error { "Objective function Initialized" }
+      log.info { "Objective function Initialized" }
       true
     } catch (e: Exception) {
       log.error { "Error while initializing Objective function : $e" }

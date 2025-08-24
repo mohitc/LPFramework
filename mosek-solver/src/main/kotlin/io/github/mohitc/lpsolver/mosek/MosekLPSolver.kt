@@ -134,12 +134,12 @@ class MosekLPSolver(
   override fun initVars(): Boolean {
     log.info { "Initializing Variables" }
     val numVar = model.variables.allValues().size
-    log.info { "Variable Size = $numVar" }
+    log.debug { "Variable Size = $numVar" }
     var currVarIdentifier = 0
     try {
       baseModel?.appendvars(numVar)
       model.variables.allValues().forEach { lpVar ->
-        log.info { "Initializing variable $lpVar" }
+        log.debug { "Initializing variable $lpVar" }
         baseModel!!.putvarname(currVarIdentifier, lpVar.identifier)
         baseModel!!.putvarbound(currVarIdentifier, boundkey.ra, lpVar.lbound, lpVar.ubound)
         baseModel!!.putvartype(currVarIdentifier, convertVarType(lpVar.type))
@@ -155,6 +155,7 @@ class MosekLPSolver(
   }
 
   override fun initConstraints(): Boolean {
+    log.info { "Initializing Constraints" }
     val numConstraints = model.constraints.allValues().size
     // we need to store the contribution of a variable to a constraint for initializing
     // the mosek model. In the first pass, we store the contributions as a pair of Int
@@ -196,8 +197,7 @@ class MosekLPSolver(
         }
         currentConstraintIdentifier++
       }
-      log.info { "Variable Map: $variableMap" }
-      log.info { "Variable Contributions: $varContributions" }
+      log.debug { "Variable Map: $variableMap, Contributions: $varContributions" }
       // Initialize all variable contributions
       varContributions.forEach { varIdentifier, coeffList ->
         baseModel!!.putacol(

@@ -22,7 +22,7 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPModelParserTest {
-  private val log = KotlinLogging.logger("LPModelParserTest")
+  private val log = KotlinLogging.logger { this.javaClass.name }
 
   private val sampleModel = fun(withResult: Boolean): LPModel {
     val model =

@@ -187,7 +187,7 @@ open class ScipLpSolver(
     log.info { "Extracting results of the computed model into the variables" }
     for (entry in variableMap.entries) {
       val res = scipModel.getSolVal(sol, entry.value)
-      log.info { "Variable ${entry.key} value $res" }
+      log.debug { "Variable ${entry.key} value $res" }
       model.variables.get(entry.key)?.populateResult(res)
     }
     return true
@@ -297,7 +297,7 @@ open class ScipLpSolver(
             log.error { "Found variable in objective ${term.lpVarIdentifier} that was not initialized" }
             return false
           }
-          log.info { "Updating coefficient of variable ${term.lpVarIdentifier} to ${term.coefficient}" }
+          log.debug { "Updating coefficient of variable ${term.lpVarIdentifier} to ${term.coefficient}" }
           scipModel.setVariableObjective(scipVar, term.coefficient!!)
         } else {
           log.error { "Constant parameter handling to be added to objective function by re-evaluating in result" }

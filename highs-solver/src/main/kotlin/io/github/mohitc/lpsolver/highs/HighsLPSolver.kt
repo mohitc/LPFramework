@@ -173,7 +173,7 @@ class HighsLPSolver(
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.info { "Initializing constraint $lpConstraint" }
+        log.debug { "Initializing constraint $lpConstraint" }
         val reducedConstraint = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
           log.error { "model.reduce($lpConstraint) want not null got null" }
@@ -239,13 +239,13 @@ class HighsLPSolver(
       }
       reducedObjectiveFn.expression.forEach { term ->
         if (!term.isConstant()) {
-          log.info { "Adding capability for term $term" }
+          log.debug { "Adding capability for term $term" }
           val highsVar = variableMap[term.lpVarIdentifier]
           if (highsVar == null) {
             log.error { "Found variable in objective ${term.lpVarIdentifier} that was not initialized" }
             return false
           }
-          log.info { "Updating coefficient of variable ${term.lpVarIdentifier} to ${term.coefficient}" }
+          log.debug { "Updating coefficient of variable ${term.lpVarIdentifier} to ${term.coefficient}" }
           highsModel.changeObjectiveCoefficient(highsVar, term.coefficient!!)
         } else {
           highsModel.changeObjectiveOffset(term.coefficient!!)

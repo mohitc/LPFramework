@@ -23,10 +23,7 @@ class OjalgoLpSolver(
 
   private val constraintMap: MutableMap<String, Expression> = mutableMapOf()
 
-  override fun initModel(): Boolean {
-    // TODO("Not yet implemented")
-    return true
-  }
+  override fun initModel(): Boolean = true
 
   override fun getBaseModel(): ExpressionsBasedModel? = ojalgoModel
 
@@ -137,6 +134,7 @@ class OjalgoLpSolver(
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
+        log.debug { "Initializing constraint $lpConstraint" }
         val reducedExpression = model.reduce(lpConstraint)
         if (reducedExpression == null) {
           log.error { "reduced expression is empty. Skipping" }

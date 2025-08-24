@@ -42,7 +42,7 @@ class SudokuSolverSample : SolverTestInstance {
     // Initialize constraint that each coordinate can only have a single value set at a time
     for (x in 1..9) {
       for (y in 1..9) {
-        log.info { "Initialize constraint to indicate that coordinate ($x, $y) has exactly one field value" }
+        log.debug { "Initialize constraint to indicate that coordinate ($x, $y) has exactly one field value" }
         val constr = LPConstraint("UniqueValue-$x-$y")
         for (fieldVal in 1..9) {
           constr.lhs.addTerm(varName(fieldVal, x, y))
@@ -56,7 +56,7 @@ class SudokuSolverSample : SolverTestInstance {
     // Initialize row and column constraints
     for (fieldVal in 1..9) {
       for (x in 1..9) {
-        log.info { "Initializing row and column constraints for variable $fieldVal and row/column $x" }
+        log.debug { "Initializing row and column constraints for variable $fieldVal and row/column $x" }
         val rowConstraint = LPConstraint("row-($fieldVal)-$x")
         val columnConstraint = LPConstraint("column-($fieldVal)-$x")
         for (y in 1..9) {
@@ -76,7 +76,7 @@ class SudokuSolverSample : SolverTestInstance {
     for (startX in 1..8 step 3) {
       for (startY in 1..9 step 3) {
         for (fieldVal in 1..9) {
-          log.info { "Adding constraint for variable $fieldVal in grid starting at ($startX, $startY)" }
+          log.debug { "Adding constraint for variable $fieldVal in grid starting at ($startX, $startY)" }
           val constr = LPConstraint("gridconstr-$fieldVal-$startX-$startY")
           for (x in startX..(startX + 2)) {
             for (y in startY..(startY + 2)) {

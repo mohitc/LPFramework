@@ -275,7 +275,7 @@ class LPParameterGroup<T : LPParameter>(
       log.error { "${value.javaClass.simpleName} with identifier ${value.identifier} already exists." }
       return null
     }
-    log.info { "Adding ${value.javaClass.simpleName} ${value.identifier} to group $group" }
+    log.debug { "Adding ${value.javaClass.simpleName} ${value.identifier} to group $group" }
     grouping.getOrPut(group, { mutableSetOf() }).add(value.identifier)
     parameters[value.identifier] = value
     return value

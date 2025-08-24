@@ -128,7 +128,7 @@ class GurobiLpSolver(
         if (grbVar != null) {
           variableMap[lpVar.identifier] = grbVar
         } else {
-          log.info { "Could not create variable for variable $lpVar" }
+          log.error { "Could not create variable for variable $lpVar" }
           return false
         }
       } catch (e: Exception) {
@@ -161,7 +161,7 @@ class GurobiLpSolver(
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
-        log.info { "Initializing Constraint ($lpConstraint)" }
+        log.debug { "Initializing Constraint ($lpConstraint)" }
         val reducedConstraint: LPConstraint? = model.reduce(lpConstraint)
         if (reducedConstraint == null) {
           log.error { "Reduced constraint could not be computed for constraint ${lpConstraint.identifier}" }

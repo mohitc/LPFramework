@@ -26,7 +26,7 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LPModelToDtoTest {
-  private val log = KotlinLogging.logger(LPModelToDtoTest::javaClass.name)
+  private val log = KotlinLogging.logger { this.javaClass.name }
 
   private fun varsToDto() =
     Stream.of(

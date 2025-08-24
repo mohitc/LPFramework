@@ -208,7 +208,7 @@ class CplexLpSolver(
     try {
       val cplexExpr: IloLinearNumExpr? = cplexModel?.linearNumExpr()
       if (cplexExpr == null) {
-        log.info { "Unexpected error while generating expression. Check is model is initialized" }
+        log.error { "Unexpected error while generating expression. Check that model is initialized" }
         return null
       }
       val reducedExpr = model.reduce(expr)
