@@ -5,7 +5,7 @@ on:
     - cron: "30 12 * * 1"
     # Scheduled to run once a week on monday
   push:
-    branches: ['master']
+    branches: ['main']
     paths-ignore:
       - 'dev-env-fedora/**'
       - '.github/**'

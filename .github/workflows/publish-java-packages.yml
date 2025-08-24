@@ -2,7 +2,7 @@ name: Publish package to GitHub Packages by building packaged on the container
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
     paths-ignore:
       - 'dev-env-fedora/**'
       - '.github/**'
