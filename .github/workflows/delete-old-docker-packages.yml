@@ -13,7 +13,5 @@ jobs:
       - name: "Cleanup ghcr.io packages that are not tagged"
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          owner: mohitc
-          repository: LPFramework
-          package: dev-env-fedora
+          package: lpframework/dev-env-fedora
           exclude-tags: main,nightly
