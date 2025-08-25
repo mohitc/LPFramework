@@ -124,17 +124,13 @@ open class ScipLpSolver(
   override fun solve(): LPSolutionStatus {
     try {
       // set parameters
-      var retCode = scipModel.setRealParam("limits/time", 100.0)
+      var retCode = scipModel.setRealParam("limits/time", 3600.0)
       if (retCode != SCIPRetCode.SCIP_OKAY) {
         log.error { "setting time limits want OKAY got $retCode" }
       }
       retCode = scipModel.setRealParam("limits/memory", 10000.0)
       if (retCode != SCIPRetCode.SCIP_OKAY) {
         log.error { "setting memory limits want OKAY got $retCode" }
-      }
-      retCode = scipModel.setLongintParam("limits/totalnodes", 1000)
-      if (retCode != SCIPRetCode.SCIP_OKAY) {
-        log.error { "setting total node limits want OKAY got $retCode" }
       }
       scipModel.messageHandlerQuiet(false)
 
