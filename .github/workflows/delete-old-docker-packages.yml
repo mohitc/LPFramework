@@ -15,4 +15,4 @@ jobs:
         with:
           package: lpframework/dev-env-fedora
           exclude-tags: main,nightly
-          keep-n-untagged: 10
+          older-than: 1 month
