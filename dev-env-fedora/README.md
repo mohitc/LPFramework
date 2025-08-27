@@ -10,8 +10,15 @@ be used across various development environments.
 ## Using the Docker instances from Github
 
 The projects automation build and publish the docker image to the Github
-container registry periodically. In order to use the pre-built image, navigate
-to the root folder of the project and run the following command
+container registry periodically.
+
+Unless explicitly required, it is recommended to setup your docker environment
+to run in [rootless mode](https://docs.docker.com/engine/security/rootless/).
+This ensures that build changes made in the docker container do not clash file
+permissions on your local file system.
+
+In order to use the pre-built image, navigate to the root folder of the project
+and run the following command
 
 ```shell
 $ docker run \
