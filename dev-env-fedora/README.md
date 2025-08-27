@@ -16,7 +16,7 @@ to the root folder of the project and run the following command
 ```shell
 $ docker run \
   --mount type=bind,src=.,dst=/root/projects/LPFramework \
-  -it ghcr.io/mohitc/lpframework/dev-env-fedora:master \
+  -it ghcr.io/mohitc/lpframework/dev-env-fedora:main \
   /bin/bash
 ```
 

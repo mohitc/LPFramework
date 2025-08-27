@@ -24,7 +24,7 @@ docker container, you can update the commands to run the container to
 $ docker run \
   --mount type=bind,src=./,dst=/root/projects/LPFramework \
   --mount type=bind,src={path-to-mosek-license-folder},dst=/root/mosek \
-  -it ghcr.io/mohitc/lpframework/dev-env-fedora:master \
+  -it ghcr.io/mohitc/lpframework/dev-env-fedora:main \
   /bin/bash
 
 ```
