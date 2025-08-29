@@ -14,8 +14,9 @@ on:
     paths:
       - 'dev-env-fedora/**'
       - '!dev-env-fedora/README.md'
+  release:
+    types: [published]
   workflow_dispatch:
-
 
 env:
   # Use docker.io for Docker Hub if empty

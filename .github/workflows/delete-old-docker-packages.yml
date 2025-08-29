@@ -14,5 +14,5 @@ jobs:
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           package: lpframework/dev-env-fedora
-          exclude-tags: main,nightly
+          exclude-tags: main,nightly,v*
           older-than: 1 month

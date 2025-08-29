@@ -10,7 +10,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mohitc/lpframework/dev-env-fedora:master
+      image: ghcr.io/mohitc/lpframework/dev-env-fedora:main
     permissions:
       contents: read
     steps:

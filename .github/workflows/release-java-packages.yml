@@ -1,11 +1,10 @@
-name: Publish package to GitHub Packages by building packaged on the container
+name: Publish release package to Maven Central
 on:
-  push:
-    branches:
-      - 'main'
-    paths-ignore:
-      - 'dev-env-fedora/**'
-      - '.github/**'
+  release:
+    # This workflow will trigger when a new release is published.
+    # It will not run for pre-releases or drafts.
+    types: [published]
+  # Manual trigger
   workflow_dispatch:
 
 jobs:
@@ -31,10 +30,6 @@ jobs:
           mavenCentralUser: ${{ secrets.MAVEN_CENTRAL_USER }}
           mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           gpgPassphrase: ${{ secrets.GPG_PASSPHRASE }}
+          isRelease: 'true'
       - name: Cleanup GPG
         uses: ./.github/actions/cleanup-gpg
-
-  # Once the docker image is published, verify that the underlying build is working.
-  call-cleanup-packages:
-    needs: publish
-    uses: ./.github/workflows/delete-old-packages.yml

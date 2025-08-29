@@ -7,7 +7,7 @@ jobs:
   define-matrix:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mohitc/lpframework/dev-env-fedora:master
+      image: ghcr.io/mohitc/lpframework/dev-env-fedora:main
     permissions:
       contents: read
       packages: write
