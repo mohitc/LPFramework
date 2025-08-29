@@ -25,8 +25,14 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Get project version
+      id: get_version
+      run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+      shell: bash
+
     # Use Maven deploy command to deploy packages
     - name: 'Publish Java package to github'
+      if: inputs.isRelease == 'true' || endsWith(steps.get_version.outputs.version, '-SNAPSHOT')
       run: |
         mvn -Dgithub.user=${{ inputs.githubActor }} \
           -Dgithub.token=${{ inputs.githubToken }} \
@@ -34,14 +40,9 @@ runs:
           --batch-mode deploy
       shell: bash
 
-    - name: Get project version
-      id: get_version
-      run: echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
-      shell: bash
-
     # Skip tests in this instance because they are the same as the previous build
+    # Only publish to Maven Central if it's a release build, or if it's a non-release (dev) build of a SNAPSHOT version.
     - name: 'Publish Java package to Maven Central'
-      # Only publish to Maven Central if it's a release build, or if it's a non-release (dev) build of a SNAPSHOT version.
       if: inputs.isRelease == 'true' || endsWith(steps.get_version.outputs.version, '-SNAPSHOT')
       run: |
         mvn -Dcentral.user=${{ inputs.mavenCentralUser }} \
