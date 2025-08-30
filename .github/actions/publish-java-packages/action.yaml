@@ -41,9 +41,11 @@ runs:
       shell: bash
 
     # Skip tests in this instance because they are the same as the previous build
-    # Only publish to Maven Central if it's a release build, or if it's a non-release (dev) build of a SNAPSHOT version.
+    # Only publish to Maven Central if it's a non-release (dev) build of a SNAPSHOT version.
+    # We do not have JAR sources for the CPLEX version so release to central can be done from
+    # a local workspace.
     - name: 'Publish Java package to Maven Central'
-      if: inputs.isRelease == 'true' || endsWith(steps.get_version.outputs.version, '-SNAPSHOT')
+      if: endsWith(steps.get_version.outputs.version, '-SNAPSHOT')
       run: |
         mvn -Dcentral.user=${{ inputs.mavenCentralUser }} \
           -Dcentral.token=${{ inputs.mavenCentralPassword }} \

@@ -108,6 +108,21 @@
               </gpgArguments>
             </configuration>
           </plugin>
+          <!-- Dokka plugin to generate Javadoc for Kotlin code -->
+          <plugin>
+            <groupId>org.jetbrains.dokka</groupId>
+            <artifactId>dokka-maven-plugin</artifactId>
+            <version>${dokka.version}</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>javadocJar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
           <!-- Plugin to publish packages to maven central -->
           <plugin>
             <groupId>org.sonatype.central</groupId>
@@ -141,7 +156,7 @@
     <kotlin.version>2.2.10</kotlin.version>
     <logger.version>3.0.5</logger.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <revision>0.0.1</revision>
+    <revision>0.0.2-SNAPSHOT</revision>
     <glpk.skiptests>false</glpk.skiptests>
     <scip.skiptests>false</scip.skiptests>
     <scip-ffm.skiptests>false</scip-ffm.skiptests>
@@ -163,11 +178,11 @@
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.11.3</maven-javadoc-plugin.version>
     <maven-central-publishing-plugin.version>0.8.0</maven-central-publishing-plugin.version>
     <maven-version-plugin.version>2.18.0</maven-version-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
+    <dokka.version>2.0.0</dokka.version>
     <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
   </properties>
 
@@ -257,6 +272,9 @@
         <version>${maven-flatten-plugin.version}</version>
         <configuration>
           <updatePomFile>true</updatePomFile>
+          <!-- This mode resolves properties like ${revision} without touching other POM elements, -->
+          <!-- preventing conflicts with the central-publishing-maven-plugin. -->
+          <flattenMode>oss</flattenMode>
         </configuration>
         <executions>
           <execution>
@@ -355,19 +373,6 @@
             <id>attach-sources</id>
             <goals>
               <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven-javadoc-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
