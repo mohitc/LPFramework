@@ -52,9 +52,9 @@ ENV PATH="/opt/jextract/bin:$PATH"
 
 # Download and install SCIPOpt
 
-RUN wget https://www.scipopt.org/download/release/scipoptsuite-9.2.2.tgz -P /tmp && \
-    tar -zxvf /tmp/scipoptsuite-9.2.2.tgz -C /opt && \
-    ln -s /opt/scipoptsuite-9.2.2 /opt/scipopt
+RUN wget https://www.scipopt.org/download/release/scipoptsuite-9.2.3.tgz -P /tmp && \
+    tar -zxvf /tmp/scipoptsuite-9.2.3.tgz -C /opt && \
+    ln -s /opt/scipoptsuite-9.2.3 /opt/scipopt
 
 RUN dnf install --setopt=install_weak_deps=False cmake coin-or-Ipopt-devel gmp-devel zlib-ng-devel zlib-ng-compat-devel readline-devel boost-devel tbb-devel -y
 RUN mkdir /opt/scipopt/build && \
