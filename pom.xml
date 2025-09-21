@@ -153,7 +153,7 @@
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <java.version>23</java.version>
     <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
-    <kotlin.version>2.2.10</kotlin.version>
+    <kotlin.version>2.2.20</kotlin.version>
     <logger.version>3.0.5</logger.version>
     <slf4j.version>2.0.17</slf4j.version>
     <revision>0.0.2-SNAPSHOT</revision>
@@ -169,9 +169,9 @@
     <ktlint.version>3.5.0</ktlint.version>
     <jacoco.version>0.8.13</jacoco.version>
     <junit.version>5.13.4</junit.version>
-    <surefire.version>3.5.3</surefire.version>
+    <surefire.version>3.5.4</surefire.version>
     <build-helper.version>3.6.1</build-helper.version>
-    <failsafe.version>3.5.3</failsafe.version>
+    <failsafe.version>3.5.4</failsafe.version>
     <mockito-kotlin.version>6.0.0</mockito-kotlin.version>
     <mockito.version>5.19.0</mockito.version>
     <maven-flatten-plugin.version>1.7.2</maven-flatten-plugin.version>
@@ -179,7 +179,7 @@
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-central-publishing-plugin.version>0.8.0</maven-central-publishing-plugin.version>
-    <maven-version-plugin.version>2.18.0</maven-version-plugin.version>
+    <maven-version-plugin.version>2.19.0</maven-version-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
     <dokka.version>2.0.0</dokka.version>
