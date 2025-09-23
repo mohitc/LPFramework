@@ -173,13 +173,13 @@
     <build-helper.version>3.6.1</build-helper.version>
     <failsafe.version>3.5.4</failsafe.version>
     <mockito-kotlin.version>6.0.0</mockito-kotlin.version>
-    <mockito.version>5.19.0</mockito.version>
-    <maven-flatten-plugin.version>1.7.2</maven-flatten-plugin.version>
-    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+    <mockito.version>5.20.0</mockito.version>
+    <maven-flatten-plugin.version>1.7.3</maven-flatten-plugin.version>
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-central-publishing-plugin.version>0.8.0</maven-central-publishing-plugin.version>
-    <maven-version-plugin.version>2.19.0</maven-version-plugin.version>
+    <maven-version-plugin.version>2.19.1</maven-version-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
     <dokka.version>2.0.0</dokka.version>
