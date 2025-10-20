@@ -167,7 +167,7 @@
     <gurobi.skiptests>true</gurobi.skiptests>
     <ojalgo.skiptests>false</ojalgo.skiptests>
     <ktlint.version>3.5.0</ktlint.version>
-    <jacoco.version>0.8.13</jacoco.version>
+    <jacoco.version>0.8.14</jacoco.version>
     <junit.version>6.0.0</junit.version>
     <surefire.version>3.5.4</surefire.version>
     <build-helper.version>3.6.1</build-helper.version>
@@ -182,7 +182,7 @@
     <maven-version-plugin.version>2.19.1</maven-version-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
-    <dokka.version>2.0.0</dokka.version>
+    <dokka.version>2.1.0</dokka.version>
     <jextract.executable>/opt/jextract/bin/jextract</jextract.executable>
   </properties>
 
