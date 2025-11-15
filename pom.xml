@@ -39,7 +39,7 @@
   <scm>
     <connection>scm:git:git://github.com/mohitc/LPFramework.git</connection>
     <developerConnection>scm:git:https://github.com:mohitc/LPFramework.git</developerConnection>
-    <url>https://github.com/mohitc/LPFramework/tree/master</url>
+    <url>https://github.com/mohitc/LPFramework/tree/main</url>
   </scm>
 
   <!-- The CPLEX Solver Jar is not available in maven repositories,
