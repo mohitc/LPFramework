@@ -179,7 +179,7 @@
     <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-central-publishing-plugin.version>0.9.0</maven-central-publishing-plugin.version>
-    <maven-version-plugin.version>2.19.1</maven-version-plugin.version>
+    <maven-version-plugin.version>2.20.1</maven-version-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <jextract-maven-plugin.version>0.4.3</jextract-maven-plugin.version>
     <dokka.version>2.1.0</dokka.version>
