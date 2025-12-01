@@ -1,5 +1,5 @@
-# Start from Fedora 42
-FROM fedora:42
+# Start from Fedora 43
+FROM fedora:43
 
 # Copy maven settings.xml
 COPY settings.xml /root/.m2/settings.xml
@@ -8,7 +8,7 @@ COPY settings.xml /root/.m2/settings.xml
 COPY adoptium.repo /etc/yum.repos.d/adoptium.repo
 
 # Install java and some common packages and update dependencies from image
-RUN dnf install --setopt=install_weak_deps=False temurin-24-jdk wget git gcc g++ awk -y && \
+RUN dnf install --setopt=install_weak_deps=False temurin-25-jdk wget git gcc g++ awk -y && \
     dnf update -y
 
 # Java Home configuration 
@@ -44,9 +44,9 @@ ENV CFLAGS=""
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 
 # Download and install jextract
-RUN wget https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz -P /tmp && \
-    tar -zxvf /tmp/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz -C /opt && \
-    ln -s /opt/jextract-22 /opt/jextract
+RUN wget https://download.java.net/java/early_access/jextract/25/2/openjdk-25-jextract+2-4_linux-x64_bin.tar.gz -P /tmp && \
+    tar -zxvf /tmp/openjdk-25-jextract+2-4_linux-x64_bin.tar.gz -C /opt && \
+    ln -s /opt/jextract-25 /opt/jextract
 
 ENV PATH="/opt/jextract/bin:$PATH"
 
