@@ -73,7 +73,7 @@ RUN cd /opt/ && \
 
 # Download and install Mosek
 
-RUN wget https://download.mosek.com/stable/11.0.25/mosektoolslinux64x86.tar.bz2 -P /tmp && \
+RUN wget https://download.mosek.com/stable/11.1.3/mosektoolslinux64x86.tar.bz2 -P /tmp && \
     tar -xvf /tmp/mosektoolslinux64x86.tar.bz2 -C /tmp && \
     mv /tmp/mosek/11.0 /opt/mosek
 
