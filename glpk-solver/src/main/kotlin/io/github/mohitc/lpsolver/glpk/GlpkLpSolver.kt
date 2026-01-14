@@ -43,6 +43,7 @@ open class GlpkLpSolver(
     try {
       log.info { "Creating new GLPK problem instance with name ${model.identifier}" }
       glpkModel.setModelName(model.identifier)
+      glpkModel.createIndex()
       true
     } catch (e: Exception) {
       log.error { "Error while initializing GLPK Problem instance $e" }
@@ -85,6 +86,8 @@ open class GlpkLpSolver(
       log.error { "Exception while computing the GLPK model : $e" }
       model.solution = LPModelResult(LPSolutionStatus.ERROR)
       return LPSolutionStatus.ERROR
+    } finally {
+      glpkModel.cleanup()
     }
   }
 

@@ -22,7 +22,7 @@ class GLPKProblem {
 
   fun getObjective(): GLPKObjective? {
     val objDir = GLPK.glp_get_obj_dir(glpPtr)
-    return GLPKObjective.values().firstOrNull { it.value == objDir }
+    return GLPKObjective.entries.firstOrNull { it.value == objDir }
   }
 
   fun setObjective(direction: GLPKObjective) = GLPK.glp_set_obj_dir(glpPtr, direction.value)
@@ -81,7 +81,7 @@ class GLPKProblem {
 
   fun getRowType(rowIndex: Int): GLPKBoundType? {
     val rowType = GLPK.glp_get_row_type(glpPtr, rowIndex)
-    return GLPKBoundType.values().firstOrNull { it.value == rowType }
+    return GLPKBoundType.entries.firstOrNull { it.value == rowType }
   }
 
   fun getRowLowerBound(rowIndex: Int) = GLPK.glp_get_row_lb(glpPtr, rowIndex)
@@ -90,7 +90,7 @@ class GLPKProblem {
 
   fun getColType(colIndex: Int): GLPKBoundType? {
     val colType = GLPK.glp_get_col_type(glpPtr, colIndex)
-    return GLPKBoundType.values().firstOrNull { it.value == colType }
+    return GLPKBoundType.entries.firstOrNull { it.value == colType }
   }
 
   fun getColLowerBound(colIndex: Int) = GLPK.glp_get_col_lb(glpPtr, colIndex)
@@ -110,7 +110,7 @@ class GLPKProblem {
 
   fun getColKind(colIndex: Int): GLPKVarKind? {
     val varKind = GLPK.glp_get_col_kind(glpPtr, colIndex)
-    return GLPKVarKind.values().firstOrNull { it.value == varKind }
+    return GLPKVarKind.entries.firstOrNull { it.value == varKind }
   }
 
   fun intopt(params: GlpIocp): Int {
@@ -124,7 +124,7 @@ class GLPKProblem {
 
   fun mipStatus(): GLPKMipStatus? {
     val mipStatus = GLPK.glp_mip_status(glpPtr)
-    return GLPKMipStatus.values().firstOrNull { it.value == mipStatus }
+    return GLPKMipStatus.entries.firstOrNull { it.value == mipStatus }
   }
 
   fun mipObjectiveValue(): Double = GLPK.glp_mip_obj_val(glpPtr)
@@ -132,4 +132,11 @@ class GLPKProblem {
   fun mipRowVal(rowIndex: Int): Double = GLPK.glp_mip_row_val(glpPtr, rowIndex)
 
   fun mipColVal(colIndex: Int): Double = GLPK.glp_mip_col_val(glpPtr, colIndex)
+
+  /** function createIndex simulates the call to glp_create_index which is
+   * required to initialize a name lookup index for a GLPK problem instance.
+   */
+  fun createIndex() = GLPK.glp_create_index(glpPtr)
+
+  fun cleanup() = GLPK.glp_delete_prob(glpPtr)
 }
