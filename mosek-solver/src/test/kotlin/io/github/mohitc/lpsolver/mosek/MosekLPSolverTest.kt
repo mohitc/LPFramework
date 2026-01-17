@@ -28,6 +28,18 @@ import java.util.stream.Stream
 class MosekLPSolverTest {
   private val log = KotlinLogging.logger { this.javaClass.name }
 
+  companion object {
+    init {
+      try {
+        MosekLPSolver(LPModel("test"))
+      } catch (e: Exception) {
+        KotlinLogging
+          .logger(MosekLPSolverTest::class.java.simpleName)
+          .error { "Error while loading initializing solver instance: $e" }
+      }
+    }
+  }
+
   private fun setParameter(
     solver: MosekLPSolver,
     field: String,

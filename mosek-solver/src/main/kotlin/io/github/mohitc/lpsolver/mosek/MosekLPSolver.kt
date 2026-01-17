@@ -15,11 +15,30 @@ import io.github.mohitc.lpapi.model.enums.LPOperator
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
 import io.github.mohitc.lpsolver.LPSolver
+import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
 class MosekLPSolver(
   model: LPModel,
 ) : LPSolver<Task>(model) {
+  companion object {
+    init {
+      listOf("mosek64").forEach { lib ->
+        try {
+          System.loadLibrary(lib)
+        } catch (e: Exception) {
+          val log = KotlinLogging.logger(MosekLPSolver::class.java.simpleName)
+          log.error {
+            """
+            Error Initializing library. 
+            System information ${logSystemInformation()} 
+            Error: $e"""
+          }
+        }
+      }
+    }
+  }
+
   private var baseModel: Task? = null
 
   private val variableMap: MutableMap<String, Int> = mutableMapOf<String, Int>()
@@ -72,8 +91,10 @@ class MosekLPSolver(
       when (solutionStatus) {
         LPSolutionStatus.ERROR, LPSolutionStatus.INFEASIBLE, LPSolutionStatus.UNBOUNDED,
         LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED,
-        ->
+        -> {
           model.solution = LPModelResult(solutionStatus)
+        }
+
         else -> {
           val variableResults = baseModel!!.getxx(soltype.itg)
           variableMap.forEach {
