@@ -49,4 +49,20 @@ abstract class LPSolver<T>(
   /**Function to initialize the variables in the model
    */
   abstract fun initObjectiveFunction(): Boolean
+
+  companion object {
+    /** Function to log system information while loading system libraries.
+     */
+    fun logSystemInformation(): String =
+      (
+        """
+            java.library.path: ${System.getProperty("java.library.path")}
+            java.vendor: ${System.getProperty("java.vendor")}
+            java.version: ${System.getProperty("java.version")}
+            java.vm.name: ${System.getProperty("java.vm.name")}
+            java.vm.version: ${System.getProperty("java.vm.version")}
+            java.runtime.version: ${System.getProperty("java.runtime.version")}
+          """
+      )
+  }
 }

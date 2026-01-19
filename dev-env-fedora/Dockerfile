@@ -20,9 +20,9 @@ RUN source /etc/bashrc
 
 # Download and install Maven 
 
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz -P /tmp && \
-    tar -zxvf /tmp/apache-maven-3.9.11-bin.tar.gz -C /opt && \
-    ln -s /opt/apache-maven-3.9.11 /opt/maven
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz -P /tmp && \
+    tar -zxvf /tmp/apache-maven-3.9.12-bin.tar.gz -C /opt && \
+    ln -s /opt/apache-maven-3.9.12 /opt/maven
 
 ENV M2_HOME="/opt/maven"
 ENV MAVEN_HOME="/opt/maven"
@@ -73,9 +73,12 @@ RUN cd /opt/ && \
 
 # Download and install Mosek
 
-RUN wget https://download.mosek.com/stable/11.0.25/mosektoolslinux64x86.tar.bz2 -P /tmp && \
+RUN wget https://download.mosek.com/stable/11.1.3/mosektoolslinux64x86.tar.bz2 -P /tmp && \
     tar -xvf /tmp/mosektoolslinux64x86.tar.bz2 -C /tmp && \
-    mv /tmp/mosek/11.0 /opt/mosek
+    mv /tmp/mosek/11.1 /opt/mosek
+
+ENV LD_LIBRARY_PATH="/opt/mosek/tools/platform/linux64x86/bin:$LD_LIBRARY_PATH"
+ENV PATH="/opt/mosek/tools/platform/linux64x86/bin:$PATH"
 
 # Cleanup downloads
 RUN rm -rf /tmp/*

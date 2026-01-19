@@ -20,8 +20,8 @@
 
   <properties>
     <mosek-root.path>/opt/mosek</mosek-root.path>
-    <ld-library-path>${mosek-root.path}/tools/platform/linux64x86/bin</ld-library-path>
-    <mosek.version>11.1.0</mosek.version>
+    <mosek-ld-library-path>${mosek-root.path}/tools/platform/linux64x86/bin</mosek-ld-library-path>
+    <mosek.version>11.1.3</mosek.version>
   </properties>
 
   <dependencies>
@@ -82,7 +82,7 @@
               <skipTests>${mosek.skiptests}</skipTests>
               <!-- Provide environment variables -->
               <environmentVariables>
-                <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+                <LD_LIBRARY_PATH>${mosek-ld-library-path}</LD_LIBRARY_PATH>
               </environmentVariables>
             </configuration>
           </execution>
@@ -96,7 +96,7 @@
         <configuration>
           <!-- Provide environment variables -->
           <environmentVariables>
-            <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
+            <LD_LIBRARY_PATH>${mosek-ld-library-path}</LD_LIBRARY_PATH>
           </environmentVariables>
         </configuration>
       </plugin>

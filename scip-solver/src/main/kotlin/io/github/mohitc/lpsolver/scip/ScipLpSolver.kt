@@ -14,19 +14,41 @@ import io.github.mohitc.scip.ffm.SCIPStatus
 import io.github.mohitc.scip.ffm.SCIPVarType
 import io.github.mohitc.scip.ffm.Solution
 import io.github.mohitc.scip.ffm.Variable
+import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
 open class ScipLpSolver(
   model: LPModel,
 ) : LPSolver<SCIPProblem>(model) {
   companion object {
+    init {
+      listOf("scip").forEach { lib ->
+        try {
+          System.loadLibrary(lib)
+        } catch (e: Exception) {
+          val log = KotlinLogging.logger(ScipLpSolver::class.java.simpleName)
+          log.error {
+            """
+            Error Initializing library. 
+            System information ${logSystemInformation()} 
+            Error: $e"""
+          }
+        }
+      }
+    }
+
     internal fun getSolutionStatus(status: SCIPStatus): LPSolutionStatus =
       when (status) {
         SCIPStatus.OPTIMAL -> LPSolutionStatus.OPTIMAL
+
         SCIPStatus.INFEASIBLE -> LPSolutionStatus.INFEASIBLE
+
         SCIPStatus.UNBOUNDED -> LPSolutionStatus.UNBOUNDED
+
         SCIPStatus.TIME_LIMIT -> LPSolutionStatus.TIME_LIMIT
+
         SCIPStatus.INFEASIBLE_OR_UNBOUNDED -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+
         SCIPStatus.SOLUTION_LIMIT,
         SCIPStatus.GAP_LIMIT,
         SCIPStatus.BEST_SOLUTION_LIMIT,
@@ -38,44 +60,13 @@ open class ScipLpSolver(
         SCIPStatus.PRIMAL_LIMIT,
         SCIPStatus.RESTART_LIMIT,
         -> LPSolutionStatus.CUTOFF
+
         SCIPStatus.UNKNOWN -> LPSolutionStatus.UNKNOWN
+
         SCIPStatus.TERMINATED -> LPSolutionStatus.ERROR
+
         SCIPStatus.USER_INTERRUPT -> LPSolutionStatus.ERROR
       }
-
-//    init {
-//      try {
-//        System.loadLibrary("scip")
-//      } catch (e: Exception) {
-//        val log = KotlinLogging.logger(this::class.java.simpleName)
-//
-//        /**
-//         * Information string.
-//         */
-//        var info =
-//            """
-//            The dynamic link library for SCIP could not be loaded.
-//            Consider using java -Djava.library.path=
-//            The current value of system property java.library.path is:
-//            ${System.getProperty("java.library.path")}
-//
-//          """
-//
-//        info +=
-//            """
-//          java.vendor: ${System.getProperty("java.vendor")}
-//          java.version: ${System.getProperty("java.version")}
-//          java.vm.name: ${System.getProperty("java.vm.name")}
-//          java.vm.version: ${System.getProperty("java.vm.version")}
-//          java.runtime.version: ${System.getProperty("java.runtime.version")}
-//
-//
-//          ${e.message}
-//          """
-//        log.error { info }
-//        throw e
-//      }
-//    }
   }
 
   private var scipModel: SCIPProblem = SCIPProblem()
