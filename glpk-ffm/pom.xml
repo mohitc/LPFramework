@@ -23,9 +23,36 @@
   <properties>
     <glpkc-header.path>/usr/local/include/</glpkc-header.path>
     <glpk-library>glpk</glpk-library>
+    <glpk-library.path>/usr/local/lib</glpk-library.path>
   </properties>
   <build>
     <plugins>
+      <!-- Failsafe plugin to run integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe.version}</version>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <skipTests>${highs-ffm.skiptests}</skipTests>
+              <!-- Provide environment variables -->
+              <environmentVariables>
+                <LD_LIBRARY_PATH>${glpk-library.path}</LD_LIBRARY_PATH>
+              </environmentVariables>
+              <systemPropertyVariables>
+                <jextract.trace.downcalls>false</jextract.trace.downcalls>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -40,6 +67,19 @@
             <configuration>
               <sources>
                 <source>${project.build.directory}/generated-sources/java/</source>
+              </sources>
+            </configuration>
+          </execution>
+          <!-- Add the integration test directory to the build -->
+          <execution>
+            <id>add-integration-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/integration-test/kotlin</source>
               </sources>
             </configuration>
           </execution>
@@ -93,6 +133,7 @@
             <includeFunctions>glp_intopt</includeFunctions>
             <includeFunction>glp_create_prob</includeFunction>
             <includeFunction>glp_delete_prob</includeFunction>
+            <includeFunction>glp_create_index</includeFunction>
             <includeFunction>glp_get_prob_name</includeFunction>
             <includeFunction>glp_set_prob_name</includeFunction>
             <includeFunction>glp_get_obj_name</includeFunction>
