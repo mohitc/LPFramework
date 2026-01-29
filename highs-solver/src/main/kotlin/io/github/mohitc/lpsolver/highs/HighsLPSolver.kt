@@ -48,10 +48,15 @@ class HighsLPSolver(
       -> LPSolutionStatus.ERROR
 
       HIGHSModelStatus.OPTIMAL -> LPSolutionStatus.OPTIMAL
+
       HIGHSModelStatus.INFEASIBLE -> LPSolutionStatus.INFEASIBLE
+
       HIGHSModelStatus.UNBOUNDED_OR_INFEASIBLE -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+
       HIGHSModelStatus.UNBOUNDED -> LPSolutionStatus.UNBOUNDED
+
       HIGHSModelStatus.TIME_LIMIT -> LPSolutionStatus.TIME_LIMIT
+
       HIGHSModelStatus.OBJECTIVE_BOUND,
       HIGHSModelStatus.OBJECTIVE_TARGET,
       HIGHSModelStatus.ITERATION_LIMIT,
@@ -111,7 +116,7 @@ class HighsLPSolver(
       model.solution = LPModelResult(LPSolutionStatus.ERROR)
       return LPSolutionStatus.ERROR
     } finally {
-      highsModel.cleanup()
+      highsModel.close()
     }
   }
 
