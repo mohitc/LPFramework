@@ -27,10 +27,15 @@ class HighsLPSolver(
 
   override fun initModel(): Boolean {
     // Add code to configure instance.
-    return true
+    checkOpen()
+    val status = highsModel.passModelName(model.identifier)
+    return status == HIGHSStatus.OK
   }
 
-  override fun getBaseModel() = highsModel
+  override fun getBaseModel(): HIGHSProblem {
+    checkOpen()
+    return highsModel
+  }
 
   private fun getSolutionStatus(modelStatus: HIGHSModelStatus): LPSolutionStatus =
     when (modelStatus) {
@@ -48,10 +53,15 @@ class HighsLPSolver(
       -> LPSolutionStatus.ERROR
 
       HIGHSModelStatus.OPTIMAL -> LPSolutionStatus.OPTIMAL
+
       HIGHSModelStatus.INFEASIBLE -> LPSolutionStatus.INFEASIBLE
+
       HIGHSModelStatus.UNBOUNDED_OR_INFEASIBLE -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+
       HIGHSModelStatus.UNBOUNDED -> LPSolutionStatus.UNBOUNDED
+
       HIGHSModelStatus.TIME_LIMIT -> LPSolutionStatus.TIME_LIMIT
+
       HIGHSModelStatus.OBJECTIVE_BOUND,
       HIGHSModelStatus.OBJECTIVE_TARGET,
       HIGHSModelStatus.ITERATION_LIMIT,
@@ -60,6 +70,7 @@ class HighsLPSolver(
     }
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
       var retCode: HIGHSStatus
       val executionTime =
@@ -110,8 +121,6 @@ class HighsLPSolver(
       log.error { "Error while computing HIGHS model: $e" }
       model.solution = LPModelResult(LPSolutionStatus.ERROR)
       return LPSolutionStatus.ERROR
-    } finally {
-      highsModel.cleanup()
     }
   }
 
@@ -143,6 +152,7 @@ class HighsLPSolver(
     }
 
   override fun initVars(): Boolean {
+    checkOpen()
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
@@ -170,6 +180,7 @@ class HighsLPSolver(
   }
 
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -230,6 +241,7 @@ class HighsLPSolver(
     }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     log.info { "Initializing Objective Function" }
     try {
       val reducedObjectiveFn = model.reduce(model.objective.expression)
@@ -258,5 +270,9 @@ class HighsLPSolver(
       log.error { "Exception while configuring the SCIP objective function: $e" }
       return false
     }
+  }
+
+  override fun free() {
+    highsModel.close()
   }
 }

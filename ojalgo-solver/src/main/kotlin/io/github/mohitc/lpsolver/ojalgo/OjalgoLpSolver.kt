@@ -17,7 +17,7 @@ import kotlin.system.measureTimeMillis
 class OjalgoLpSolver(
   model: LPModel,
 ) : LPSolver<ExpressionsBasedModel>(model) {
-  private var ojalgoModel: ExpressionsBasedModel? = ExpressionsBasedModel()
+  private var ojalgoModel: ExpressionsBasedModel = ExpressionsBasedModel()
 
   private var variableMap: MutableMap<String, Variable> = mutableMapOf()
 
@@ -25,7 +25,10 @@ class OjalgoLpSolver(
 
   override fun initModel(): Boolean = true
 
-  override fun getBaseModel(): ExpressionsBasedModel? = ojalgoModel
+  override fun getBaseModel(): ExpressionsBasedModel {
+    checkOpen()
+    return ojalgoModel
+  }
 
   private fun getSolutionStatus(state: State): LPSolutionStatus =
     when (state) {
@@ -54,6 +57,7 @@ class OjalgoLpSolver(
   }
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
       log.info { "Starting computation of model" }
       var modelResult: Optimisation.Result
@@ -106,12 +110,13 @@ class OjalgoLpSolver(
   }
 
   override fun initVars(): Boolean {
+    checkOpen()
     log.info { "Initializing Variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
         log.debug { "Initializing variable ($lpVar)" }
         val ojalgoVar =
-          ojalgoModel!!.addVariable(lpVar.identifier).lower(lpVar.lbound).upper(lpVar.ubound).apply {
+          ojalgoModel.addVariable(lpVar.identifier).lower(lpVar.lbound).upper(lpVar.ubound).apply {
             when (lpVar.type) {
               LPVarType.INTEGER, LPVarType.BOOLEAN -> integer(true)
               LPVarType.DOUBLE -> integer(false)
@@ -131,6 +136,7 @@ class OjalgoLpSolver(
   }
 
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -144,7 +150,7 @@ class OjalgoLpSolver(
               .filter { t -> t.isConstant() }
               .sumOf { t -> t.coefficient!! }
           val expr =
-            ojalgoModel!!
+            ojalgoModel
               .addExpression(lpConstraint.identifier)
               .apply {
                 when (reducedExpression.operator) {
@@ -172,6 +178,7 @@ class OjalgoLpSolver(
   }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     log.info { "Initializing Objective Function" }
     return try {
       val reducedObjective =
@@ -189,5 +196,9 @@ class OjalgoLpSolver(
       log.error { "Exception while configuring the optimization objective: $e" }
       return false
     }
+  }
+
+  override fun free() {
+    ojalgoModel.dispose()
   }
 }

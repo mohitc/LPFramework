@@ -4,10 +4,12 @@ import mu.KotlinLogging
 import org.highs.java.HIGHS
 import java.lang.foreign.Arena
 import java.lang.foreign.MemorySegment
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-class HIGHSProblem {
+class HIGHSProblem : AutoCloseable {
   private val highsPtr: MemorySegment = HIGHS.Highs_create()
+  private val isClosed = AtomicBoolean(false)
 
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
 
@@ -17,13 +19,33 @@ class HIGHSProblem {
 
   private val maxStringLength: Long = 512 // mapped to kHighsMaximumStringLength
 
-  fun cleanup() = HIGHS.Highs_destroy(highsPtr)
+  private fun checkOpen() {
+    if (isClosed.get()) {
+      throw RuntimeException("HIGHSProblem is closed")
+    }
+  }
+
+  override fun close() {
+    if (isClosed.compareAndSet(false, true)) {
+      HIGHS.Highs_destroy(highsPtr)
+    }
+  }
 
   fun setDoubleOptionValue(
     paramName: String,
     value: Double,
-  ) = Arena.ofConfined().use {
-    HIGHSStatus.fromValue(HIGHS.Highs_setDoubleOptionValue(highsPtr, it.allocateFrom(paramName), value))
+  ): HIGHSStatus {
+    checkOpen()
+    return Arena.ofConfined().use {
+      HIGHSStatus.fromValue(HIGHS.Highs_setDoubleOptionValue(highsPtr, it.allocateFrom(paramName), value))
+    }
+  }
+
+  fun passModelName(name: String): HIGHSStatus {
+    checkOpen()
+    Arena.ofConfined().use {
+      return HIGHSStatus.fromValue(HIGHS.Highs_passModelName(highsPtr, it.allocateFrom(name)))
+    }
   }
 
   fun createVar(
@@ -32,6 +54,7 @@ class HIGHSProblem {
     ub: Double,
     varType: HIGHSVarType,
   ): Int? {
+    checkOpen()
     Arena.ofConfined().use {
       var retCode = HIGHSStatus.fromValue(HIGHS.Highs_addVar(highsPtr, lb, ub))
       if (retCode != HIGHSStatus.OK) {
@@ -54,6 +77,7 @@ class HIGHSProblem {
   }
 
   fun getVarByName(name: String): Int? {
+    checkOpen()
     Arena.ofConfined().use {
       val colIndex = it.allocate(HIGHS.C_INT)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getColByName(highsPtr, it.allocateFrom(name), colIndex))
@@ -66,6 +90,7 @@ class HIGHSProblem {
   }
 
   fun getVarName(colIndex: Int): String? {
+    checkOpen()
     Arena.ofConfined().use {
       val strPtr = it.allocate(HIGHS.C_CHAR, maxStringLength)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getColName(highsPtr, colIndex, strPtr))
@@ -78,6 +103,7 @@ class HIGHSProblem {
   }
 
   fun getVarType(colIndex: Int): HIGHSVarType? {
+    checkOpen()
     Arena.ofConfined().use {
       val colIntegrality = it.allocate(HIGHS.C_INT)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getColIntegrality(highsPtr, colIndex, colIntegrality))
@@ -95,6 +121,7 @@ class HIGHSProblem {
     ub: Double,
     varAndCoefficients: List<Pair<Int, Double>>,
   ): Int? {
+    checkOpen()
     Arena.ofConfined().use {
       var retCode =
         HIGHSStatus.fromValue(
@@ -136,6 +163,7 @@ class HIGHSProblem {
   }
 
   fun getConstraintByName(name: String): Int? {
+    checkOpen()
     Arena.ofConfined().use {
       val rowIndex = it.allocate(HIGHS.C_INT)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getRowByName(highsPtr, it.allocateFrom(name), rowIndex))
@@ -148,6 +176,7 @@ class HIGHSProblem {
   }
 
   fun getConstraintName(rowIndex: Int): String? {
+    checkOpen()
     Arena.ofConfined().use {
       val strPtr = it.allocate(HIGHS.C_CHAR, maxStringLength)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getRowName(highsPtr, rowIndex, strPtr))
@@ -160,6 +189,7 @@ class HIGHSProblem {
   }
 
   fun getObjectiveDirection(): HIGHSObjective? {
+    checkOpen()
     Arena.ofConfined().use {
       val intPtr = it.allocate(HIGHS.C_INT)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getObjectiveSense(highsPtr, intPtr))
@@ -171,10 +201,13 @@ class HIGHSProblem {
     }
   }
 
-  fun changeObjectiveDirection(obj: HIGHSObjective): HIGHSStatus =
-    HIGHSStatus.fromValue(HIGHS.Highs_changeObjectiveSense(highsPtr, obj.value))
+  fun changeObjectiveDirection(obj: HIGHSObjective): HIGHSStatus {
+    checkOpen()
+    return HIGHSStatus.fromValue(HIGHS.Highs_changeObjectiveSense(highsPtr, obj.value))
+  }
 
   fun getObjectiveOffset(): Double? {
+    checkOpen()
     Arena.ofConfined().use {
       val dblPtr = it.allocate(HIGHS.C_DOUBLE)
       val retCode = HIGHSStatus.fromValue(HIGHS.Highs_getObjectiveOffset(highsPtr, dblPtr))
@@ -189,29 +222,52 @@ class HIGHSProblem {
   fun changeObjectiveCoefficient(
     varIndex: Int,
     coeff: Double,
-  ) = HIGHSStatus.fromValue(HIGHS.Highs_changeColCost(highsPtr, varIndex, coeff))
+  ): HIGHSStatus {
+    checkOpen()
+    return HIGHSStatus.fromValue(HIGHS.Highs_changeColCost(highsPtr, varIndex, coeff))
+  }
 
-  fun changeObjectiveOffset(offset: Double) = HIGHSStatus.fromValue(HIGHS.Highs_changeObjectiveOffset(highsPtr, offset))
+  fun changeObjectiveOffset(offset: Double): HIGHSStatus {
+    checkOpen()
+    return HIGHSStatus.fromValue(HIGHS.Highs_changeObjectiveOffset(highsPtr, offset))
+  }
 
-  fun run() = HIGHSStatus.fromValue(HIGHS.Highs_run(highsPtr))
+  fun run(): HIGHSStatus {
+    checkOpen()
+    return HIGHSStatus.fromValue(HIGHS.Highs_run(highsPtr))
+  }
 
-  fun getModelStatus() = HIGHSModelStatus.fromValue(HIGHS.Highs_getModelStatus(highsPtr))
+  fun getModelStatus(): HIGHSModelStatus {
+    checkOpen()
+    return HIGHSModelStatus.fromValue(HIGHS.Highs_getModelStatus(highsPtr))
+  }
 
-  fun infinity() = HIGHS.Highs_getInfinity(highsPtr)
+  fun infinity(): Double {
+    checkOpen()
+    return HIGHS.Highs_getInfinity(highsPtr)
+  }
 
-  fun negInfinity() = infinity() * -1
+  fun negInfinity(): Double {
+    checkOpen()
+    return infinity() * -1
+  }
 
-  fun writeModel(filename: String) =
-    Arena.ofConfined().use {
+  fun writeModel(filename: String): HIGHSStatus {
+    checkOpen()
+    return Arena.ofConfined().use {
       HIGHSStatus.fromValue(HIGHS.Highs_writeModel(highsPtr, it.allocateFrom(filename)))
     }
+  }
 
-  fun writeSolution(filename: String) =
-    Arena.ofConfined().use {
+  fun writeSolution(filename: String): HIGHSStatus {
+    checkOpen()
+    return Arena.ofConfined().use {
       HIGHSStatus.fromValue(HIGHS.Highs_writeSolutionPretty(highsPtr, it.allocateFrom(filename)))
     }
+  }
 
   fun getSolution(): Result? {
+    checkOpen()
     Arena.ofConfined().use {
       val col = it.allocate(HIGHS.C_DOUBLE, varCtr.get().toLong())
       val colDual = it.allocate(HIGHS.C_DOUBLE, varCtr.get().toLong())
@@ -252,6 +308,7 @@ class HIGHSProblem {
   }
 
   fun getOutputInfo(param: HIGHSInfoParam): Number? {
+    checkOpen()
     Arena.ofConfined().use {
       val infoTypeMemorySegment = it.allocate(HIGHS.C_INT)
       var status =
@@ -266,6 +323,7 @@ class HIGHSProblem {
           log.error { "infoType (${infoTypeMemorySegment.get(HIGHS.C_INT, 0)}) not supported in the implementation" }
           return null
         }
+
         HIGHSInfoType.INT -> {
           val infoVal = it.allocate(HIGHS.C_INT)
           status = HIGHSStatus.fromValue(HIGHS.Highs_getIntInfoValue(highsPtr, it.allocateFrom(param.param), infoVal))
@@ -275,6 +333,7 @@ class HIGHSProblem {
           }
           return infoVal.get(HIGHS.C_INT, 0)
         }
+
         HIGHSInfoType.INT64 -> {
           val infoVal = it.allocate(HIGHS.C_LONG)
           status = HIGHSStatus.fromValue(HIGHS.Highs_getInt64InfoValue(highsPtr, it.allocateFrom(param.param), infoVal))
@@ -284,6 +343,7 @@ class HIGHSProblem {
           }
           return infoVal.get(HIGHS.C_LONG, 0)
         }
+
         HIGHSInfoType.DOUBLE -> {
           val infoVal = it.allocate(HIGHS.C_DOUBLE)
           status =

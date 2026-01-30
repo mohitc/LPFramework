@@ -16,10 +16,60 @@ import io.github.mohitc.lpapi.model.enums.LPVarType
 import io.github.mohitc.lpsolver.LPSolver
 import kotlin.system.measureTimeMillis
 
-class CplexLpSolver(
-  model: LPModel,
-) : LPSolver<IloCplex>(model) {
-  private var cplexModel: IloCplex? = null
+class CplexLpSolver : LPSolver<IloCplex> {
+  private var cplexModel: IloCplex
+
+  companion object {
+    fun getSolutionStatus(cplexStatus: IloCplex.Status?): LPSolutionStatus =
+      when (cplexStatus) {
+        IloCplex.Status.Optimal -> {
+          LPSolutionStatus.OPTIMAL
+        }
+
+        IloCplex.Status.InfeasibleOrUnbounded -> {
+          LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+        }
+
+        IloCplex.Status.Infeasible -> {
+          LPSolutionStatus.INFEASIBLE
+        }
+
+        IloCplex.Status.Unbounded -> {
+          LPSolutionStatus.UNBOUNDED
+        }
+
+        IloCplex.Status.Bounded -> {
+          LPSolutionStatus.BOUNDED
+        }
+
+        IloCplex.Status.Error -> {
+          LPSolutionStatus.ERROR
+        }
+
+        null -> {
+          LPSolutionStatus.ERROR
+        }
+
+        else -> {
+          LPSolutionStatus.UNKNOWN
+        }
+      }
+
+    fun getCplexVarType(type: LPVarType): IloNumVarType =
+      when (type) {
+        LPVarType.BOOLEAN -> IloNumVarType.Bool
+        LPVarType.INTEGER -> IloNumVarType.Int
+        LPVarType.DOUBLE -> IloNumVarType.Float
+      }
+  }
+
+  constructor(model: LPModel) : super(model) {
+    this.cplexModel = IloCplex()
+  }
+
+  internal constructor(model: LPModel, cplexModel: IloCplex) : super(model) {
+    this.cplexModel = cplexModel
+  }
 
   private var variableMap: MutableMap<String, IloNumVar> = mutableMapOf()
 
@@ -28,9 +78,9 @@ class CplexLpSolver(
   private var cplexObjective: IloLinearNumExpr? = null
 
   override fun initModel(): Boolean {
+    checkOpen()
     try {
-      log.info { "Initializing cplex model for ${model.identifier}" }
-      cplexModel = IloCplex()
+      cplexModel.getModel().setName(model.identifier)
     } catch (e: Exception) {
       log.error { "Error while initializing CPLEX Model $e" }
       return false
@@ -38,9 +88,10 @@ class CplexLpSolver(
     return true
   }
 
-  override fun getBaseModel(): IloCplex? = cplexModel
+  override fun getBaseModel(): IloCplex = cplexModel
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
       log.info { "Starting computation of model" }
       val executionTime =
@@ -94,20 +145,6 @@ class CplexLpSolver(
     }
   }
 
-  fun getSolutionStatus(cplexStatus: IloCplex.Status?): LPSolutionStatus =
-    when (cplexStatus) {
-      IloCplex.Status.Optimal -> LPSolutionStatus.OPTIMAL
-      IloCplex.Status.InfeasibleOrUnbounded -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
-      IloCplex.Status.Infeasible -> LPSolutionStatus.INFEASIBLE
-      IloCplex.Status.Unbounded -> LPSolutionStatus.UNBOUNDED
-      IloCplex.Status.Bounded -> LPSolutionStatus.BOUNDED
-      IloCplex.Status.Error -> LPSolutionStatus.ERROR
-      null -> LPSolutionStatus.ERROR
-      else -> {
-        LPSolutionStatus.UNKNOWN
-      }
-    }
-
   /** Function to initialize all variables in the model
    *
    */
@@ -135,6 +172,7 @@ class CplexLpSolver(
   }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     log.info { "Initializing Objective Function" }
     try {
       // Initialize cplex objective, to be used later to extract value of the objective function
@@ -161,6 +199,7 @@ class CplexLpSolver(
   }
 
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -181,9 +220,11 @@ class CplexLpSolver(
             LPOperator.LESS_EQUAL -> {
               cplexModel?.addLe(lhs, rhs, lpConstraint.identifier)
             }
+
             LPOperator.GREATER_EQUAL -> {
               cplexModel?.addGe(lhs, rhs, lpConstraint.identifier)
             }
+
             LPOperator.EQUAL -> {
               cplexModel?.addEq(lhs, rhs, lpConstraint.identifier)
             }
@@ -230,10 +271,8 @@ class CplexLpSolver(
     }
   }
 
-  internal fun getCplexVarType(type: LPVarType): IloNumVarType =
-    when (type) {
-      LPVarType.BOOLEAN -> IloNumVarType.Bool
-      LPVarType.INTEGER -> IloNumVarType.Int
-      LPVarType.DOUBLE -> IloNumVarType.Float
-    }
+  override fun free() {
+    cplexModel.clearModel()
+    cplexModel.end()
+  }
 }

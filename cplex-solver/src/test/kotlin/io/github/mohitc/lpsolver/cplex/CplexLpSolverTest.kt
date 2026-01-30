@@ -57,11 +57,6 @@ class CplexLpSolverTest {
     }
   }
 
-  private fun setCplexModel(
-    solver: CplexLpSolver,
-    model: IloCplex?,
-  ) = setParameter(solver, "cplexModel", model)
-
   private fun setVariableMap(
     solver: CplexLpSolver,
     variableMap: MutableMap<String, IloNumVar>,
@@ -74,12 +69,6 @@ class CplexLpSolverTest {
 
   private fun argsForTestSolve() =
     Stream.of(
-      Arguments.of(
-        "null model results in an error",
-        null,
-        LPSolutionStatus.ERROR,
-        LPModelResult(LPSolutionStatus.ERROR),
-      ),
       Arguments.of(
         "exception results in an error",
         mock<IloCplex> { on { solve() } doThrow IloException() },
@@ -146,14 +135,13 @@ class CplexLpSolverTest {
   @MethodSource("argsForTestSolve")
   fun testSolve(
     testCase: String,
-    cplexMock: IloCplex?,
+    cplexMock: IloCplex,
     wantStatus: LPSolutionStatus,
     wantResult: LPModelResult,
   ) {
     log.info { "Test Case: $testCase" }
     val lpModel = LPModel()
-    val solver = CplexLpSolver(lpModel)
-    setCplexModel(solver, cplexMock)
+    val solver = CplexLpSolver(lpModel, cplexMock)
     val gotStatus = solver.solve()
     assertEquals(wantStatus, gotStatus, "solver.solve()")
 
@@ -215,7 +203,7 @@ class CplexLpSolverTest {
   fun testExtractResult(
     testCase: String,
     lpVar: LPVar,
-    cplexMock: IloCplex?,
+    cplexMock: IloCplex,
     variableMap: MutableMap<String, IloNumVar>,
     wantResult: Boolean,
     want: Number,
@@ -223,9 +211,8 @@ class CplexLpSolverTest {
     log.info { "Test Case: $testCase" }
     val lpModel = LPModel()
     lpModel.variables.add(lpVar)
-    val solver = CplexLpSolver(lpModel)
+    val solver = CplexLpSolver(lpModel, cplexMock)
     // setup mocks
-    setCplexModel(solver, cplexMock)
     setVariableMap(solver, variableMap)
     solver.solve()
     assertEquals(wantResult, lpVar.resultSet, "lpVar.resultSet")
@@ -274,7 +261,7 @@ class CplexLpSolverTest {
     testCase: String,
     varGroup: String?,
     lpVar: LPVar,
-    cplexMock: IloCplex?,
+    cplexMock: IloCplex,
     wantSuccess: Boolean,
     wantVarMap: MutableMap<String, IloNumVar>,
   ) {
@@ -285,9 +272,8 @@ class CplexLpSolverTest {
     } else {
       lpModel.variables.add(varGroup, lpVar)
     }
-    val solver = CplexLpSolver(lpModel)
+    val solver = CplexLpSolver(lpModel, cplexMock)
     // setup mocks
-    setCplexModel(solver, cplexMock)
     val gotVarMap =
       mutableMapOf<String, IloNumVar>().apply {
         setVariableMap(solver, this)
@@ -545,7 +531,7 @@ class CplexLpSolverTest {
   fun testInitConstraints(
     desc: String,
     variableMap: MutableMap<LPVar, IloNumVar>,
-    cplexMock: IloCplex?,
+    cplexMock: IloCplex,
     lhs: io.github.mohitc.lpapi.model.LPExpression,
     operator: LPOperator,
     rhs: io.github.mohitc.lpapi.model.LPExpression,
@@ -562,9 +548,8 @@ class CplexLpSolverTest {
         cplexVarMap[entry.key.identifier] = entry.value
       }
     }
-    val solver = CplexLpSolver(lpModel)
+    val solver = CplexLpSolver(lpModel, cplexMock)
     // setup mocks
-    setCplexModel(solver, cplexMock)
     setVariableMap(solver, cplexVarMap)
     setConstraintMap(solver, cplexConstraintMap)
 
@@ -656,7 +641,7 @@ class CplexLpSolverTest {
   fun testInitObjective(
     desc: String,
     variableMap: MutableMap<LPVar, IloNumVar>,
-    cplexMock: IloCplex?,
+    cplexMock: IloCplex,
     objectiveExpr: io.github.mohitc.lpapi.model.LPExpression,
     objectiveType: LPObjectiveType,
     wantSuccess: Boolean,
@@ -671,9 +656,8 @@ class CplexLpSolverTest {
         cplexVarMap[entry.key.identifier] = entry.value
       }
     }
-    val solver = CplexLpSolver(lpModel)
+    val solver = CplexLpSolver(lpModel, cplexMock)
     // setup mocks
-    setCplexModel(solver, cplexMock)
     setVariableMap(solver, cplexVarMap)
     lpModel.objective.expression = objectiveExpr
     lpModel.objective.objective = objectiveType

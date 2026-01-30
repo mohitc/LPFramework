@@ -16,46 +16,38 @@ class ITGLPKProblemTest {
   @Test
   fun testChangeObjectiveDirection() {
     GLPKObjective.entries.forEach { v ->
-      val glpkProblem = GLPKProblem()
-      glpkProblem.setObjective(v)
-      assertEquals(
-        v,
-        glpkProblem.getObjective(),
-        "Want Direction ${v.description}",
-      )
-      glpkProblem.cleanup()
+      GLPKProblem().use { glpkProblem ->
+        glpkProblem.setObjective(v)
+        assertEquals(
+          v,
+          glpkProblem.getObjective(),
+          "Want Direction ${v.description}",
+        )
+      }
     }
   }
 
   @Test
   fun testModelName() {
-    val glpkProblem = GLPKProblem()
-    try {
+    GLPKProblem().use { glpkProblem ->
       val modelNameToSet = "model-name-test"
       glpkProblem.setModelName(modelNameToSet)
       assertEquals(modelNameToSet, glpkProblem.getModelName())
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
   @Test
   fun testObjectiveName() {
-    val glpkProblem = GLPKProblem()
-    try {
+    GLPKProblem().use { glpkProblem ->
       val objNameToSet = "obj-name-test"
       glpkProblem.setObjectiveName(objNameToSet)
       assertEquals(objNameToSet, glpkProblem.getObjectiveName())
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
   @Test
   fun testGetCols() {
-    val glpkProblem = GLPKProblem()
-    try {
-      glpkProblem.createIndex()
+    GLPKProblem().use { glpkProblem ->
       val numVarsToCreate = 5
       val colMap = mutableMapOf<String, Int>()
       for (i in 1..numVarsToCreate) {
@@ -70,16 +62,12 @@ class ITGLPKProblemTest {
         assertEquals(colIndex, glpkProblem.findCol(colName))
       }
       assertEquals(numVarsToCreate, glpkProblem.getNumCols())
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
   @Test
   fun testGetRows() {
-    val glpkProblem = GLPKProblem()
-    try {
-      glpkProblem.createIndex()
+    GLPKProblem().use { glpkProblem ->
       val numConstraintsToCreate = 5
       val rowMap = mutableMapOf<String, Int>()
       for (i in 1..numConstraintsToCreate) {
@@ -93,36 +81,28 @@ class ITGLPKProblemTest {
         assertEquals(rowIndex, glpkProblem.findRow(rowName))
       }
       assertEquals(numConstraintsToCreate, glpkProblem.getNumRows())
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
   @Test
   fun testColKind() {
-    val glpkProblem = GLPKProblem()
-    try {
+    GLPKProblem().use { glpkProblem ->
       GLPKVarKind.entries.forEach { v ->
         val colIndex = glpkProblem.addCols(1)
         glpkProblem.setColKind(colIndex, v)
         assertEquals(v, glpkProblem.getColKind(colIndex))
       }
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
   @Test
   fun testRowType() {
-    val glpkProblem = GLPKProblem()
-    try {
+    GLPKProblem().use { glpkProblem ->
       GLPKBoundType.entries.forEach { v ->
         val rowIndex = glpkProblem.addRows(1)
         glpkProblem.setRowBounds(rowIndex, v, 0.0, 1.0)
         assertEquals(v, glpkProblem.getRowType(rowIndex))
       }
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
@@ -174,16 +154,13 @@ class ITGLPKProblemTest {
     expectedLb: Double,
     expectedUb: Double,
   ) {
-    val glpkProblem = GLPKProblem()
-    try {
+    GLPKProblem().use { glpkProblem ->
       log.info("Validating Column Bounds: ${bound.description}")
       val colIndex = glpkProblem.addCols(1)
       glpkProblem.setColBounds(colIndex, bound, lb, ub)
       assertEquals(bound, glpkProblem.getColType(colIndex), "Bound Type")
       assertEquals(expectedLb, glpkProblem.getColLowerBound(colIndex), "Lower Bound")
       assertEquals(expectedUb, glpkProblem.getColUpperBound(colIndex), "Upper Bound")
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 
@@ -196,16 +173,13 @@ class ITGLPKProblemTest {
     expectedLb: Double,
     expectedUb: Double,
   ) {
-    val glpkProblem = GLPKProblem()
-    try {
+    GLPKProblem().use { glpkProblem ->
       log.info("Validating Row Bounds: ${bound.description}")
       val rowIndex = glpkProblem.addRows(1)
       glpkProblem.setRowBounds(rowIndex, bound, lb, ub)
       assertEquals(bound, glpkProblem.getRowType(rowIndex), "Bound Type")
       assertEquals(expectedLb, glpkProblem.getRowLowerBound(rowIndex), "Lower Bound")
       assertEquals(expectedUb, glpkProblem.getRowUpperBound(rowIndex), "Upper Bound")
-    } finally {
-      glpkProblem.cleanup()
     }
   }
 }

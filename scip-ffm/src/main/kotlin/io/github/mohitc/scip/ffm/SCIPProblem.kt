@@ -11,16 +11,23 @@ import java.lang.foreign.MemoryLayout
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.SequenceLayout
 import java.lang.foreign.ValueLayout
+import java.util.concurrent.atomic.AtomicBoolean
 
-class SCIPProblem {
+class SCIPProblem : AutoCloseable {
   private val log = KotlinLogging.logger(this.javaClass.simpleName)
 
-  private lateinit var scipPtr: MemorySegment
-
+  private val scipPtr: MemorySegment
   private val scipArena: Arena = Arena.ofConfined()
+  private val isClosed: AtomicBoolean
 
-  init {
-    initialize()
+  constructor() {
+    val scipPtrPtr: MemorySegment = scipArena.allocate(SCIP.C_POINTER)
+    val retCode = SCIPRetCode.fromVal(SCIP.SCIPcreate(scipPtrPtr))
+    if (retCode != SCIPRetCode.SCIP_OKAY) {
+      throw RuntimeException("SCIPcreate() failed with return code $retCode")
+    }
+    this.scipPtr = getPtrFromPtrPtr(scipPtrPtr)
+    this.isClosed = AtomicBoolean(false)
   }
 
   companion object {
@@ -47,25 +54,39 @@ class SCIPProblem {
     }
   }
 
-  private fun initialize(): SCIPRetCode {
-    val compilerAddress: MemorySegment = scipArena.allocate(SCIP.C_POINTER) // SCIP**
-    val retCode: Int = SCIP.SCIPcreate(compilerAddress)
-    scipPtr = getPtrFromPtrPtr(compilerAddress)
-    return SCIPRetCode.fromVal(retCode)
+  private fun checkOpen() {
+    if (isClosed.get()) {
+      throw RuntimeException("SCIPProblem is closed")
+    }
   }
 
-  fun infinity() = SCIP.SCIPinfinity(scipPtr)
+  override fun close() {
+    if (isClosed.compareAndSet(false, true)) {
+      SCIPRetCode.fromVal(SCIP.SCIPfreeProb(scipPtr))
+    }
+  }
 
-  fun createProblem(probName: String) =
-    Arena.ofConfined().use {
+  fun infinity(): Double {
+    checkOpen()
+    return SCIP.SCIPinfinity(scipPtr)
+  }
+
+  fun createProblem(probName: String): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
       SCIPRetCode.fromVal(SCIP.SCIPcreateProbBasic(scipPtr, it.allocateFrom(probName)))
     }
+  }
 
-  fun getStatus() = SCIPStatus.fromVal(SCIP.SCIPgetStatus(scipPtr))
+  fun getStatus(): SCIPStatus {
+    checkOpen()
+    return SCIPStatus.fromVal(SCIP.SCIPgetStatus(scipPtr))
+  }
 
-  fun freeProblem() = SCIPRetCode.fromVal(SCIP.SCIPfreeProb(scipPtr))
-
-  fun includeDefaultPlugins() = SCIPRetCode.fromVal(SCIPPlugins.SCIPincludeDefaultPlugins(scipPtr))
+  fun includeDefaultPlugins(): SCIPRetCode {
+    checkOpen()
+    return SCIPRetCode.fromVal(SCIPPlugins.SCIPincludeDefaultPlugins(scipPtr))
+  }
 
   fun createVar(
     varName: String,
@@ -74,6 +95,7 @@ class SCIPProblem {
     objective: Double,
     varType: SCIPVarType,
   ): Variable? {
+    checkOpen()
     Arena.ofConfined().use {
       val varPtrPtr: MemorySegment = scipArena.allocate(SCIP.C_POINTER) // VAR**
       var retCode =
@@ -94,8 +116,12 @@ class SCIPProblem {
     }
   }
 
-  fun releaseVar(scipVar: Variable) =
-    Arena.ofConfined().use { SCIPRetCode.fromVal(SCIP.SCIPreleaseVar(scipPtr, getPtrPtrFromPtr(it, scipVar.ptr))) }
+  fun releaseVar(scipVar: Variable): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIP.SCIPreleaseVar(scipPtr, getPtrPtrFromPtr(it, scipVar.ptr)))
+    }
+  }
 
   fun createConstraint(
     name: String,
@@ -104,6 +130,7 @@ class SCIPProblem {
     lb: Double,
     ub: Double,
   ): Constraint? {
+    checkOpen()
     Arena.ofConfined().use {
       val constraintPtrPtr = scipArena.allocate(SCIP.C_POINTER)
       var retCode =
@@ -133,51 +160,75 @@ class SCIPProblem {
     }
   }
 
-  fun releaseConstraint(constraint: Constraint) =
-    Arena.ofConfined().use {
+  fun releaseConstraint(constraint: Constraint): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
       SCIPRetCode.fromVal(SCIPReleaseConstraint.SCIPreleaseCons(scipPtr, getPtrPtrFromPtr(it, constraint.ptr)))
     }
+  }
 
   fun setBoolParam(
     param: String,
     value: Boolean,
-  ) = Arena.ofConfined().use {
-    SCIPRetCode.fromVal(SCIPParams.SCIPsetBoolParam(scipPtr, it.allocateFrom(param), if (value) 1 else 0))
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIPParams.SCIPsetBoolParam(scipPtr, it.allocateFrom(param), if (value) 1 else 0))
+    }
   }
 
   fun setRealParam(
     param: String,
     value: Double,
-  ) = Arena.ofConfined().use {
-    SCIPRetCode.fromVal(SCIPParams.SCIPsetRealParam(scipPtr, it.allocateFrom(param), value))
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIPParams.SCIPsetRealParam(scipPtr, it.allocateFrom(param), value))
+    }
   }
 
   fun setStringParam(
     param: String,
     value: String,
-  ) = Arena.ofConfined().use {
-    SCIPRetCode.fromVal(SCIPParams.SCIPsetStringParam(scipPtr, it.allocateFrom(param), it.allocateFrom(value)))
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIPParams.SCIPsetStringParam(scipPtr, it.allocateFrom(param), it.allocateFrom(value)))
+    }
   }
 
   fun setIntParam(
     param: String,
     value: Int,
-  ) = Arena.ofConfined().use {
-    SCIPRetCode.fromVal(SCIPParams.SCIPsetIntParam(scipPtr, it.allocateFrom(param), value))
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIPParams.SCIPsetIntParam(scipPtr, it.allocateFrom(param), value))
+    }
   }
 
   fun setLongintParam(
     param: String,
     value: Long,
-  ) = Arena.ofConfined().use {
-    SCIPRetCode.fromVal(SCIPParams.SCIPsetLongintParam(scipPtr, it.allocateFrom(param), value))
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIPParams.SCIPsetLongintParam(scipPtr, it.allocateFrom(param), value))
+    }
   }
 
-  fun solve() = SCIPRetCode.fromVal(SCIP.SCIPsolve(scipPtr))
+  fun solve(): SCIPRetCode {
+    checkOpen()
+    return SCIPRetCode.fromVal(SCIP.SCIPsolve(scipPtr))
+  }
 
-  fun getGap() = SCIP.SCIPgetGap(scipPtr)
+  fun getGap(): Double {
+    checkOpen()
+    return SCIP.SCIPgetGap(scipPtr)
+  }
 
   fun getBestSol(): Solution? {
+    checkOpen()
     val sol = SCIP.SCIPgetBestSol(scipPtr)
     log.info { "Best Solution $sol" }
     return if (sol != null && sol.address() != 0L) Solution(ptr = sol) else null
@@ -186,18 +237,31 @@ class SCIPProblem {
   fun getSolVal(
     sol: Solution,
     variable: Variable,
-  ) = SCIP.SCIPgetSolVal(scipPtr, sol.ptr, variable.ptr)
+  ): Double {
+    checkOpen()
+    return SCIP.SCIPgetSolVal(scipPtr, sol.ptr, variable.ptr)
+  }
 
   fun setVariableObjective(
     variable: Variable,
     objective: Double,
-  ) = SCIPRetCode.fromVal(SCIP.SCIPchgVarObj(scipPtr, variable.ptr, objective))
+  ): SCIPRetCode {
+    checkOpen()
+    return SCIPRetCode.fromVal(SCIP.SCIPchgVarObj(scipPtr, variable.ptr, objective))
+  }
 
-  fun maximize() = SCIP.SCIPsetObjsense(scipPtr, SCIP.SCIP_OBJSENSE_MAXIMIZE())
+  fun maximize(): SCIPRetCode {
+    checkOpen()
+    return SCIPRetCode.fromVal(SCIP.SCIPsetObjsense(scipPtr, SCIP.SCIP_OBJSENSE_MAXIMIZE()))
+  }
 
-  fun minimize() = SCIP.SCIPsetObjsense(scipPtr, SCIP.SCIP_OBJSENSE_MINIMIZE())
+  fun minimize(): SCIPRetCode {
+    checkOpen()
+    return SCIPRetCode.fromVal(SCIP.SCIPsetObjsense(scipPtr, SCIP.SCIP_OBJSENSE_MINIMIZE()))
+  }
 
   fun messageHandlerQuiet(value: Boolean) {
+    checkOpen()
     val setting: Int = if (value) 1 else 0
     SCIP.SCIPsetMessagehdlrQuiet(scipPtr, setting)
   }
@@ -206,8 +270,13 @@ class SCIPProblem {
     fileName: String,
     extension: String,
     genericNames: SCIPBool,
-  ) = Arena.ofConfined().use {
-    SCIP.SCIPwriteOrigProblem(scipPtr, it.allocateFrom(fileName), it.allocateFrom(extension), genericNames.value)
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(
+        SCIP.SCIPwriteOrigProblem(scipPtr, it.allocateFrom(fileName), it.allocateFrom(extension), genericNames.value),
+      )
+    }
   }
 }
 

@@ -39,20 +39,25 @@ open class GlpkLpSolver(
       binarize = GLPKFeatureStatus.ON,
     )
 
-  override fun initModel(): Boolean =
+  override fun initModel(): Boolean {
+    checkOpen()
     try {
       log.info { "Creating new GLPK problem instance with name ${model.identifier}" }
       glpkModel.setModelName(model.identifier)
-      glpkModel.createIndex()
-      true
+      return true
     } catch (e: Exception) {
       log.error { "Error while initializing GLPK Problem instance $e" }
-      false
+      return false
     }
+  }
 
-  override fun getBaseModel(): GLPKProblem = glpkModel
+  override fun getBaseModel(): GLPKProblem {
+    checkOpen()
+    return glpkModel
+  }
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
       log.info { "Starting computation of model" }
       val executionTime =
@@ -86,14 +91,13 @@ open class GlpkLpSolver(
       log.error { "Exception while computing the GLPK model : $e" }
       model.solution = LPModelResult(LPSolutionStatus.ERROR)
       return LPSolutionStatus.ERROR
-    } finally {
-      glpkModel.cleanup()
     }
   }
 
   /** Function to initialize all variables in the GLPK Model. Returns false in case any variable initialization fails
    */
   override fun initVars(): Boolean {
+    checkOpen()
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
@@ -121,6 +125,7 @@ open class GlpkLpSolver(
 
   /** Function to initialize constraints in the GLPK Model. Returns false in case any constraint initialization fails */
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -177,6 +182,7 @@ open class GlpkLpSolver(
   }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     return try {
       log.info { "Initializing objective function" }
 
@@ -221,4 +227,8 @@ open class GlpkLpSolver(
       GLPKMipStatus.FEASIBLE -> LPSolutionStatus.TIME_LIMIT
       GLPKMipStatus.NOFEASIBLE -> LPSolutionStatus.INFEASIBLE
     }
+
+  override fun free() {
+    glpkModel.close()
+  }
 }

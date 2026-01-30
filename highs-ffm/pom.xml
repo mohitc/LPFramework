@@ -109,6 +109,7 @@
             <includeFunction>Highs_setDoubleOptionValue</includeFunction>
             <includeFunction>Highs_writeModel</includeFunction>
             <includeFunction>Highs_addVar</includeFunction>
+            <includeFunction>Highs_passModelName</includeFunction>
             <includeFunction>Highs_changeColIntegrality</includeFunction>
             <includeFunction>Highs_passColName</includeFunction>
             <includeFunction>Highs_getColByName</includeFunction>
