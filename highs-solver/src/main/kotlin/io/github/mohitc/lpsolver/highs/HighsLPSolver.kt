@@ -28,7 +28,8 @@ class HighsLPSolver(
   override fun initModel(): Boolean {
     // Add code to configure instance.
     checkOpen()
-    return true
+    val status = highsModel.passModelName(model.identifier)
+    return status == HIGHSStatus.OK
   }
 
   override fun getBaseModel(): HIGHSProblem {

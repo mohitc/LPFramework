@@ -41,6 +41,13 @@ class HIGHSProblem : AutoCloseable {
     }
   }
 
+  fun passModelName(name: String): HIGHSStatus {
+    checkOpen()
+    Arena.ofConfined().use {
+      return HIGHSStatus.fromValue(HIGHS.Highs_passModelName(highsPtr, it.allocateFrom(name)))
+    }
+  }
+
   fun createVar(
     name: String,
     lb: Double,
@@ -316,6 +323,7 @@ class HIGHSProblem : AutoCloseable {
           log.error { "infoType (${infoTypeMemorySegment.get(HIGHS.C_INT, 0)}) not supported in the implementation" }
           return null
         }
+
         HIGHSInfoType.INT -> {
           val infoVal = it.allocate(HIGHS.C_INT)
           status = HIGHSStatus.fromValue(HIGHS.Highs_getIntInfoValue(highsPtr, it.allocateFrom(param.param), infoVal))
@@ -325,6 +333,7 @@ class HIGHSProblem : AutoCloseable {
           }
           return infoVal.get(HIGHS.C_INT, 0)
         }
+
         HIGHSInfoType.INT64 -> {
           val infoVal = it.allocate(HIGHS.C_LONG)
           status = HIGHSStatus.fromValue(HIGHS.Highs_getInt64InfoValue(highsPtr, it.allocateFrom(param.param), infoVal))
@@ -334,6 +343,7 @@ class HIGHSProblem : AutoCloseable {
           }
           return infoVal.get(HIGHS.C_LONG, 0)
         }
+
         HIGHSInfoType.DOUBLE -> {
           val infoVal = it.allocate(HIGHS.C_DOUBLE)
           status =
