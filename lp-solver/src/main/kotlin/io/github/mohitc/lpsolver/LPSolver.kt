@@ -3,16 +3,37 @@ package io.github.mohitc.lpsolver
 import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import mu.KotlinLogging
+import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class LPSolver<T>(
   val model: LPModel,
-) {
+) : AutoCloseable {
   val log = KotlinLogging.logger(this.javaClass.simpleName)
+  private val isClosed = AtomicBoolean(false)
+
+  protected fun checkOpen() {
+    if (isClosed.get()) {
+      throw RuntimeException("${this.javaClass.simpleName} is closed")
+    }
+  }
+
+  override fun close() {
+    if (isClosed.compareAndSet(false, true)) {
+      free()
+    }
+  }
+
+  /**
+   * Frees the resources associated with the solver.
+   * Subclasses should implement this method to perform cleanup.
+   */
+  protected abstract fun free()
 
   /** Function to initialize the model in the solver based on the model specification in the LPModel
    * model
    */
   fun initialize(): Boolean {
+    checkOpen()
     try {
       if (!initModel() || !initVars() || !initConstraints()) {
         return false

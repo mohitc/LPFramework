@@ -76,6 +76,7 @@ open class ScipLpSolver(
   private var constraintMap: MutableMap<String, Constraint> = mutableMapOf()
 
   override fun initModel(): Boolean {
+    checkOpen()
     try {
       val createVarRetVal = scipModel.createProblem(model.identifier)
       log.info { "createProblem(${model.identifier}) = $createVarRetVal" }
@@ -88,7 +89,10 @@ open class ScipLpSolver(
     return false
   }
 
-  override fun getBaseModel() = scipModel
+  override fun getBaseModel(): SCIPProblem {
+    checkOpen()
+    return scipModel
+  }
 
   private fun releaseModelVars() {
     log.info { "Releasing variables from SCIP" }
@@ -113,6 +117,7 @@ open class ScipLpSolver(
   }
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
       // set parameters
       var retCode = scipModel.setRealParam("limits/time", 3600.0)
@@ -125,7 +130,6 @@ open class ScipLpSolver(
       }
       scipModel.messageHandlerQuiet(false)
 
-      releaseModelConstraints()
       // solve problem
       val executionTime =
         measureTimeMillis {
@@ -157,8 +161,6 @@ open class ScipLpSolver(
 
       val solutionStatus = getSolutionStatus(scipModel.getStatus())
       model.solution = LPModelResult(solutionStatus, objectiveVal, executionTime, gap)
-      releaseModelVars()
-      scipModel.close()
       return solutionStatus
       // print all solutions
     } catch (e: Exception) {
@@ -178,8 +180,8 @@ open class ScipLpSolver(
   }
 
   override fun initVars(): Boolean {
+    checkOpen()
     log.info { "Initializing variables" }
-
     model.variables.allValues().forEach { lpVar ->
       try {
         log.debug { "Initializing variable ($lpVar)" }
@@ -202,6 +204,7 @@ open class ScipLpSolver(
   }
 
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.error { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -266,6 +269,7 @@ open class ScipLpSolver(
   }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     log.info { "Initializing Objective Function" }
     try {
       val reducedObjectiveFn = model.reduce(model.objective.expression)
@@ -305,4 +309,10 @@ open class ScipLpSolver(
       LPVarType.BOOLEAN -> SCIPVarType.SCIP_VARTYPE_BINARY
       LPVarType.DOUBLE -> SCIPVarType.SCIP_VARTYPE_CONTINUOUS
     }
+
+  override fun free() {
+    releaseModelVars()
+    releaseModelConstraints()
+    scipModel.close()
+  }
 }

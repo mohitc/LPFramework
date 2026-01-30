@@ -1,7 +1,6 @@
 package io.github.mohitc.lpsolver.cplex
 
 import ilog.cplex.IloCplex
-import io.github.mohitc.lpapi.model.LPModel
 import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,9 +10,8 @@ import org.junit.jupiter.api.Test
 class CplexLpSolverConverterTest {
   @Test
   fun testGetCplexVarType() {
-    val solver = CplexLpSolver(LPModel())
     LPVarType.values().forEach { v ->
-      assertNotNull(solver.getCplexVarType(v), "No equivalent variable type associated with LPVarType $v")
+      assertNotNull(CplexLpSolver.getCplexVarType(v), "No equivalent variable type associated with LPVarType $v")
     }
   }
 
@@ -32,11 +30,10 @@ class CplexLpSolverConverterTest {
         Pair(null, LPSolutionStatus.ERROR),
       )
 
-    val solver = CplexLpSolver(LPModel())
     solutionStatusMap.entries.forEach { entry ->
       assertEquals(
         entry.value,
-        solver.getSolutionStatus(entry.key),
+        CplexLpSolver.getSolutionStatus(entry.key),
         "CPLEX status ${entry.key} not translated correctly to ${entry.value}",
       )
     }

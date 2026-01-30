@@ -18,9 +18,7 @@ import io.github.mohitc.lpsolver.LPSolver
 import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
-class MosekLPSolver(
-  model: LPModel,
-) : LPSolver<Task>(model) {
+class MosekLPSolver : LPSolver<Task> {
   companion object {
     init {
       listOf("mosek64").forEach { lib ->
@@ -39,23 +37,33 @@ class MosekLPSolver(
     }
   }
 
-  private var baseModel: Task? = null
+  private var baseModel: Task
 
   private val variableMap: MutableMap<String, Int> = mutableMapOf<String, Int>()
 
   private val constraintMap: MutableMap<String, Int> = mutableMapOf<String, Int>()
 
-  override fun initModel(): Boolean {
+  constructor(model: LPModel) : super(model) {
     try {
-      val task = Task()
+      baseModel = Task()
       // route log stream to the slf4j logger
-      task.set_Stream(
+      baseModel.set_Stream(
         streamtype.log,
         object : Stream() {
           override fun stream(msg: String) = log.info { msg }
         },
       )
-      baseModel = task
+    } catch (e: Throwable) {
+      log.error { "Exception while initializing model: $e" }
+      log.debug { e.stackTraceToString() }
+      throw RuntimeException(e)
+    }
+  }
+
+  override fun initModel(): Boolean {
+    checkOpen()
+    try {
+      baseModel.puttaskname(model.identifier)
     } catch (e: Throwable) {
       log.error { "Exception while initializing model: $e" }
       log.debug { e.stackTraceToString() }
@@ -64,27 +72,25 @@ class MosekLPSolver(
     return true
   }
 
-  override fun getBaseModel(): Task? = baseModel
+  override fun getBaseModel(): Task {
+    checkOpen()
+    return baseModel
+  }
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
-      if (baseModel == null) {
-        log.error("Base model not initialized.")
-        model.solution = LPModelResult(LPSolutionStatus.ERROR)
-        return LPSolutionStatus.ERROR
-      }
-
       // Solve the problem
       val executionTime =
         measureTimeMillis {
-          baseModel!!.optimize()
+          baseModel.optimize()
         }
       // Print a summary containing information
       // about the solution for debugging purposes
-      baseModel!!.solutionsummary(streamtype.msg)
+      baseModel.solutionsummary(streamtype.msg)
 
       // Get status information about the solution
-      val mosekStatus = baseModel!!.getsolsta(soltype.itg)
+      val mosekStatus = baseModel.getsolsta(soltype.itg)
 
       val solutionStatus = convertSolutionStatus(mosekStatus)
 
@@ -96,11 +102,8 @@ class MosekLPSolver(
         }
 
         else -> {
-          val variableResults = baseModel!!.getxx(soltype.itg)
-          variableMap.forEach {
-            lpVarIdentifier,
-            index,
-            ->
+          val variableResults = baseModel.getxx(soltype.itg)
+          variableMap.forEach { (lpVarIdentifier, index) ->
             model.variables.get(lpVarIdentifier)?.populateResult(variableResults[index])
           }
           val objectiveVal = model.evaluate(model.objective.expression)
@@ -153,17 +156,18 @@ class MosekLPSolver(
     }
 
   override fun initVars(): Boolean {
+    checkOpen()
     log.info { "Initializing Variables" }
     val numVar = model.variables.allValues().size
     log.debug { "Variable Size = $numVar" }
     var currVarIdentifier = 0
     try {
-      baseModel?.appendvars(numVar)
+      baseModel.appendvars(numVar)
       model.variables.allValues().forEach { lpVar ->
         log.debug { "Initializing variable $lpVar" }
-        baseModel!!.putvarname(currVarIdentifier, lpVar.identifier)
-        baseModel!!.putvarbound(currVarIdentifier, boundkey.ra, lpVar.lbound, lpVar.ubound)
-        baseModel!!.putvartype(currVarIdentifier, convertVarType(lpVar.type))
+        baseModel.putvarname(currVarIdentifier, lpVar.identifier)
+        baseModel.putvarbound(currVarIdentifier, boundkey.ra, lpVar.lbound, lpVar.ubound)
+        baseModel.putvartype(currVarIdentifier, convertVarType(lpVar.type))
         variableMap[lpVar.identifier] = currVarIdentifier
         currVarIdentifier++
       }
@@ -176,6 +180,7 @@ class MosekLPSolver(
   }
 
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.info { "Initializing Constraints" }
     val numConstraints = model.constraints.allValues().size
     // we need to store the contribution of a variable to a constraint for initializing
@@ -185,7 +190,7 @@ class MosekLPSolver(
     val varContributions = mutableMapOf<String, MutableList<Pair<Int, Double>>>()
     var currentConstraintIdentifier = 0
     try {
-      baseModel?.appendcons(numConstraints)
+      baseModel.appendcons(numConstraints)
       model.constraints.allValues().forEach { lPConstraint ->
         log.debug { "Initializing constraint: $lPConstraint" }
         val reducedConstraint = model.reduce(lPConstraint)
@@ -212,16 +217,16 @@ class MosekLPSolver(
             }.map { t -> t.coefficient }
             .firstOrNull() ?: 0.0
         when (reducedConstraint.operator) {
-          LPOperator.EQUAL -> baseModel!!.putconbound(currentConstraintIdentifier, boundkey.fx, value, value)
-          LPOperator.LESS_EQUAL -> baseModel!!.putconbound(currentConstraintIdentifier, boundkey.up, 0.0, value)
-          LPOperator.GREATER_EQUAL -> baseModel!!.putconbound(currentConstraintIdentifier, boundkey.lo, value, 0.0)
+          LPOperator.EQUAL -> baseModel.putconbound(currentConstraintIdentifier, boundkey.fx, value, value)
+          LPOperator.LESS_EQUAL -> baseModel.putconbound(currentConstraintIdentifier, boundkey.up, 0.0, value)
+          LPOperator.GREATER_EQUAL -> baseModel.putconbound(currentConstraintIdentifier, boundkey.lo, value, 0.0)
         }
         currentConstraintIdentifier++
       }
       log.debug { "Variable Map: $variableMap, Contributions: $varContributions" }
       // Initialize all variable contributions
       varContributions.forEach { varIdentifier, coeffList ->
-        baseModel!!.putacol(
+        baseModel.putacol(
           variableMap[varIdentifier]!!,
           coeffList
             .map { t ->
@@ -245,6 +250,7 @@ class MosekLPSolver(
     }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     try {
       val reducedObjective =
         model
@@ -256,15 +262,19 @@ class MosekLPSolver(
               "recalculation of the objective value calculation only"
           }
         } else {
-          baseModel!!.putcj(variableMap[t.lpVarIdentifier]!!, t.coefficient!!)
+          baseModel.putcj(variableMap[t.lpVarIdentifier]!!, t.coefficient!!)
         }
       }
-      baseModel!!.putobjsense(getObjectiveSense(model.objective.objective))
+      baseModel.putobjsense(getObjectiveSense(model.objective.objective))
     } catch (e: Throwable) {
       log.error { "Error while initializing objective function: $e" }
       log.debug { e.stackTraceToString() }
       return false
     }
     return true
+  }
+
+  override fun free() {
+    baseModel.dispose()
   }
 }

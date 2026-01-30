@@ -17,9 +17,7 @@ import io.github.mohitc.lpapi.model.enums.LPVarType
 import io.github.mohitc.lpsolver.LPSolver
 import kotlin.system.measureTimeMillis
 
-class GurobiLpSolver(
-  model: LPModel,
-) : LPSolver<GRBModel>(model) {
+class GurobiLpSolver : LPSolver<GRBModel> {
   companion object {
     val solutionStatesWithoutResults =
       setOf(
@@ -28,18 +26,97 @@ class GurobiLpSolver(
         LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED,
         LPSolutionStatus.UNKNOWN,
       )
+
+    /**Function to get the LP Solution Status based on the Gurobi Model Status
+     */
+    fun getSolutionStatus(grbStatus: Int?): LPSolutionStatus =
+      when (grbStatus) {
+        GRB.Status.OPTIMAL -> {
+          LPSolutionStatus.OPTIMAL
+        }
+
+        GRB.Status.UNBOUNDED -> {
+          LPSolutionStatus.UNBOUNDED
+        }
+
+        GRB.Status.INFEASIBLE -> {
+          LPSolutionStatus.INFEASIBLE
+        }
+
+        GRB.Status.INF_OR_UNBD -> {
+          LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
+        }
+
+        GRB.Status.TIME_LIMIT -> {
+          LPSolutionStatus.TIME_LIMIT
+        }
+
+        GRB.Status.CUTOFF -> {
+          LPSolutionStatus.CUTOFF
+        }
+
+        null -> {
+          LPSolutionStatus.ERROR
+        }
+
+        else -> {
+          LPSolutionStatus.UNKNOWN
+        }
+      }
+
+    /** Function to get the Gurobi variable type from the LP Variable type
+     */
+    fun getGurobiVarType(type: LPVarType): Char =
+      when (type) {
+        LPVarType.INTEGER -> GRB.INTEGER
+        LPVarType.BOOLEAN -> GRB.BINARY
+        LPVarType.DOUBLE -> GRB.CONTINUOUS
+      }
+
+    /** Function to get the Gurobi operator from the LP Operator type
+     */
+    fun getGurobiOperator(operator: LPOperator): Char =
+      when (operator) {
+        LPOperator.GREATER_EQUAL -> GRB.GREATER_EQUAL
+        LPOperator.EQUAL -> GRB.EQUAL
+        LPOperator.LESS_EQUAL -> GRB.LESS_EQUAL
+      }
+
+    /** Function to get the Gurobi Objective type based on the LP ObjectiveType
+     */
+    fun getGurobiObjectiveType(objType: LPObjectiveType): Int =
+      when (objType) {
+        LPObjectiveType.MINIMIZE -> GRB.MINIMIZE
+        LPObjectiveType.MAXIMIZE -> GRB.MAXIMIZE
+      }
   }
 
-  private var grbModel: GRBModel? = null
+  private val env: GRBEnv
+
+  private var grbModel: GRBModel
+
+  constructor(model: LPModel) : super(model) {
+    env = GRBEnv()
+    grbModel = GRBModel(env)
+  }
+
+  internal constructor(
+    model: LPModel,
+    env: GRBEnv,
+    grbModel: GRBModel,
+  ) : super(model) {
+    this.env = env
+    this.grbModel = grbModel
+  }
 
   private var variableMap: MutableMap<String, GRBVar> = mutableMapOf()
 
   private var constraintMap: MutableMap<String, GRBConstr> = mutableMapOf()
 
   override fun initModel(): Boolean {
+    checkOpen()
     try {
-      val env = GRBEnv()
-      this.grbModel = GRBModel(env)
+      grbModel.set(GRB.StringAttr.ModelName, model.identifier)
       return true
     } catch (e: GRBException) {
       log.error("Error in generating Gurobi model", e)
@@ -47,18 +124,22 @@ class GurobiLpSolver(
     return false
   }
 
-  override fun getBaseModel(): GRBModel? = grbModel
+  override fun getBaseModel(): GRBModel {
+    checkOpen()
+    return grbModel
+  }
 
   override fun solve(): LPSolutionStatus {
+    checkOpen()
     try {
       log.info { "Starting computation of model" }
       val executionTime =
         measureTimeMillis {
-          grbModel?.optimize()
+          grbModel.optimize()
         }
       val solutionStatus =
         getSolutionStatus(
-          grbModel?.get(GRB.IntAttr.Status),
+          grbModel.get(GRB.IntAttr.Status),
         )
       log.info { "Computation terminated. Solution Status : $solutionStatus" }
       if (solutionStatus == LPSolutionStatus.ERROR) {
@@ -70,9 +151,9 @@ class GurobiLpSolver(
         model.solution =
           LPModelResult(
             solutionStatus,
-            grbModel?.get(GRB.DoubleAttr.ObjVal),
+            grbModel.get(GRB.DoubleAttr.ObjVal),
             executionTime,
-            grbModel?.get(GRB.DoubleAttr.MIPGap),
+            grbModel.get(GRB.DoubleAttr.MIPGap),
           )
         log.info { "${model.solution}" }
       } else {
@@ -102,29 +183,14 @@ class GurobiLpSolver(
     }
   }
 
-  /**Function to get the LP Solution Status based on the Gurobi Model Status
-   */
-  internal fun getSolutionStatus(grbStatus: Int?): LPSolutionStatus =
-    when (grbStatus) {
-      GRB.Status.OPTIMAL -> LPSolutionStatus.OPTIMAL
-      GRB.Status.UNBOUNDED -> LPSolutionStatus.UNBOUNDED
-      GRB.Status.INFEASIBLE -> LPSolutionStatus.INFEASIBLE
-      GRB.Status.INF_OR_UNBD -> LPSolutionStatus.INFEASIBLE_OR_UNBOUNDED
-      GRB.Status.TIME_LIMIT -> LPSolutionStatus.TIME_LIMIT
-      GRB.Status.CUTOFF -> LPSolutionStatus.CUTOFF
-      null -> LPSolutionStatus.ERROR
-      else -> {
-        LPSolutionStatus.UNKNOWN
-      }
-    }
-
   override fun initVars(): Boolean {
+    checkOpen()
     log.info { "Initializing variables" }
     model.variables.allValues().forEach { lpVar ->
       try {
         log.debug { "Initializing variable ($lpVar)" }
         val grbVarType = getGurobiVarType(lpVar.type)
-        val grbVar = grbModel?.addVar(lpVar.lbound, lpVar.ubound, 0.0, grbVarType, lpVar.identifier)
+        val grbVar = grbModel.addVar(lpVar.lbound, lpVar.ubound, 0.0, grbVarType, lpVar.identifier)
         if (grbVar != null) {
           variableMap[lpVar.identifier] = grbVar
         } else {
@@ -139,25 +205,8 @@ class GurobiLpSolver(
     return true
   }
 
-  /** Function to get the Gurobi variable type from the LP Variable type
-   */
-  internal fun getGurobiVarType(type: LPVarType): Char =
-    when (type) {
-      LPVarType.INTEGER -> GRB.INTEGER
-      LPVarType.BOOLEAN -> GRB.BINARY
-      LPVarType.DOUBLE -> GRB.CONTINUOUS
-    }
-
-  /** Function to get the Gurobi operator from the LP Operator type
-   */
-  internal fun getGurobiOperator(operator: LPOperator): Char =
-    when (operator) {
-      LPOperator.GREATER_EQUAL -> GRB.GREATER_EQUAL
-      LPOperator.EQUAL -> GRB.EQUAL
-      LPOperator.LESS_EQUAL -> GRB.LESS_EQUAL
-    }
-
   override fun initConstraints(): Boolean {
+    checkOpen()
     log.info { "Initializing constraints" }
     model.constraints.allValues().forEach { lpConstraint ->
       try {
@@ -170,7 +219,7 @@ class GurobiLpSolver(
 
         val gurobiOperator = getGurobiOperator(lpConstraint.operator)
         val modelConstraint: GRBConstr? =
-          grbModel?.addConstr(
+          grbModel.addConstr(
             generateExpression(lpConstraint.lhs),
             gurobiOperator,
             generateExpression(lpConstraint.rhs),
@@ -190,6 +239,7 @@ class GurobiLpSolver(
   }
 
   override fun initObjectiveFunction(): Boolean {
+    checkOpen()
     log.info { "Initializing Objective Function" }
     return try {
       // Initialize cplex objective, to be used later to extract value of the objective function
@@ -198,21 +248,13 @@ class GurobiLpSolver(
       if (gurobiObjective == null) {
         return false
       }
-      grbModel?.setObjective(gurobiObjective, objectiveType)
+      grbModel.setObjective(gurobiObjective, objectiveType)
       true
     } catch (e: Exception) {
       log.error { "Exception while generating Gurobi Objective function $e" }
       false
     }
   }
-
-  /** Function to get the Gurobi Objective type based on the LP ObjectiveType
-   */
-  internal fun getGurobiObjectiveType(objType: LPObjectiveType): Int =
-    when (objType) {
-      LPObjectiveType.MINIMIZE -> GRB.MINIMIZE
-      LPObjectiveType.MAXIMIZE -> GRB.MAXIMIZE
-    }
 
   /** Function to generate Gurobi linear expressions based on LPModel expressions which are used in generating the
    * Objective function as well as the model constraints.
@@ -241,5 +283,10 @@ class GurobiLpSolver(
       log.error { "Error while generating linear expression for Gurobi model: $e" }
       return null
     }
+  }
+
+  override fun free() {
+    grbModel.dispose()
+    env.dispose()
   }
 }
