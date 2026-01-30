@@ -158,10 +158,7 @@ open class ScipLpSolver(
       val solutionStatus = getSolutionStatus(scipModel.getStatus())
       model.solution = LPModelResult(solutionStatus, objectiveVal, executionTime, gap)
       releaseModelVars()
-      retCode = scipModel.freeProblem()
-      if (retCode != SCIPRetCode.SCIP_OKAY) {
-        log.error { "freeProblem() want OKAY got $retCode" }
-      }
+      scipModel.close()
       return solutionStatus
       // print all solutions
     } catch (e: Exception) {
