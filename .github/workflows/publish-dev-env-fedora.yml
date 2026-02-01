@@ -8,7 +8,7 @@ name: Docker
 on:
   # Scheduled to run once a week on monday
   schedule:
-    - cron: "30 12 * * 1"
+    - cron: "30 12 1,15 * *"
   # On a push to the docker folders
   push:
     paths:
@@ -82,7 +82,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
+          cache-from: ${{ case(github.event_name == 'schedule', '', 'type=gha') }}
           cache-to: type=gha,mode=max
 
       # Sign the resulting Docker image digest except on PRs.
