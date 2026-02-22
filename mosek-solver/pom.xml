@@ -21,7 +21,7 @@
   <properties>
     <mosek-root.path>/opt/mosek</mosek-root.path>
     <mosek-ld-library-path>${mosek-root.path}/tools/platform/linux64x86/bin</mosek-ld-library-path>
-    <mosek.version>11.1.5</mosek.version>
+    <mosek.version>11.1.6</mosek.version>
   </properties>
 
   <dependencies>
