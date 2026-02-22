@@ -20,9 +20,10 @@ RUN source /etc/bashrc
 
 # Download and install Maven 
 
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz -P /tmp && \
-    tar -zxvf /tmp/apache-maven-3.9.12-bin.tar.gz -C /opt && \
-    ln -s /opt/apache-maven-3.9.12 /opt/maven
+ARG MAVEN_VERSION=3.9.12
+RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz -P /tmp && \
+    tar -zxvf /tmp/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt && \
+    ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven
 
 ENV M2_HOME="/opt/maven"
 ENV MAVEN_HOME="/opt/maven"
@@ -33,9 +34,10 @@ ENV PATH="/opt/maven/bin:$PATH"
 # Setup CFLAGS env variables during the configure and installation process to force using the ansi C standards for the
 # GLPK builds.
 ENV CFLAGS="-ansi"
-RUN wget https://ftp.gnu.org/gnu/glpk/glpk-5.0.tar.gz -P /tmp && \
-    tar -zxvf /tmp/glpk-5.0.tar.gz -C /tmp && \
-    cd /tmp/glpk-5.0 && \
+ARG GLPK_VERSION=5.0
+RUN wget https://ftp.gnu.org/gnu/glpk/glpk-${GLPK_VERSION}.tar.gz -P /tmp && \
+    tar -zxvf /tmp/glpk-${GLPK_VERSION}.tar.gz -C /tmp && \
+    cd /tmp/glpk-${GLPK_VERSION} && \
     ./configure && \
     make && \
     make install
@@ -51,10 +53,10 @@ RUN wget https://download.java.net/java/early_access/jextract/25/2/openjdk-25-je
 ENV PATH="/opt/jextract/bin:$PATH"
 
 # Download and install SCIPOpt
-
-RUN wget https://www.scipopt.org/download/release/scipoptsuite-10.0.0.tgz -P /tmp && \
-    tar -zxvf /tmp/scipoptsuite-10.0.0.tgz -C /opt && \
-    ln -s /opt/scipoptsuite-10.0.0 /opt/scipopt
+ARG SCIP_VERSION=10.0.1
+RUN wget https://www.scipopt.org/download/release/scipoptsuite-${SCIP_VERSION}.tgz -P /tmp && \
+    tar -zxvf /tmp/scipoptsuite-${SCIP_VERSION}.tgz -C /opt && \
+    ln -s /opt/scipoptsuite-${SCIP_VERSION} /opt/scipopt
 
 RUN dnf install --setopt=install_weak_deps=False cmake coin-or-Ipopt-devel gmp-devel zlib-ng-devel zlib-ng-compat-devel readline-devel boost-devel tbb-devel mpfr-devel -y
 RUN mkdir /opt/scipopt/build && \
@@ -64,9 +66,9 @@ RUN mkdir /opt/scipopt/build && \
     make install
 
 # Download and install HIGHS
-
+ARG HIGHS_VERSION=v1.13.1
 RUN cd /opt/ && \
-    git clone --branch v1.12.0 --single-branch https://github.com/ERGO-Code/HiGHS.git && \
+    git clone --branch ${HIGHS_VERSION} --single-branch https://github.com/ERGO-Code/HiGHS.git && \
     cd /opt/HiGHS && \
     cmake -S . -B build && \
     cmake --build build
