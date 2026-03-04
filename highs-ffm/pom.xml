@@ -107,6 +107,9 @@
             <includeFunction>Highs_destroy</includeFunction>
             <includeFunction>Highs_getInfinity</includeFunction>
             <includeFunction>Highs_setDoubleOptionValue</includeFunction>
+            <includeFunction>Highs_setStringOptionValue</includeFunction>
+            <includeFunction>Highs_setBoolOptionValue</includeFunction>
+            <includeFunction>Highs_setIntOptionValue</includeFunction>
             <includeFunction>Highs_writeModel</includeFunction>
             <includeFunction>Highs_addVar</includeFunction>
             <includeFunction>Highs_passModelName</includeFunction>
@@ -132,6 +135,10 @@
             <includeFunction>Highs_getIntInfoValue</includeFunction>
             <includeFunction>Highs_getInt64InfoValue</includeFunction>
             <includeFunction>Highs_getDoubleInfoValue</includeFunction>
+            <includeFunction>Highs_getIntOptionValue</includeFunction>
+            <includeFunction>Highs_getStringOptionValue</includeFunction>
+            <includeFunction>Highs_getBoolOptionValue</includeFunction>
+            <includeFunction>Highs_getDoubleOptionValue</includeFunction>
           </includeFunctions>
         </configuration>
         <executions>
