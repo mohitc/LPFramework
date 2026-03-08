@@ -79,6 +79,7 @@
               <goal>verify</goal>
             </goals>
             <configuration>
+              <argLine>@{argLine}</argLine>
               <skipTests>${mosek.skiptests}</skipTests>
               <!-- Provide environment variables -->
               <environmentVariables>

@@ -1,5 +1,6 @@
 package io.github.mohitc.glpk.ffm
 
+import io.github.mohitc.glpk.ffm.GlpIocp
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -181,5 +182,48 @@ class ITGLPKProblemTest {
       assertEquals(expectedLb, glpkProblem.getRowLowerBound(rowIndex), "Lower Bound")
       assertEquals(expectedUb, glpkProblem.getRowUpperBound(rowIndex), "Upper Bound")
     }
+  }
+
+  @Test
+  fun testSolve() {
+    val params =
+      GlpIocp(
+        preSolve = GLPKFeatureStatus.ON,
+        messageLevel = GLPKMessageLevel.MSG_ON,
+        binarize = GLPKFeatureStatus.ON,
+      )
+    // Maximize x + y
+    // s.t. x + y <= 1
+    // x, y >= 0
+    GLPKProblem().use { glpkProblem ->
+      glpkProblem.setObjective(GLPKObjective.MAXIMIZE)
+
+      val x = glpkProblem.addCols(1)
+      glpkProblem.setColBounds(x, GLPKBoundType.LOWER_BOUNDED, 0.0, 0.0)
+      glpkProblem.setColKind(x, GLPKVarKind.CONTINUOUS)
+      glpkProblem.setObjectiveCoefficient(x, 1.0)
+
+      val y = glpkProblem.addCols(1)
+      glpkProblem.setColBounds(y, GLPKBoundType.LOWER_BOUNDED, 0.0, 0.0)
+      glpkProblem.setColKind(y, GLPKVarKind.INTEGER)
+      glpkProblem.setObjectiveCoefficient(y, 1.0)
+
+      val row = glpkProblem.addRows(1)
+      glpkProblem.setRowBounds(row, GLPKBoundType.UPPER_BOUNDED, 0.0, 1.0)
+      glpkProblem.setMatrixRow(row, 2, listOf(x, y), listOf(1.0, 1.0))
+
+      val ret = glpkProblem.intopt(params)
+      assertEquals(0, ret, "Solver return code")
+      assertEquals(GLPKMipStatus.OPTIMAL, glpkProblem.mipStatus())
+      assertEquals(1.0, glpkProblem.mipObjectiveValue(), 0.0001)
+    }
+  }
+
+  @Test
+  fun testClose() {
+    val problem = GLPKProblem()
+    problem.close()
+    // Should not throw exception on double close or similar if handled correctly
+    problem.close()
   }
 }

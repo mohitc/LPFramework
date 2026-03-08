@@ -78,6 +78,7 @@
               <goal>verify</goal>
             </goals>
             <configuration>
+              <argLine>@{argLine}</argLine>
               <skipTests>${highs.skiptests}</skipTests>
               <!-- Provide environment variables -->
               <environmentVariables>

@@ -3,6 +3,7 @@ package io.github.mohitc.scip.ffm
 import mu.KotlinLogging
 import org.scip.java.SCIP
 import org.scip.java.SCIPConstraint
+import org.scip.java.SCIPDefs
 import org.scip.java.SCIPParams
 import org.scip.java.SCIPPlugins
 import org.scip.java.SCIPReleaseConstraint
@@ -207,13 +208,23 @@ class SCIPProblem : AutoCloseable {
     }
   }
 
-  fun setLongintParam(
+  fun setLongParam(
     param: String,
     value: Long,
   ): SCIPRetCode {
     checkOpen()
     return Arena.ofConfined().use {
       SCIPRetCode.fromVal(SCIPParams.SCIPsetLongintParam(scipPtr, it.allocateFrom(param), value))
+    }
+  }
+
+  fun setCharParam(
+    param: String,
+    value: Char,
+  ): SCIPRetCode {
+    checkOpen()
+    return Arena.ofConfined().use {
+      SCIPRetCode.fromVal(SCIPParams.SCIPsetCharParam(scipPtr, it.allocateFrom(param), value.code.toByte()))
     }
   }
 
@@ -255,6 +266,11 @@ class SCIPProblem : AutoCloseable {
     return SCIPRetCode.fromVal(SCIP.SCIPsetObjsense(scipPtr, SCIP.SCIP_OBJSENSE_MAXIMIZE()))
   }
 
+  fun getObjSense(): SCIPObjSense {
+    checkOpen()
+    return SCIPObjSense.fromVal(SCIP.SCIPgetObjsense(scipPtr))
+  }
+
   fun minimize(): SCIPRetCode {
     checkOpen()
     return SCIPRetCode.fromVal(SCIP.SCIPsetObjsense(scipPtr, SCIP.SCIP_OBJSENSE_MINIMIZE()))
@@ -276,6 +292,93 @@ class SCIPProblem : AutoCloseable {
       SCIPRetCode.fromVal(
         SCIP.SCIPwriteOrigProblem(scipPtr, it.allocateFrom(fileName), it.allocateFrom(extension), genericNames.value),
       )
+    }
+  }
+
+  fun getStringParam(param: String): String? {
+    checkOpen()
+    Arena.ofConfined().use {
+      val paramValPtr =
+        scipArena.allocate(SCIP.C_POINTER)
+      val retCode = SCIPRetCode.fromVal(SCIPParams.SCIPgetStringParam(scipPtr, it.allocateFrom(param), paramValPtr))
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "getStringParam($param) want OK got $retCode" }
+        return null
+      }
+      return paramValPtr
+        .get(SCIP.C_POINTER, 0) // Get the pointer to the start of the string
+        .reinterpret(SCIPDefs.SCIP_MAXSTRLEN().toLong()) // reinterpret as a segment of length SCIP_MAXSTRLEN
+        .getString(0) // extract the relevant string.
+    }
+  }
+
+  fun getIntParam(param: String): Int? {
+    checkOpen()
+    Arena.ofConfined().use {
+      val paramValPtr =
+        scipArena.allocate(SCIP.C_POINTER)
+      val retCode = SCIPRetCode.fromVal(SCIPParams.SCIPgetIntParam(scipPtr, it.allocateFrom(param), paramValPtr))
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "getIntParam($param) want OK got $retCode" }
+        return null
+      }
+      return paramValPtr.get(SCIP.C_INT, 0)
+    }
+  }
+
+  fun getRealParam(param: String): Double? {
+    checkOpen()
+    Arena.ofConfined().use {
+      val paramValPtr =
+        scipArena.allocate(SCIP.C_POINTER)
+      val retCode = SCIPRetCode.fromVal(SCIPParams.SCIPgetRealParam(scipPtr, it.allocateFrom(param), paramValPtr))
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "getRealParam($param) want OK got $retCode" }
+        return null
+      }
+      return paramValPtr.get(SCIP.C_DOUBLE, 0)
+    }
+  }
+
+  fun getBoolParam(param: String): Boolean? {
+    checkOpen()
+    Arena.ofConfined().use {
+      val paramValPtr =
+        scipArena.allocate(SCIP.C_POINTER)
+      val retCode = SCIPRetCode.fromVal(SCIPParams.SCIPgetBoolParam(scipPtr, it.allocateFrom(param), paramValPtr))
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "getBoolParam($param) want OK got $retCode" }
+        return null
+      }
+      return paramValPtr.get(SCIP.C_INT, 0) == SCIPBool.SCIP_TRUE.value
+    }
+  }
+
+  fun getLongParam(param: String): Long? {
+    checkOpen()
+    Arena.ofConfined().use {
+      val paramValPtr =
+        scipArena.allocate(SCIP.C_POINTER)
+      val retCode = SCIPRetCode.fromVal(SCIPParams.SCIPgetLongintParam(scipPtr, it.allocateFrom(param), paramValPtr))
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "getLongintParam($param) want OK got $retCode" }
+        return null
+      }
+      return paramValPtr.get(SCIP.C_LONG, 0)
+    }
+  }
+
+  fun getCharParam(param: String): Char? {
+    checkOpen()
+    Arena.ofConfined().use {
+      val paramValPtr =
+        scipArena.allocate(SCIP.C_POINTER)
+      val retCode = SCIPRetCode.fromVal(SCIPParams.SCIPgetCharParam(scipPtr, it.allocateFrom(param), paramValPtr))
+      if (retCode != SCIPRetCode.SCIP_OKAY) {
+        log.error { "getCharParam($param) want OK got $retCode" }
+        return null
+      }
+      return paramValPtr.get(SCIP.C_CHAR, 0).toInt().toChar()
     }
   }
 }

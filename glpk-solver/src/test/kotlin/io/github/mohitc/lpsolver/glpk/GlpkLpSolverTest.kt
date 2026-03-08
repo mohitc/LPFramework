@@ -16,11 +16,13 @@ import io.github.mohitc.lpapi.model.enums.LPSolutionStatus
 import io.github.mohitc.lpapi.model.enums.LPVarType
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import java.lang.RuntimeException
 import java.util.stream.Stream
 
@@ -37,6 +39,27 @@ class GlpkLpSolverTest {
       columIndex = 1
       rowIndex = 1
     }
+  }
+
+  @Test
+  fun testGetBaseModel() {
+    val model = LPModel("test")
+    val solver = GlpkLpSolver(model)
+    val mockGlpk = mock<GLPKProblem>()
+    setModel(solver, mockGlpk)
+    assertEquals(mockGlpk, solver.getBaseModel())
+  }
+
+  @Test
+  fun testClose() {
+    // Testing that solver.close() calls the close method on the
+    // underlying GLPKProblem
+    val model = LPModel("test")
+    val solver = GlpkLpSolver(model)
+    val mockGlpk = mock<GLPKProblem>()
+    setModel(solver, mockGlpk)
+    solver.close()
+    verify(mockGlpk).close()
   }
 
   private fun setParameter(
@@ -360,6 +383,24 @@ class GlpkLpSolverTest {
           .LPExpression()
           .apply { this.add(3).addTerm(2, "x") },
         true,
+      ),
+      Arguments.of(
+        "Missing variable in map results in failure",
+        mock<GLPKProblem> {
+          on { addCols(1) }.then {
+            columIndex++
+            columIndex - 1
+          }
+        },
+        LPModel("test").apply {
+          this.variables.add(LPVar("x", LPVarType.BOOLEAN))
+        },
+        mutableMapOf<String, Int>(),
+        LPObjectiveType.MINIMIZE,
+        io.github.mohitc.lpapi.model
+          .LPExpression()
+          .apply { this.addTerm(2, "x") },
+        false,
       ),
     )
 
@@ -713,6 +754,27 @@ class GlpkLpSolverTest {
           },
         true,
         mutableMapOf(Pair("test-constraint", 1)),
+      ),
+      Arguments.of(
+        "Missing variable in map results in failure",
+        mock<GLPKProblem> {},
+        LPModel("test").apply {
+          this.variables.add(LPVar("x", LPVarType.INTEGER, 0, 10))
+          this.constraints.add(
+            LPConstraint("test-constraint").apply {
+              this.lhs.addTerm("x")
+              this.operator = LPOperator.EQUAL
+              this.rhs.add(10)
+            },
+          )
+        },
+        fun(model: LPModel): GlpkLpSolver =
+          GlpkLpSolver(model).apply {
+            setVariableMap(this, mutableMapOf())
+            this.initModel()
+          },
+        false,
+        mutableMapOf<String, Int>(),
       ),
     )
 

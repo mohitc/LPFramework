@@ -142,18 +142,9 @@ open class GlpkLpSolver(
         log.debug { "Set row name (Index: $index, ${lpConstraint.identifier})" }
 
         // Get the constant contribution from the RHS
-        val constant: Double? =
+        val constant: Double =
           reducedConstraint.rhs.expression
-            .map { term -> if (term.coefficient != null) term.coefficient else 0.0 }
-            .reduce { u, v -> u!! + v!! }
-
-        if (constant == null) {
-          log.error {
-            "Constant contribution not found in the reduced expression for constraint " +
-              lpConstraint.identifier
-          }
-          return false
-        }
+            .sumOf { term -> term.coefficient ?: 0.0 }
 
         // set bounds
         when (reducedConstraint.operator) {
@@ -165,8 +156,8 @@ open class GlpkLpSolver(
         val ind = mutableListOf<Int>()
         val coefficients = mutableListOf<Double>()
         for (term in reducedConstraint.lhs.expression) {
-          ind.addLast(variableMap[term.lpVarIdentifier]!!)
-          coefficients.addLast(term.coefficient!!)
+          ind.add(variableMap[term.lpVarIdentifier]!!)
+          coefficients.add(term.coefficient!!)
         }
 
         glpkModel.setMatrixRow(index, reducedConstraint.lhs.expression.size, ind, coefficients)
