@@ -48,7 +48,7 @@ class ITLinearSolverTest {
       assertEquals(retCode, SCIPRetCode.SCIP_OKAY, "Time limit could not be set successfully")
       model.setRealParam("limits/memory", 10000.0)
       assertEquals(retCode, SCIPRetCode.SCIP_OKAY, "Memory limit could not be set successfully")
-      model.setLongintParam("limits/totalnodes", 1000)
+      model.setLongParam("limits/totalnodes", 1000)
       assertEquals(retCode, SCIPRetCode.SCIP_OKAY, "Total Node limit could not be set successfully")
 
       // solve problem

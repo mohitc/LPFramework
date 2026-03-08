@@ -31,7 +31,7 @@ enum class SCIPRetCode(
   ;
 
   companion object {
-    fun fromVal(intVal: Int): SCIPRetCode = SCIPRetCode.values().find { it.value == intVal } ?: SCIP_UNKNOWN
+    fun fromVal(intVal: Int): SCIPRetCode = SCIPRetCode.entries.find { it.value == intVal } ?: SCIP_UNKNOWN
   }
 }
 
@@ -81,6 +81,19 @@ enum class SCIPStatus(
   ;
 
   companion object {
-    fun fromVal(intVal: Int): SCIPStatus = SCIPStatus.values().find { it.value == intVal } ?: UNKNOWN
+    fun fromVal(intVal: Int): SCIPStatus = SCIPStatus.entries.find { it.value == intVal } ?: UNKNOWN
+  }
+}
+
+enum class SCIPObjSense(
+  val desc: String,
+  val value: Int,
+) {
+  SCIP_OBJSENSE_MAXIMIZE("Maximize", SCIP.SCIP_OBJSENSE_MAXIMIZE()),
+  SCIP_OBJSENSE_MINIMIZE("Minimize", SCIP.SCIP_OBJSENSE_MINIMIZE()),
+  ;
+
+  companion object {
+    fun fromVal(intVal: Int): SCIPObjSense = SCIPObjSense.entries.find { it.value == intVal } ?: SCIP_OBJSENSE_MINIMIZE
   }
 }

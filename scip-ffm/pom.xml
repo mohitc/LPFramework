@@ -177,6 +177,7 @@
                 <includeFunction>SCIPgetStatus</includeFunction>
                 <includeFunction>SCIPaddCons</includeFunction>
                 <includeFunction>SCIPchgVarObj</includeFunction>
+                <includeFunction>SCIPgetObjsense</includeFunction>
                 <includeFunction>SCIPsetObjsense</includeFunction>
                 <includeFunction>SCIPsetMessagehdlrQuiet</includeFunction>
                 <includeFunction>SCIPwriteOrigProblem</includeFunction>
@@ -194,6 +195,7 @@
               <includeConstants>
                 <includeConstant>TRUE</includeConstant>
                 <includeConstant>FALSE</includeConstant>
+                <includeConstant>SCIP_MAXSTRLEN</includeConstant>
               </includeConstants>
             </configuration>
           </execution>
@@ -243,6 +245,13 @@
                 <includeFunction>SCIPsetStringParam</includeFunction>
                 <includeFunction>SCIPsetIntParam</includeFunction>
                 <includeFunction>SCIPsetLongintParam</includeFunction>
+                <includeFunction>SCIPsetCharParam</includeFunction>
+                <includeFunction>SCIPgetBoolParam</includeFunction>
+                <includeFunction>SCIPgetRealParam</includeFunction>
+                <includeFunction>SCIPgetStringParam</includeFunction>
+                <includeFunction>SCIPgetIntParam</includeFunction>
+                <includeFunction>SCIPgetLongintParam</includeFunction>
+                <includeFunction>SCIPgetCharParam</includeFunction>
               </includeFunctions>
             </configuration>
           </execution>
