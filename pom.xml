@@ -323,16 +323,31 @@
         <version>${jacoco.version}</version>
         <executions>
           <execution>
+            <id>prepare-agent</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
-          <!-- attached to Maven test phase -->
+          <execution>
+            <id>prepare-agent-integration</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+          </execution>
+          <!-- attached to Maven Unit test phase -->
           <execution>
             <id>report</id>
             <phase>test</phase>
             <goals>
               <goal>report</goal>
+            </goals>
+          </execution>
+          <!-- attached to Maven integration test phase -->
+          <execution>
+            <id>report-integration</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-integration</goal>
             </goals>
           </execution>
         </executions>

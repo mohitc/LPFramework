@@ -43,7 +43,7 @@
             <configuration>
               <skipTests>${highs-ffm.skiptests}</skipTests>
               <!-- Provide environment variables -->
-              <argLine>-Djava.library.path=${java-library-path-arg}</argLine>
+              <argLine>@{argLine} -Djava.library.path=${java-library-path-arg}</argLine>
               <environmentVariables>
                 <LD_LIBRARY_PATH>${ld-library-path}</LD_LIBRARY_PATH>
               </environmentVariables>
