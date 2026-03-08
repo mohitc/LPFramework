@@ -82,5 +82,9 @@ RUN wget https://download.mosek.com/stable/11.1.3/mosektoolslinux64x86.tar.bz2 -
 ENV LD_LIBRARY_PATH="/opt/mosek/tools/platform/linux64x86/bin:$LD_LIBRARY_PATH"
 ENV PATH="/opt/mosek/tools/platform/linux64x86/bin:$PATH"
 
+# Install pinentry for gpg signing
+
+RUN dnf install pinentry -y
+
 # Cleanup downloads
 RUN rm -rf /tmp/*
