@@ -20,7 +20,7 @@ RUN source /etc/bashrc
 
 # Download and install Maven 
 
-ARG MAVEN_VERSION=3.9.13
+ARG MAVEN_VERSION=3.9.14
 RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz -P /tmp && \
     tar -zxvf /tmp/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt && \
     ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven
