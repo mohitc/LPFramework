@@ -22,7 +22,9 @@ class ITHIGHSProblemTest {
   fun testConstraints() {
     HIGHSProblem().use { h ->
       val x = h.createVar("x", 0.0, 10.0, HIGHSVarType.CONTINUOUS)
+      assertNotNull(x, "x Initialization")
       val y = h.createVar("y", 0.0, 10.0, HIGHSVarType.CONTINUOUS)
+      assertNotNull(y, "y Initialization")
 
       val constraintName = "c1"
       val rowIndex = h.createConstraint(constraintName, 0.0, 5.0, listOf(Pair(x!!, 1.0), Pair(y!!, 1.0)))

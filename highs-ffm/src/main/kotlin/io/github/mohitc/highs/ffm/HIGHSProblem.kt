@@ -163,11 +163,16 @@ class HIGHSProblem : AutoCloseable {
             highsPtr,
             lb,
             ub,
-            varAndCoefficients.size + 1,
-            it.allocateFrom(HIGHS.C_INT, 0, *varAndCoefficients.map { v -> v.first }.toIntArray()),
+            varAndCoefficients.size,
+            it.allocateFrom(
+              HIGHS.C_INT,
+              *varAndCoefficients
+                .map { v ->
+                  v.first
+                }.toIntArray(),
+            ),
             it.allocateFrom(
               HIGHS.C_DOUBLE,
-              0.0,
               *varAndCoefficients
                 .map { v ->
                   v.second
