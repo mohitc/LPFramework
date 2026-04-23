@@ -40,7 +40,6 @@ enum class HIGHSBoolOption(
     "Whether cut separation at nodes other than the root node is permitted",
     true,
   ),
-  PDLP_SCALING("pdlp_scaling", "Scaling for PDLP solver: Default = true", true),
   BLEND_MULTI_OBJECTIVES("blend_multi_objectives", "Blend multiple objectives or apply lexicographically", true),
 }
 
@@ -50,7 +49,11 @@ enum class HIGHSStringOption(
   val default: String,
 ) {
   PRESOLVE("presolve", "Presolve: \"off\", \"choose\" or \"on\"", "choose"),
-  SOLVER("solver", "LP/QP solver: \"choose\", \"simplex\", \"ipm\", \"ipx\", \"hipo\" or \"pdlp\"", "choose"),
+  SOLVER(
+    "solver",
+    "LP/QP solver: \"choose\", \"simplex\", \"ipm\", \"ipx\", \"hipo\", \"pdlp\", \"qpasm\" or \"hipdlp\"",
+    "choose",
+  ),
   PARALLEL("parallel", "Parallel: \"off\", \"choose\" or \"on\"", "choose"),
   RUN_CROSSOVER("run_crossover", "Run IPM crossover: \"off\", \"choose\" or \"on\"", "on"),
   RANGING("ranging", "Compute cost, bound, RHS and basic solution ranging: \"off\" or \"on\"", "off"),
@@ -64,7 +67,7 @@ enum class HIGHSStringOption(
   WRITE_IIS_MODEL_FILE("write_iis_model_file", "Write IIS model file", ""),
   MIP_IMPROVING_SOLUTION_FILE(
     "mip_improving_solution_file",
-    "File for reporting improving MIP solutions: not reported for an empty string \\\"\\\"\"",
+    "File for reporting improving MIP solutions: not reported for an empty string \"\"",
     "",
   ),
   MIP_LP_SOLVER("mip_lp_solver", "MIP LP solver: \"choose\", \"simplex\", \"ipm\", \"ipx\" or \"hipo\"", "choose"),
@@ -131,7 +134,12 @@ enum class HIGHSDoubleOption(
   MIP_MIN_LOGGING_INTERVAL("mip_min_logging_interval", "MIP minimum logging interval", 5.0),
   IPM_OPTIMALITY_TOLERANCE("ipm_optimality_tolerance", "IPM optimality tolerance", 1e-08),
   PDLP_OPTIMALITY_TOLERANCE("pdlp_optimality_tolerance", "PDLP optimality tolerance", 1e-07),
-  QP_REGULARIZATION_VALUE("qp_regularization_value", "Regularization value added to the Hessian", 1e-07),
+  QP_REGULARIZATION_VALUE(
+    "qp_regularization_value",
+    "Regularization value added to the Hessian in the active set QP solver",
+    1e-07,
+  ),
+  IIS_TIME_LIMIT("iis_time_limit", "Time limit for computing IIS (seconds)", Double.POSITIVE_INFINITY),
 }
 
 enum class HIGHSIntOption(
@@ -226,13 +234,29 @@ enum class HIGHSIntOption(
   IPM_ITERATION_LIMIT("ipm_iteration_limit", "Iteration limit for IPM solver", 2147483647),
   HIPO_BLOCK_SIZE("hipo_block_size", "Block size for dense linear algebra within HiPO", 128),
   PDLP_ITERATION_LIMIT("pdlp_iteration_limit", "Iteration limit for PDLP solver", 2147483647),
-  PDLP_E_RESTART_METHOD(
-    "pdlp_e_restart_method",
-    "Restart mode for PDLP solver: 0 => none; 1 => GPU (default); 2 => CPU",
+  PDLP_SCALING_MODE(
+    "pdlp_scaling_mode",
+    "Scaling mode for PDLP solver (default = 5): 1 => Ruiz; 2 => L2; 4 => PC",
+    5,
+  ),
+  PDLP_RUIZ_ITERATIONS("pdlp_ruiz_iterations", "Number of Ruiz scaling iteraitons for PDLP solver", 10),
+  PDLP_RESTART_STRATEGY(
+    "pdlp_restart_strategy",
+    "Restart strategy for PDLP solver: 0 => off; 1 => fixed; 2 => adaptive; 3 => Halpern",
+    2,
+  ),
+  PDLP_CUPDLPC_RESTART_METHOD(
+    "pdlp_cupdlpc_restart_method",
+    "Restart mode for cuPDLP-C solver: 0 => none; 1 => GPU (default); 2 => CPU",
     1,
   ),
-  QP_ITERATION_LIMIT("qp_iteration_limit", "Iteration limit for QP solver", 2147483647),
-  QP_NULLSPACE_LIMIT("qp_nullspace_limit", "Nullspace limit for QP solver", 4000),
+  PDLP_STEP_SIZE_STRATEGY(
+    "pdlp_step_size_strategy",
+    "Step size strategy for PDLP solver: 0 => fixed; 1 => adaptive; 2 => Malitsky-Pock; 3 => PID",
+    1,
+  ),
+  QP_ITERATION_LIMIT("qp_iteration_limit", "Iteration limit for the active set QP solver", 2147483647),
+  QP_NULLSPACE_LIMIT("qp_nullspace_limit", "Nullspace limit for the active set QP solver", 4000),
   IIS_STRATEGY(
     "iis_strategy",
     "Strategy for IIS calculation: 0 => Light test; 1 => Try dual ray; 2 => Try elastic LP; 4 => Prioritise columns; 8 => Find true IIS; 16 => Find relaxation IIS for MIP",

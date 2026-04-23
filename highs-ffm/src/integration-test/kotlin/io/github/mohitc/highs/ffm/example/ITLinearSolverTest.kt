@@ -210,7 +210,7 @@ class ITLinearSolverTest {
       val constraintsToCreate =
         listOf(
           ConstraintParameters(
-            name = "x+2y<=10",
+            name = "x2y10",
             varCoefficients =
               mapOf(
                 Pair("x", 1.0),
@@ -237,7 +237,7 @@ class ITLinearSolverTest {
       assertEquals(HIGHSStatus.OK, retCode, "changeObjectiveDirection(MAXIMIZE) want OK got $retCode")
 
       retCode = highsProblem.writeModel("model.lp")
-      assertEquals(retCode, HIGHSStatus.OK, "writeModel() want OK got $retCode")
+      assertEquals(HIGHSStatus.OK, retCode, "writeModel() want OK got $retCode")
 
       retCode = highsProblem.run()
       assertEquals(HIGHSStatus.OK, retCode, "run() want OK got $retCode")
