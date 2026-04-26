@@ -32,45 +32,45 @@ class HIGHSProblem : AutoCloseable {
   }
 
   fun setDoubleOptionValue(
-    param: HIGHSDoubleOption,
+    param: String,
     value: Double,
   ): HIGHSStatus {
     checkOpen()
     return Arena.ofConfined().use {
-      HIGHSStatus.fromValue(HIGHS.Highs_setDoubleOptionValue(highsPtr, it.allocateFrom(param.option), value))
+      HIGHSStatus.fromValue(HIGHS.Highs_setDoubleOptionValue(highsPtr, it.allocateFrom(param), value))
     }
   }
 
   fun setBoolOptionValue(
-    param: HIGHSBoolOption,
+    param: String,
     value: Boolean,
   ): HIGHSStatus {
     checkOpen()
     return Arena.ofConfined().use {
       HIGHSStatus.fromValue(
-        HIGHS.Highs_setBoolOptionValue(highsPtr, it.allocateFrom(param.option), (if (value) 1 else 0)),
+        HIGHS.Highs_setBoolOptionValue(highsPtr, it.allocateFrom(param), (if (value) 1 else 0)),
       )
     }
   }
 
   fun setIntOptionValue(
-    param: HIGHSIntOption,
+    param: String,
     value: Int,
   ): HIGHSStatus {
     checkOpen()
     return Arena.ofConfined().use {
-      HIGHSStatus.fromValue(HIGHS.Highs_setIntOptionValue(highsPtr, it.allocateFrom(param.option), value))
+      HIGHSStatus.fromValue(HIGHS.Highs_setIntOptionValue(highsPtr, it.allocateFrom(param), value))
     }
   }
 
   fun setStringOptionValue(
-    param: HIGHSStringOption,
+    param: String,
     value: String,
   ): HIGHSStatus {
     checkOpen()
     return Arena.ofConfined().use {
       HIGHSStatus.fromValue(
-        HIGHS.Highs_setStringOptionValue(highsPtr, it.allocateFrom(param.option), it.allocateFrom(value)),
+        HIGHS.Highs_setStringOptionValue(highsPtr, it.allocateFrom(param), it.allocateFrom(value)),
       )
     }
   }
@@ -397,13 +397,13 @@ class HIGHSProblem : AutoCloseable {
     }
   }
 
-  fun getIntOptionValue(param: HIGHSIntOption): Int? {
+  fun getIntOptionValue(param: String): Int? {
     checkOpen()
     Arena.ofConfined().use {
       val optionVal = it.allocate(HIGHS.C_INT)
       val status =
         HIGHSStatus.fromValue(
-          HIGHS.Highs_getIntOptionValue(highsPtr, it.allocateFrom(param.option), optionVal),
+          HIGHS.Highs_getIntOptionValue(highsPtr, it.allocateFrom(param), optionVal),
         )
       if (status != HIGHSStatus.OK) {
         log.error { "getIntOptionValue($param) want OK got $status" }
@@ -413,13 +413,13 @@ class HIGHSProblem : AutoCloseable {
     }
   }
 
-  fun getDoubleOptionValue(param: HIGHSDoubleOption): Double? {
+  fun getDoubleOptionValue(param: String): Double? {
     checkOpen()
     Arena.ofConfined().use {
       val optionVal = it.allocate(HIGHS.C_DOUBLE)
       val status =
         HIGHSStatus.fromValue(
-          HIGHS.Highs_getDoubleOptionValue(highsPtr, it.allocateFrom(param.option), optionVal),
+          HIGHS.Highs_getDoubleOptionValue(highsPtr, it.allocateFrom(param), optionVal),
         )
       if (status != HIGHSStatus.OK) {
         log.error { "getDoubleOptionValue($param) want OK got $status" }
@@ -429,13 +429,13 @@ class HIGHSProblem : AutoCloseable {
     }
   }
 
-  fun getStringOptionValue(param: HIGHSStringOption): String? {
+  fun getStringOptionValue(param: String): String? {
     checkOpen()
     Arena.ofConfined().use {
       val optionVal = it.allocate(HIGHS.C_CHAR, maxStringLength)
       val status =
         HIGHSStatus.fromValue(
-          HIGHS.Highs_getStringOptionValue(highsPtr, it.allocateFrom(param.option), optionVal),
+          HIGHS.Highs_getStringOptionValue(highsPtr, it.allocateFrom(param), optionVal),
         )
       if (status != HIGHSStatus.OK) {
         log.error { "getStringOptionValue($param) want OK got $status" }
@@ -445,13 +445,13 @@ class HIGHSProblem : AutoCloseable {
     }
   }
 
-  fun getBoolOptionValue(param: HIGHSBoolOption): Boolean? {
+  fun getBoolOptionValue(param: String): Boolean? {
     checkOpen()
     Arena.ofConfined().use {
       val optionVal = it.allocate(HIGHS.C_INT)
       val status =
         HIGHSStatus.fromValue(
-          HIGHS.Highs_getBoolOptionValue(highsPtr, it.allocateFrom(param.option), optionVal),
+          HIGHS.Highs_getBoolOptionValue(highsPtr, it.allocateFrom(param), optionVal),
         )
       if (status != HIGHSStatus.OK) {
         log.error { "getBoolOptionValue($param) want OK got $status" }

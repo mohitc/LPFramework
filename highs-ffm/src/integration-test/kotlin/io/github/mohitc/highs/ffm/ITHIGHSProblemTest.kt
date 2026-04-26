@@ -77,9 +77,9 @@ class ITHIGHSProblemTest {
   @Test
   fun testBoolOption() {
     HIGHSProblem().use { h ->
-      HIGHSBoolOption.entries.forEach { option ->
-        h.setBoolOptionValue(option, option.default)
-        assertEquals(option.default, h.getBoolOptionValue(option))
+      HIGHSBoolOption.entries.forEach { o ->
+        h.setBoolOptionValue(o.option, o.default)
+        assertEquals(o.default, h.getBoolOptionValue(o.option))
       }
     }
   }
@@ -87,9 +87,9 @@ class ITHIGHSProblemTest {
   @Test
   fun testDoubleOption() {
     HIGHSProblem().use { h ->
-      HIGHSDoubleOption.entries.forEach { option ->
-        h.setDoubleOptionValue(option, option.default)
-        assertEquals(option.default, h.getDoubleOptionValue(option))
+      HIGHSDoubleOption.entries.forEach { o ->
+        h.setDoubleOptionValue(o.option, o.default)
+        assertEquals(o.default, h.getDoubleOptionValue(o.option))
       }
     }
   }
@@ -97,9 +97,9 @@ class ITHIGHSProblemTest {
   @Test
   fun testIntOption() {
     HIGHSProblem().use { h ->
-      HIGHSIntOption.entries.forEach { option ->
-        h.setIntOptionValue(option, option.default)
-        assertEquals(option.default, h.getIntOptionValue(option))
+      HIGHSIntOption.entries.forEach { o ->
+        h.setIntOptionValue(o.option, o.default)
+        assertEquals(o.default, h.getIntOptionValue(o.option))
       }
     }
   }
@@ -107,9 +107,9 @@ class ITHIGHSProblemTest {
   @Test
   fun testStringOption() {
     HIGHSProblem().use { h ->
-      HIGHSStringOption.entries.forEach { option ->
-        h.setStringOptionValue(option, option.default)
-        assertEquals(option.default, h.getStringOptionValue(option))
+      HIGHSStringOption.entries.forEach { o ->
+        h.setStringOptionValue(o.option, o.default)
+        assertEquals(o.default, h.getStringOptionValue(o.option))
       }
     }
   }
