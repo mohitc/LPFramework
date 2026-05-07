@@ -52,13 +52,13 @@ $ docker build --tag lp-framework/dev-env-fedora .
 This image builds on a Fedora instance, and sets up a development environment
 that includes:
 
-* Adoptium Temurin JDK 24
-* Apache Maven (v 3.9.10)
-* JExtract Early Access (v22)
+* Adoptium Temurin JDK 25
+* Apache Maven (v 3.9.15)
+* JExtract Early Access (v25)
 * GLPK v5.0
-* SCIP Optimization Suite (v9.2.2)
-* HiGHS Solver (v1.11.0)
-* Mosek Solver (v.11.0.25)
+* SCIP Optimization Suite (v10.0.1)
+* HiGHS Solver (v1.14.0)
+* Mosek Solver (v.11.1.3)
 
 In order to build and explore the project, you can navigate to the root folder
 in this project and use the command line below run the docker image, mount the
