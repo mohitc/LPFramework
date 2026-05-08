@@ -56,7 +56,7 @@ that includes:
 * Apache Maven (v 3.9.15)
 * JExtract Early Access (v25)
 * GLPK v5.0
-* SCIP Optimization Suite (v10.0.1)
+* SCIP Optimization Suite (v10.0.2)
 * HiGHS Solver (v1.14.0)
 * Mosek Solver (v.11.1.3)
 

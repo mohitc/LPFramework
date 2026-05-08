@@ -53,7 +53,7 @@ RUN wget https://download.java.net/java/early_access/jextract/25/2/openjdk-25-je
 ENV PATH="/opt/jextract/bin:$PATH"
 
 # Download and install SCIPOpt
-ARG SCIP_VERSION=10.0.1
+ARG SCIP_VERSION=10.0.2
 RUN wget https://www.scipopt.org/download/release/scipoptsuite-${SCIP_VERSION}.tgz -P /tmp && \
     tar -zxvf /tmp/scipoptsuite-${SCIP_VERSION}.tgz -C /opt && \
     ln -s /opt/scipoptsuite-${SCIP_VERSION} /opt/scipopt
