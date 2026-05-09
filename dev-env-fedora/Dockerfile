@@ -1,5 +1,5 @@
-# Start from Fedora 43
-FROM fedora:43
+# Start from Fedora 44
+FROM fedora:44
 
 # Copy maven settings.xml
 COPY settings.xml /root/.m2/settings.xml
@@ -20,7 +20,7 @@ RUN source /etc/bashrc
 
 # Download and install Maven 
 
-ARG MAVEN_VERSION=3.9.14
+ARG MAVEN_VERSION=3.9.15
 RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz -P /tmp && \
     tar -zxvf /tmp/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt && \
     ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven
@@ -53,7 +53,7 @@ RUN wget https://download.java.net/java/early_access/jextract/25/2/openjdk-25-je
 ENV PATH="/opt/jextract/bin:$PATH"
 
 # Download and install SCIPOpt
-ARG SCIP_VERSION=10.0.1
+ARG SCIP_VERSION=10.0.2
 RUN wget https://www.scipopt.org/download/release/scipoptsuite-${SCIP_VERSION}.tgz -P /tmp && \
     tar -zxvf /tmp/scipoptsuite-${SCIP_VERSION}.tgz -C /opt && \
     ln -s /opt/scipoptsuite-${SCIP_VERSION} /opt/scipopt
