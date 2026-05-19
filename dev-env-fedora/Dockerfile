@@ -74,10 +74,11 @@ RUN cd /opt/ && \
     cmake --build build
 
 # Download and install Mosek
-
-RUN wget https://download.mosek.com/stable/11.1.3/mosektoolslinux64x86.tar.bz2 -P /tmp && \
+ARG MOSEK_VERSION=11.2.0
+ARG MOSEK_MAJOR_VERSION=11.2
+RUN wget https://download.mosek.com/stable/${MOSEK_VERSION}/mosektoolslinux64x86.tar.bz2 -P /tmp && \
     tar -xvf /tmp/mosektoolslinux64x86.tar.bz2 -C /tmp && \
-    mv /tmp/mosek/11.1 /opt/mosek
+    mv /tmp/mosek/${MOSEK_MAJOR_VERSION} /opt/mosek
 
 ENV LD_LIBRARY_PATH="/opt/mosek/tools/platform/linux64x86/bin:$LD_LIBRARY_PATH"
 ENV PATH="/opt/mosek/tools/platform/linux64x86/bin:$PATH"
