@@ -74,7 +74,7 @@ RUN cd /opt/ && \
     cmake --build build
 
 # Download and install Mosek
-ARG MOSEK_VERSION=11.2.0
+ARG MOSEK_VERSION=11.2.1
 ARG MOSEK_MAJOR_VERSION=11.2
 RUN wget https://download.mosek.com/stable/${MOSEK_VERSION}/mosektoolslinux64x86.tar.bz2 -P /tmp && \
     tar -xvf /tmp/mosektoolslinux64x86.tar.bz2 -C /tmp && \
