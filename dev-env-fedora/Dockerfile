@@ -20,7 +20,7 @@ RUN source /etc/bashrc
 
 # Download and install Maven 
 
-ARG MAVEN_VERSION=3.9.15
+ARG MAVEN_VERSION=3.9.16
 RUN wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz -P /tmp && \
     tar -zxvf /tmp/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /opt && \
     ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven
@@ -74,7 +74,7 @@ RUN cd /opt/ && \
     cmake --build build
 
 # Download and install Mosek
-ARG MOSEK_VERSION=11.2.0
+ARG MOSEK_VERSION=11.2.1
 ARG MOSEK_MAJOR_VERSION=11.2
 RUN wget https://download.mosek.com/stable/${MOSEK_VERSION}/mosektoolslinux64x86.tar.bz2 -P /tmp && \
     tar -xvf /tmp/mosektoolslinux64x86.tar.bz2 -C /tmp && \
