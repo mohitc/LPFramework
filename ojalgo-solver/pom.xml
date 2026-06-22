@@ -19,7 +19,7 @@
   </description>
 
   <properties>
-    <ojalgo.version>56.2.1</ojalgo.version>
+    <ojalgo.version>57.0.0</ojalgo.version>
   </properties>
   <dependencies>
     <dependency>
