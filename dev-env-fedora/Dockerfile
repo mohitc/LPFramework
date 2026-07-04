@@ -66,7 +66,7 @@ RUN mkdir /opt/scipopt/build && \
     make install
 
 # Download and install HIGHS
-ARG HIGHS_VERSION=v1.14.0
+ARG HIGHS_VERSION=v1.15.1
 RUN cd /opt/ && \
     git clone --branch ${HIGHS_VERSION} --single-branch https://github.com/ERGO-Code/HiGHS.git && \
     cd /opt/HiGHS && \
