@@ -48,7 +48,7 @@ mvn -P default,cplex clean install
 In order to deploy to maven central, run the command below:
 
 ```shell
-mvn -P publish-central,default,cplex  -Dmaven.test.skip=true --batch-mode clean deployC
+mvn -P publish-central,default,cplex  -Dmaven.test.skip=true --batch-mode clean deploy
 ```
 
 If the command completes successfully, you will see a deployment in the [Maven Central](https://central.sonatype.com/)
