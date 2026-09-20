@@ -53,7 +53,7 @@ RUN wget https://download.java.net/java/early_access/jextract/25/2/openjdk-25-je
 ENV PATH="/opt/jextract/bin:$PATH"
 
 # Download and install SCIPOpt
-ARG SCIP_VERSION=10.0.2
+ARG SCIP_VERSION=10.1.0
 RUN wget https://www.scipopt.org/download/release/scipoptsuite-${SCIP_VERSION}.tgz -P /tmp && \
     tar -zxvf /tmp/scipoptsuite-${SCIP_VERSION}.tgz -C /opt && \
     ln -s /opt/scipoptsuite-${SCIP_VERSION} /opt/scipopt
@@ -74,7 +74,7 @@ RUN cd /opt/ && \
     cmake --build build
 
 # Download and install Mosek
-ARG MOSEK_VERSION=11.2.1
+ARG MOSEK_VERSION=11.2.4
 ARG MOSEK_MAJOR_VERSION=11.2
 RUN wget https://download.mosek.com/stable/${MOSEK_VERSION}/mosektoolslinux64x86.tar.bz2 -P /tmp && \
     tar -xvf /tmp/mosektoolslinux64x86.tar.bz2 -C /tmp && \
